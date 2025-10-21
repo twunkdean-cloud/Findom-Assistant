@@ -6,13 +6,15 @@ import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea'; // Import Textarea for displaying the prompt
+import { useGemini } from '@/hooks/use-gemini'; // Import useGemini to get the base system prompt
 
 const ImageVisionPage = () => {
   const { appData, updateAppData } = useFindom();
+  const { getSystemPrompt } = useGemini(); // Use getSystemPrompt to build the full prompt
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [generatedDescription, setGeneratedDescription] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [usedPrompt, setUsedPrompt] = useState<string>(''); // New state for the prompt
+  const [usedPrompt, setUsedPrompt] = useState<string>(''); // State for the prompt being used
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -48,8 +50,26 @@ const ImageVisionPage = () => {
     setIsLoading(true);
     setGeneratedDescription('Generating description...');
 
-    const prompt = `From a ${persona} perspective, write a short, engaging caption for this image.`;
-    setUsedPrompt(prompt); // Set the prompt being used
+    // Get the base persona context from the useGemini hook
+    const basePersonaContext = getSystemPrompt();
+
+    let specificImageInstruction = '';
+    switch (persona) {
+      case 'dominant':
+        specificImageInstruction = `Analyze the uploaded image. As a powerful and commanding dominant, craft a short, engaging caption (max 500 characters) that asserts control and authority. Emphasize your power, the submissive's devotion (if applicable), or the overall atmosphere of submission.`;
+        break;
+      case 'submissive':
+        specificImageInstruction = `Analyze the uploaded image. As a devoted and obedient submissive, write a short, engaging caption (max 500 characters) that expresses reverence, admiration, and a desire to serve. Highlight the beauty or power of your superior (if applicable) or your own humble position.`;
+        break;
+      case 'switch':
+        specificImageInstruction = `Analyze the uploaded image. As a versatile switch, create a short, engaging caption (max 500 characters) that subtly blends elements of both dominance and submission. Hint at the dynamic power exchange or the allure of both roles.`;
+        break;
+    }
+
+    // Combine the base persona context with the specific image instruction
+    // The baseSystemPrompt already includes instructions for emojis, hashtags, and no intro/outro.
+    const fullPromptToSend = `${basePersonaContext} ${specificImageInstruction}`;
+    setUsedPrompt(fullPromptToSend); // Set the prompt being used for display and API call
 
     // IMPORTANT: This part requires a backend to handle image processing with Gemini Vision API.
     // The current setup is client-side only and will not work without a server-side endpoint.
@@ -61,7 +81,7 @@ const ImageVisionPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: prompt,
+          prompt: fullPromptToSend, // Send the detailed prompt to the backend
           imageData: appData.uploadedImageData.data,
           imageMimeType: appData.uploadedImageData.mimeType,
         }),
@@ -156,7 +176,7 @@ const ImageVisionPage = () => {
               <Textarea
                 value={usedPrompt}
                 readOnly
-                rows={3}
+                rows={6}
                 className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
               />
             </Card>
