@@ -5,12 +5,14 @@ import { Input } from '@/components/ui/input';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea'; // Import Textarea for displaying the prompt
 
 const ImageVisionPage = () => {
   const { appData, updateAppData } = useFindom();
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [generatedDescription, setGeneratedDescription] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [usedPrompt, setUsedPrompt] = useState<string>(''); // New state for the prompt
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -23,11 +25,13 @@ const ImageVisionPage = () => {
           data: (reader.result as string).split(',')[1], // Base64 data
         });
         setGeneratedDescription('');
+        setUsedPrompt(''); // Clear previous prompt
       };
       reader.readAsDataURL(file);
     } else {
       setImagePreviewUrl(null);
       updateAppData('uploadedImageData', null);
+      setUsedPrompt(''); // Clear previous prompt
     }
   };
 
@@ -45,6 +49,7 @@ const ImageVisionPage = () => {
     setGeneratedDescription('Generating description...');
 
     const prompt = `From a ${persona} perspective, write a short, engaging caption for this image.`;
+    setUsedPrompt(prompt); // Set the prompt being used
 
     // IMPORTANT: This part requires a backend to handle image processing with Gemini Vision API.
     // The current setup is client-side only and will not work without a server-side endpoint.
@@ -133,16 +138,30 @@ const ImageVisionPage = () => {
         </div>
 
         {/* Right Side: Output */}
-        <Card className="bg-gray-800 border border-gray-700 p-4 min-h-[300px] flex flex-col justify-center items-center">
-          <CardTitle className="text-lg font-semibold mb-3">Generated Description</CardTitle>
-          <div className="w-full">
-            {generatedDescription ? (
-              <p className="whitespace-pre-wrap text-gray-300">{generatedDescription}</p>
-            ) : (
-              <p className="text-gray-500 text-center">Your generated description will appear here...</p>
-            )}
-          </div>
-        </Card>
+        <div className="space-y-4">
+          <Card className="bg-gray-800 border border-gray-700 p-4 min-h-[150px] flex flex-col justify-center items-center">
+            <CardTitle className="text-lg font-semibold mb-3">Generated Description</CardTitle>
+            <div className="w-full">
+              {generatedDescription ? (
+                <p className="whitespace-pre-wrap text-gray-300">{generatedDescription}</p>
+              ) : (
+                <p className="text-gray-500 text-center">Your generated description will appear here...</p>
+              )}
+            </div>
+          </Card>
+
+          {usedPrompt && (
+            <Card className="bg-gray-800 border border-gray-700 p-4">
+              <CardTitle className="text-lg font-semibold mb-3">Prompt Used</CardTitle>
+              <Textarea
+                value={usedPrompt}
+                readOnly
+                rows={3}
+                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+              />
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
