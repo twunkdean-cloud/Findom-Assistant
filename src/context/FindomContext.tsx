@@ -83,6 +83,12 @@ const DEFAULT_APP_DATA: AppData = {
   checklist: {
     date: '', // Will be set dynamically
     tasks: [
+      '30 minute workout',
+      'Shower',
+      'AM medication',
+      'PM medication',
+      'Eat a healthy meal',
+      'Drink 8 glasses of water',
       'Post on Twitter',
       'Post on Reddit',
       'Respond to messages',
