@@ -37,9 +37,15 @@ const ChatAssistantPage = () => {
       return;
     }
 
+    // Get the base system prompt and remove the hashtag instruction
+    let baseSystemPrompt = getSystemPrompt();
+    baseSystemPrompt = baseSystemPrompt.replace(/Use two or three hashtags for each post you create\./, '');
+
     const subDetails = `Sub's Name: ${selectedSub.name}. Last Tribute: ${selectedSub.lastTribute || 'N/A'}. Preferences: ${selectedSub.preferences || 'None specified'}. Notes: ${selectedSub.notes || 'None specified'}.`;
     const userPrompt = `Generate a personalized chat message for ${selectedSub.name} based on the following context: "${chatContext}". Consider their preferences and notes.`;
-    const systemInstruction = getSystemPrompt() + ` Your response should be a concise, engaging, and in-character chat message. Incorporate details about the sub if relevant. Sub details: ${subDetails}. Do not include any introductory or concluding remarks, just the message content.`;
+    
+    // Combine the modified base prompt with specific chat assistant instructions
+    const systemInstruction = baseSystemPrompt + ` Your response should be a concise, engaging, and in-character chat message. Incorporate details about the sub if relevant. Sub details: ${subDetails}. Do not include any introductory or concluding remarks, just the message content.`;
 
     const result = await callGemini(userPrompt, systemInstruction);
     if (result) {
