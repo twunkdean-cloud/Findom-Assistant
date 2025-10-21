@@ -181,14 +181,20 @@ const TributeTrackerPage = () => {
                 </div>
                 <div>
                   <Label htmlFor="tribute-from">From (Sub's Name/Alias)</Label>
-                  <Input
-                    id="tribute-from"
-                    placeholder="Sub's Name or Alias"
-                    value={tributeFrom}
-                    onChange={(e) => setTributeFrom(e.target.value)}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                    required
-                  />
+                  <Select value={tributeFrom} onValueChange={setTributeFrom} disabled={appData.subs.length === 0}>
+                    <SelectTrigger id="tribute-from" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+                      <SelectValue placeholder="Select a sub" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
+                        {appData.subs.length === 0 ? (
+                            <SelectItem value="no-subs" disabled>No subs available. Add some in Sub Tracker!</SelectItem>
+                        ) : (
+                            appData.subs.map(sub => (
+                                <SelectItem key={sub.id} value={sub.name}>{sub.name}</SelectItem>
+                            ))
+                        )}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="tribute-source">Source</Label>
@@ -327,14 +333,20 @@ const TributeTrackerPage = () => {
             </div>
             <div>
               <Label htmlFor="edit-tribute-from">From (Sub's Name/Alias)</Label>
-              <Input
-                id="edit-tribute-from"
-                placeholder="Sub's Name or Alias"
-                value={tributeFrom}
-                onChange={(e) => setTributeFrom(e.target.value)}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                required
-              />
+              <Select value={tributeFrom} onValueChange={setTributeFrom} disabled={appData.subs.length === 0}>
+                <SelectTrigger id="edit-tribute-from" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+                  <SelectValue placeholder="Select a sub" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
+                    {appData.subs.length === 0 ? (
+                        <SelectItem value="no-subs" disabled>No subs available. Add some in Sub Tracker!</SelectItem>
+                    ) : (
+                        appData.subs.map(sub => (
+                            <SelectItem key={sub.id} value={sub.name}>{sub.name}</SelectItem>
+                        ))
+                    )}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="edit-tribute-source">Source</Label>
