@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFindom, Sub } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
 
 const SubTrackerPage = () => {
   const { appData, updateAppData } = useFindom();
@@ -24,6 +24,8 @@ const SubTrackerPage = () => {
   const [subLastTribute, setSubLastTribute] = useState('');
   const [subPreferences, setSubPreferences] = useState('');
   const [subNotes, setSubNotes] = useState('');
+  const [subConversationHistory, setSubConversationHistory] = useState<string | undefined>(undefined);
+  const [conversationFileName, setConversationFileName] = useState<string | undefined>(undefined);
 
   const resetForm = () => {
     setSubName('');
@@ -31,7 +33,39 @@ const SubTrackerPage = () => {
     setSubLastTribute('');
     setSubPreferences('');
     setSubNotes('');
+    setSubConversationHistory(undefined);
+    setConversationFileName(undefined);
     setCurrentSub(null);
+  };
+
+  const handleConversationUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type !== 'application/json') {
+        toast.error('Please upload a JSON file.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          // Optionally parse and re-stringify to validate JSON
+          JSON.parse(content);
+          setSubConversationHistory(content);
+          setConversationFileName(file.name);
+          toast.success('Conversation history uploaded!');
+        } catch (error) {
+          console.error('Error parsing conversation history file:', error);
+          toast.error('Failed to parse conversation history. Please ensure it is valid JSON.');
+          setSubConversationHistory(undefined);
+          setConversationFileName(undefined);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      setSubConversationHistory(undefined);
+      setConversationFileName(undefined);
+    }
   };
 
   const handleAddSub = (e: React.FormEvent) => {
@@ -48,6 +82,7 @@ const SubTrackerPage = () => {
       lastTribute: subLastTribute,
       preferences: subPreferences,
       notes: subNotes,
+      conversationHistory: subConversationHistory,
     };
 
     updateAppData('subs', [...appData.subs, newSub]);
@@ -70,6 +105,7 @@ const SubTrackerPage = () => {
       lastTribute: subLastTribute,
       preferences: subPreferences,
       notes: subNotes,
+      conversationHistory: subConversationHistory,
     };
 
     updateAppData('subs', appData.subs.map(sub =>
@@ -94,6 +130,8 @@ const SubTrackerPage = () => {
     setSubLastTribute(sub.lastTribute);
     setSubPreferences(sub.preferences);
     setSubNotes(sub.notes);
+    setSubConversationHistory(sub.conversationHistory);
+    setConversationFileName(sub.conversationHistory ? 'conversation.json' : undefined); // Placeholder name
     setIsEditDialogOpen(true);
   };
 
@@ -169,6 +207,21 @@ const SubTrackerPage = () => {
                     rows={3}
                     className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="conversation-history">Conversation History (JSON)</Label>
+                  <Input
+                    id="conversation-history"
+                    type="file"
+                    accept=".json"
+                    onChange={handleConversationUpload}
+                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
+                  />
+                  {conversationFileName && (
+                    <p className="text-xs text-gray-400 flex items-center">
+                      <UploadCloud className="h-3 w-3 mr-1" /> {conversationFileName} uploaded.
+                    </p>
+                  )}
                 </div>
                 <DialogFooter className="flex gap-3 pt-4">
                   <Button type="submit" className="flex-1 bg-green-600 px-4 py-2 rounded hover:bg-green-700">
@@ -279,6 +332,26 @@ const SubTrackerPage = () => {
                 rows={3}
                 className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-conversation-history">Conversation History (JSON)</Label>
+              <Input
+                id="edit-conversation-history"
+                type="file"
+                accept=".json"
+                onChange={handleConversationUpload}
+                className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
+              />
+              {conversationFileName && (
+                <p className="text-xs text-gray-400 flex items-center">
+                  <UploadCloud className="h-3 w-3 mr-1" /> {conversationFileName} uploaded.
+                </p>
+              )}
+              {!conversationFileName && currentSub?.conversationHistory && (
+                <p className="text-xs text-gray-400 flex items-center">
+                  <UploadCloud className="h-3 w-3 mr-1" /> Existing conversation history present.
+                </p>
+              )}
             </div>
             <DialogFooter className="flex gap-3 pt-4">
               <Button type="submit" className="flex-1 bg-green-600 px-4 py-2 rounded hover:bg-green-700">

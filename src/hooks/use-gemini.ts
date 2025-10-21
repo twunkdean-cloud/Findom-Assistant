@@ -17,7 +17,7 @@ export function useGemini() {
     return prompt;
   }, [appData.persona]);
 
-  const callGemini = useCallback(async (userPrompt: string, systemPrompt?: string) => {
+  const callGemini = useCallback(async (userPrompt: string, systemPrompt?: string, conversationHistory?: string) => {
     setIsLoading(true);
     setError(null);
 
@@ -30,13 +30,18 @@ export function useGemini() {
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
+    let fullSystemInstruction = systemPrompt || getSystemPrompt();
+    if (conversationHistory) {
+      fullSystemInstruction += `\n\nHere is the past conversation history with the sub (JSON format): ${conversationHistory}. Use this context to tailor your response, understanding their past interactions and preferences.`;
+    }
+
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: userPrompt }] }],
-          systemInstruction: { parts: [{ text: systemPrompt || getSystemPrompt() }] },
+          systemInstruction: { parts: [{ text: fullSystemInstruction }] },
         }),
       });
 

@@ -15,6 +15,7 @@ export interface Sub {
   lastTribute: string;
   preferences: string;
   notes: string;
+  conversationHistory?: string; // New field for conversation history
 }
 
 export interface RedFlag {

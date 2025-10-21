@@ -47,7 +47,7 @@ const ChatAssistantPage = () => {
     // Combine the modified base prompt with specific chat assistant instructions
     const systemInstruction = baseSystemPrompt + ` Your response should be a concise, engaging, and in-character chat message. Incorporate details about the sub if relevant. Sub details: ${subDetails}. Do not include any introductory or concluding remarks, just the message content.`;
 
-    const result = await callGemini(userPrompt, systemInstruction);
+    const result = await callGemini(userPrompt, systemInstruction, selectedSub.conversationHistory); // Pass conversationHistory
     if (result) {
       setGeneratedMessage(result);
       toast.success('Message generated successfully!');
