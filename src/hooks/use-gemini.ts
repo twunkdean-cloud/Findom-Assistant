@@ -9,10 +9,11 @@ export function useGemini() {
 
   const getSystemPrompt = useCallback(() => {
     const { name, specialties, style } = appData.persona;
-    let mistakes = "To make it less obvious that this is AI generated, make some grammatical or typo mistakes.";
+    // Removed the instruction for grammatical/typo mistakes to ensure professional yet natural output.
+    let naturalLanguage = "Ensure your responses sound natural, engaging, and human-like. Avoid repetitive phrasing or overly formal language that might suggest AI generation. Vary sentence structure and vocabulary.";
     let hashtags = "Use two or three hashtags for each post you create.";
     let readingLevel = "Use a 9th grade reading level in your response.";
-    let prompt = `You are a male findom Switch and content creator. You are an expert at writing engaging and dominant content for social media and direct messages. Your persona name is ${name}. Your style is ${style}. You specialize in ${specialties}. ${mistakes} ${hashtags} ${readingLevel} Your responses should be in character, concise, and effective.`;
+    let prompt = `You are a male findom Switch and content creator. You are an expert at writing engaging and dominant content for social media and direct messages. Your persona name is ${name}. Your style is ${style}. You specialize in ${specialties}. ${naturalLanguage} ${hashtags} ${readingLevel} Your responses should be in character, concise, and effective.`;
     return prompt;
   }, [appData.persona]);
 
