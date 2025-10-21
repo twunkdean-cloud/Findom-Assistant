@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFindom, Tribute } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
@@ -23,6 +24,8 @@ const TributeTrackerPage = () => {
   const [tributeFrom, setTributeFrom] = useState('');
   const [tributeReason, setTributeReason] = useState('');
   const [tributeNotes, setTributeNotes] = useState('');
+  const [tributeSource, setTributeSource] = useState('');
+  const [tributeSourceDetail, setTributeSourceDetail] = useState('');
 
   const resetForm = () => {
     setTributeAmount(0);
@@ -30,15 +33,26 @@ const TributeTrackerPage = () => {
     setTributeFrom('');
     setTributeReason('');
     setTributeNotes('');
+    setTributeSource('');
+    setTributeSourceDetail('');
     setCurrentTribute(null);
   };
 
   const handleAddTribute = (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseFloat(tributeAmount as string);
-    if (isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim()) {
-      toast.error('Amount (must be greater than 0), Date, and From fields are required.');
+    if (isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim() || !tributeSource) {
+      toast.error('Amount (must be greater than 0), Date, From, and Source fields are required.');
       return;
+    }
+
+    let finalSource = tributeSource;
+    if (tributeSource === 'Wishlist Gift' || tributeSource === 'Other') {
+      if (!tributeSourceDetail.trim()) {
+        toast.error(`Please specify the ${tributeSource.toLowerCase()}.`);
+        return;
+      }
+      finalSource = `${tributeSource}: ${tributeSourceDetail.trim()}`;
     }
 
     const newTribute: Tribute = {
@@ -48,6 +62,7 @@ const TributeTrackerPage = () => {
       from: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
       notes: tributeNotes.trim() || undefined,
+      source: finalSource,
     };
 
     updateAppData('tributes', [...appData.tributes, newTribute]);
@@ -59,9 +74,18 @@ const TributeTrackerPage = () => {
   const handleEditTribute = (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseFloat(tributeAmount as string);
-    if (!currentTribute || isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim()) {
-      toast.error('Amount (must be greater than 0), Date, and From fields are required.');
+    if (!currentTribute || isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim() || !tributeSource) {
+      toast.error('Amount (must be greater than 0), Date, From, and Source fields are required.');
       return;
+    }
+
+    let finalSource = tributeSource;
+    if (tributeSource === 'Wishlist Gift' || tributeSource === 'Other') {
+      if (!tributeSourceDetail.trim()) {
+        toast.error(`Please specify the ${tributeSource.toLowerCase()}.`);
+        return;
+      }
+      finalSource = `${tributeSource}: ${tributeSourceDetail.trim()}`;
     }
 
     const updatedTribute: Tribute = {
@@ -71,6 +95,7 @@ const TributeTrackerPage = () => {
       from: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
       notes: tributeNotes.trim() || undefined,
+      source: finalSource,
     };
 
     updateAppData('tributes', appData.tributes.map(tribute =>
@@ -90,11 +115,23 @@ const TributeTrackerPage = () => {
 
   const openEditDialog = (tribute: Tribute) => {
     setCurrentTribute(tribute);
-    setTributeAmount(tribute.amount.toString()); // Convert to string for input field
+    setTributeAmount(tribute.amount.toString());
     setTributeDate(tribute.date);
     setTributeFrom(tribute.from);
     setTributeReason(tribute.reason || '');
     setTributeNotes(tribute.notes || '');
+
+    // Parse source for editing
+    if (tribute.source.startsWith('Wishlist Gift:')) {
+      setTributeSource('Wishlist Gift');
+      setTributeSourceDetail(tribute.source.replace('Wishlist Gift:', '').trim());
+    } else if (tribute.source.startsWith('Other:')) {
+      setTributeSource('Other');
+      setTributeSourceDetail(tribute.source.replace('Other:', '').trim());
+    } else {
+      setTributeSource(tribute.source);
+      setTributeSourceDetail('');
+    }
     setIsEditDialogOpen(true);
   };
 
@@ -154,6 +191,37 @@ const TributeTrackerPage = () => {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="tribute-source">Source</Label>
+                  <Select value={tributeSource} onValueChange={setTributeSource}>
+                    <SelectTrigger id="tribute-source" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+                      <SelectValue placeholder="Select source" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
+                      <SelectItem value="PayPal">PayPal</SelectItem>
+                      <SelectItem value="CashApp">CashApp</SelectItem>
+                      <SelectItem value="Revolut">Revolut</SelectItem>
+                      <SelectItem value="Wise">Wise</SelectItem>
+                      <SelectItem value="Venmo">Venmo</SelectItem>
+                      <SelectItem value="Throne">Throne</SelectItem>
+                      <SelectItem value="Wishlist Gift">Wishlist Gift</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {(tributeSource === 'Wishlist Gift' || tributeSource === 'Other') && (
+                  <div>
+                    <Label htmlFor="tribute-source-detail">{tributeSource === 'Wishlist Gift' ? 'Gift Description' : 'Specify Other Source'}</Label>
+                    <Input
+                      id="tribute-source-detail"
+                      placeholder={tributeSource === 'Wishlist Gift' ? 'e.g., new phone, designer bag' : 'e.g., Bank Transfer, Crypto'}
+                      value={tributeSourceDetail}
+                      onChange={(e) => setTributeSourceDetail(e.target.value)}
+                      className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                      required
+                    />
+                  </div>
+                )}
+                <div>
                   <Label htmlFor="tribute-reason">Reason (Optional)</Label>
                   <Input
                     id="tribute-reason"
@@ -197,6 +265,7 @@ const TributeTrackerPage = () => {
                     <TableHead className="text-gray-300">Amount</TableHead>
                     <TableHead className="text-gray-300">Date</TableHead>
                     <TableHead className="text-gray-300">From</TableHead>
+                    <TableHead className="text-gray-300">Source</TableHead>
                     <TableHead className="text-gray-300">Reason</TableHead>
                     <TableHead className="text-gray-300">Actions</TableHead>
                   </TableRow>
@@ -207,6 +276,7 @@ const TributeTrackerPage = () => {
                       <TableCell className="font-medium text-green-400">${tribute.amount.toFixed(2)}</TableCell>
                       <TableCell className="text-gray-400">{tribute.date}</TableCell>
                       <TableCell className="text-gray-200">{tribute.from}</TableCell>
+                      <TableCell className="text-gray-400">{tribute.source}</TableCell>
                       <TableCell className="text-gray-400">{tribute.reason || 'N/A'}</TableCell>
                       <TableCell className="flex space-x-2">
                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(tribute)} className="text-blue-400 hover:text-blue-300">
@@ -266,6 +336,37 @@ const TributeTrackerPage = () => {
                 required
               />
             </div>
+            <div>
+              <Label htmlFor="edit-tribute-source">Source</Label>
+              <Select value={tributeSource} onValueChange={setTributeSource}>
+                <SelectTrigger id="edit-tribute-source" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+                  <SelectValue placeholder="Select source" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
+                  <SelectItem value="PayPal">PayPal</SelectItem>
+                  <SelectItem value="CashApp">CashApp</SelectItem>
+                  <SelectItem value="Revolut">Revolut</SelectItem>
+                  <SelectItem value="Wise">Wise</SelectItem>
+                  <SelectItem value="Venmo">Venmo</SelectItem>
+                  <SelectItem value="Throne">Throne</SelectItem>
+                  <SelectItem value="Wishlist Gift">Wishlist Gift</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {(tributeSource === 'Wishlist Gift' || tributeSource === 'Other') && (
+              <div>
+                <Label htmlFor="edit-tribute-source-detail">{tributeSource === 'Wishlist Gift' ? 'Gift Description' : 'Specify Other Source'}</Label>
+                <Input
+                  id="edit-tribute-source-detail"
+                  placeholder={tributeSource === 'Wishlist Gift' ? 'e.g., new phone, designer bag' : 'e.g., Bank Transfer, Crypto'}
+                  value={tributeSourceDetail}
+                  onChange={(e) => setTributeSourceDetail(e.target.value)}
+                  className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                  required
+                />
+              </div>
+            )}
             <div>
               <Label htmlFor="edit-tribute-reason">Reason (Optional)</Label>
               <Input

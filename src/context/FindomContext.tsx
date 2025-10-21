@@ -55,6 +55,7 @@ export interface Tribute {
   from: string;
   reason?: string;
   notes?: string;
+  source: string; // New field for tribute source
 }
 
 export interface AppData {
@@ -130,7 +131,7 @@ interface FindomContextType {
 
 const FindomContext = createContext<FindomContextType | undefined>(undefined);
 
-export const FindomProvider = ({ children }: { children: ReactNode }) => {
+export const FindomProvider = ({ children }: { ReactNode }) => {
   const [appData, setAppData] = useState<AppData>(DEFAULT_APP_DATA);
 
   // Helper to get today's date in YYYY-MM-DD format
