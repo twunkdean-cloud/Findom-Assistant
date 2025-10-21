@@ -171,26 +171,39 @@ const DashboardPage = () => {
       <TributeChart tributes={appData.tributes} /> {/* Integrate the chart here */}
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
-        <CardTitle className="text-lg font-semibold mb-3">Monthly Goal Settings</CardTitle>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            type="number"
-            placeholder="Target Amount"
-            value={goalAmount}
-            onChange={(e) => setGoalAmount(parseFloat(e.target.value) || 0)}
-            className="flex-1 p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-          />
-          <Input
-            type="number"
-            placeholder="Current Progress"
-            value={goalProgressInput}
-            onChange={(e) => setGoalProgressInput(parseFloat(e.target.value) || 0)}
-            className="flex-1 p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-          />
-          <Button onClick={handleSaveGoal} className="bg-green-600 px-4 py-2 rounded hover:bg-green-700">
-            Save
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Monthly Goal Settings</CardTitle>
+          <p className="text-sm text-gray-400">Set your financial target for the month and manually adjust your current progress.</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="goal-target">Target Amount ($)</Label>
+            <Input
+              id="goal-target"
+              type="number"
+              placeholder="e.g., 5000"
+              value={goalAmount}
+              onChange={(e) => setGoalAmount(parseFloat(e.target.value) || 0)}
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            />
+            <p className="text-xs text-gray-500">This is the total amount you aim to achieve this month.</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="goal-progress">Current Progress ($)</Label>
+            <Input
+              id="goal-progress"
+              type="number"
+              placeholder="e.g., 1250"
+              value={goalProgressInput}
+              onChange={(e) => setGoalProgressInput(parseFloat(e.target.value) || 0)}
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            />
+            <p className="text-xs text-gray-500">Manually update how much you've earned towards your goal so far.</p>
+          </div>
+          <Button onClick={handleSaveGoal} className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 w-full">
+            Save Goal Settings
           </Button>
-        </div>
+        </CardContent>
       </Card>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
