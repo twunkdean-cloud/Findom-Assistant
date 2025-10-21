@@ -42,8 +42,9 @@ export interface Goal {
 }
 
 export interface Checklist {
-  date: string;
-  completed: string[];
+  date: string; // YYYY-MM-DD format
+  tasks: string[]; // All possible tasks
+  completed: string[]; // Completed tasks for the current date
 }
 
 export interface AppData {
@@ -79,7 +80,20 @@ const DEFAULT_APP_DATA: AppData = {
   },
   screenTime: 0,
   timerStart: null,
-  checklist: { date: '', completed: [] },
+  checklist: {
+    date: '', // Will be set dynamically
+    tasks: [
+      'Post on Twitter',
+      'Post on Reddit',
+      'Respond to messages',
+      'Create 5 pictures',
+      'Create 1 video for clips for sale',
+      'Engage with subs on social media',
+      'Check analytics',
+      'Plan next content',
+    ],
+    completed: [],
+  },
   uploadedImageData: null,
 };
 
@@ -98,7 +112,13 @@ const FindomContext = createContext<FindomContextType | undefined>(undefined);
 export const FindomProvider = ({ children }: { children: ReactNode }) => {
   const [appData, setAppData] = useState<AppData>(DEFAULT_APP_DATA);
 
-  // Load state from localStorage on initial mount
+  // Helper to get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  // Load state from localStorage on initial mount and handle daily checklist reset
   useEffect(() => {
     const loadedData: Partial<AppData> = {};
     Object.keys(DEFAULT_APP_DATA).forEach((key) => {
@@ -111,7 +131,28 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     });
-    setAppData((prev) => ({ ...prev, ...loadedData }));
+
+    setAppData((prev) => {
+      const newState = { ...prev, ...loadedData };
+      const todayDate = getTodayDate();
+
+      // Handle checklist initialization/reset
+      if (!newState.checklist.date || newState.checklist.date !== todayDate) {
+        // If no date or date is old, reset completed tasks and update date
+        newState.checklist = {
+          ...newState.checklist,
+          date: todayDate,
+          completed: [],
+        };
+        // Also save this reset state to localStorage immediately
+        try {
+          localStorage.setItem('findom_checklist', JSON.stringify(newState.checklist));
+        } catch (e) {
+          console.error('Error saving reset checklist to localStorage:', e);
+        }
+      }
+      return newState;
+    });
   }, []);
 
   // Save individual state items to localStorage
@@ -148,6 +189,13 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
       localStorage.clear();
       setAppData(DEFAULT_APP_DATA);
       toast.success('All data has been cleared.');
+      // Re-initialize checklist after clearing all data
+      const todayDate = getTodayDate();
+      updateAppData('checklist', {
+        ...DEFAULT_APP_DATA.checklist,
+        date: todayDate,
+        completed: [],
+      });
     }
   };
 
