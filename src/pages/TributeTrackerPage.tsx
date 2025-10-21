@@ -18,7 +18,7 @@ const TributeTrackerPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentTribute, setCurrentTribute] = useState<Tribute | null>(null);
 
-  const [tributeAmount, setTributeAmount] = useState<number>(0);
+  const [tributeAmount, setTributeAmount] = useState<string | number>(0);
   const [tributeDate, setTributeDate] = useState('');
   const [tributeFrom, setTributeFrom] = useState('');
   const [tributeReason, setTributeReason] = useState('');
@@ -35,14 +35,15 @@ const TributeTrackerPage = () => {
 
   const handleAddTribute = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tributeAmount || !tributeDate || !tributeFrom.trim()) {
-      toast.error('Amount, Date, and From fields are required.');
+    const parsedAmount = parseFloat(tributeAmount as string);
+    if (isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim()) {
+      toast.error('Amount (must be greater than 0), Date, and From fields are required.');
       return;
     }
 
     const newTribute: Tribute = {
       id: Date.now(),
-      amount: tributeAmount,
+      amount: parsedAmount,
       date: tributeDate,
       from: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
@@ -57,14 +58,15 @@ const TributeTrackerPage = () => {
 
   const handleEditTribute = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentTribute || !tributeAmount || !tributeDate || !tributeFrom.trim()) {
-      toast.error('Amount, Date, and From fields are required.');
+    const parsedAmount = parseFloat(tributeAmount as string);
+    if (!currentTribute || isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim()) {
+      toast.error('Amount (must be greater than 0), Date, and From fields are required.');
       return;
     }
 
     const updatedTribute: Tribute = {
       ...currentTribute,
-      amount: tributeAmount,
+      amount: parsedAmount,
       date: tributeDate,
       from: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
@@ -88,7 +90,7 @@ const TributeTrackerPage = () => {
 
   const openEditDialog = (tribute: Tribute) => {
     setCurrentTribute(tribute);
-    setTributeAmount(tribute.amount);
+    setTributeAmount(tribute.amount.toString()); // Convert to string for input field
     setTributeDate(tribute.date);
     setTributeFrom(tribute.from);
     setTributeReason(tribute.reason || '');
@@ -124,7 +126,7 @@ const TributeTrackerPage = () => {
                     type="number"
                     placeholder="0.00"
                     value={tributeAmount}
-                    onChange={(e) => setTributeAmount(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setTributeAmount(e.target.value)}
                     className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
                     required
                   />
@@ -237,7 +239,7 @@ const TributeTrackerPage = () => {
                 type="number"
                 placeholder="0.00"
                 value={tributeAmount}
-                onChange={(e) => setTributeAmount(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setTributeAmount(e.target.value)}
                 className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
                 required
               />

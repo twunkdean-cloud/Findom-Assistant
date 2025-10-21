@@ -20,7 +20,7 @@ const SubTrackerPage = () => {
   const [currentSub, setCurrentSub] = useState<Sub | null>(null);
 
   const [subName, setSubName] = useState('');
-  const [subTotal, setSubTotal] = useState<number>(0);
+  const [subTotal, setSubTotal] = useState<string | number>(0);
   const [subLastTribute, setSubLastTribute] = useState('');
   const [subPreferences, setSubPreferences] = useState('');
   const [subNotes, setSubNotes] = useState('');
@@ -74,11 +74,12 @@ const SubTrackerPage = () => {
       toast.error('Sub name is required.');
       return;
     }
+    const parsedTotal = parseFloat(subTotal as string) || 0;
 
     const newSub: Sub = {
       id: Date.now(),
       name: subName.trim(),
-      total: subTotal,
+      total: parsedTotal,
       lastTribute: subLastTribute,
       preferences: subPreferences,
       notes: subNotes,
@@ -97,11 +98,12 @@ const SubTrackerPage = () => {
       toast.error('Sub name is required.');
       return;
     }
+    const parsedTotal = parseFloat(subTotal as string) || 0;
 
     const updatedSub: Sub = {
       ...currentSub,
       name: subName.trim(),
-      total: subTotal,
+      total: parsedTotal,
       lastTribute: subLastTribute,
       preferences: subPreferences,
       notes: subNotes,
@@ -126,7 +128,7 @@ const SubTrackerPage = () => {
   const openEditDialog = (sub: Sub) => {
     setCurrentSub(sub);
     setSubName(sub.name);
-    setSubTotal(sub.total);
+    setSubTotal(sub.total.toString()); // Convert to string for input field
     setSubLastTribute(sub.lastTribute);
     setSubPreferences(sub.preferences);
     setSubNotes(sub.notes);
@@ -172,7 +174,7 @@ const SubTrackerPage = () => {
                     type="number"
                     placeholder="0"
                     value={subTotal}
-                    onChange={(e) => setSubTotal(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setSubTotal(e.target.value)}
                     className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
                   />
                 </div>
@@ -297,7 +299,7 @@ const SubTrackerPage = () => {
                 type="number"
                 placeholder="0"
                 value={subTotal}
-                onChange={(e) => setSubTotal(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setSubTotal(e.target.value)}
                 className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
               />
             </div>
