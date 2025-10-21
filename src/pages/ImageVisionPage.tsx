@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,16 +7,16 @@ import { Input } from '@/components/ui/input';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea'; // Import Textarea for displaying the prompt
-import { useGemini } from '@/hooks/use-gemini'; // Import useGemini to get the base system prompt
+import { Textarea } from '@/components/ui/textarea';
+import { useGemini } from '@/hooks/use-gemini';
 
 const ImageVisionPage = () => {
   const { appData, updateAppData } = useFindom();
-  const { getSystemPrompt } = useGemini(); // Use getSystemPrompt to build the full prompt
+  const { getSystemPrompt } = useGemini();
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [generatedDescription, setGeneratedDescription] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [usedPrompt, setUsedPrompt] = useState<string>(''); // State for the prompt being used
+  const [usedPrompt, setUsedPrompt] = useState<string>('');
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -24,16 +26,16 @@ const ImageVisionPage = () => {
         setImagePreviewUrl(reader.result as string);
         updateAppData('uploadedImageData', {
           mimeType: file.type,
-          data: (reader.result as string).split(',')[1], // Base64 data
+          data: (reader.result as string).split(',')[1],
         });
         setGeneratedDescription('');
-        setUsedPrompt(''); // Clear previous prompt
+        setUsedPrompt('');
       };
       reader.readAsDataURL(file);
     } else {
       setImagePreviewUrl(null);
       updateAppData('uploadedImageData', null);
-      setUsedPrompt(''); // Clear previous prompt
+      setUsedPrompt('');
     }
   };
 
@@ -50,38 +52,30 @@ const ImageVisionPage = () => {
     setIsLoading(true);
     setGeneratedDescription('Generating description...');
 
-    // Get the base persona context from the useGemini hook
     const basePersonaContext = getSystemPrompt();
 
     let specificImageInstruction = '';
     switch (persona) {
       case 'dominant':
-        specificImageInstruction = `Analyze the uploaded image. As a powerful and commanding dominant, craft a short, engaging caption (max 500 characters) that asserts control and authority. Emphasize your power, the submissive's devotion (if applicable), or the overall atmosphere of submission.`;
+        specificImageInstruction = `Analyze the uploaded image. As a powerful and commanding dominant, generate a short, engaging caption (max 500 characters) that asserts control and authority. Focus on elements in the image that convey power, luxury, or the submissive's devotion. Describe the scene from a dominant perspective, highlighting your presence or the impact of your actions.`;
         break;
       case 'submissive':
-        specificImageInstruction = `Analyze the uploaded image. As a devoted and obedient submissive, write a short, engaging caption (max 500 characters) that expresses reverence, admiration, and a desire to serve. Highlight the beauty or power of your superior (if applicable) or your own humble position.`;
+        specificImageInstruction = `Analyze the uploaded image. As a devoted and obedient submissive, generate a short, engaging caption (max 500 characters) that expresses reverence, admiration, and a desire to serve. Focus on elements in the image that convey humility, worship, or the dominant's power. Describe the scene from a submissive perspective, highlighting your feelings or actions of devotion.`;
         break;
       case 'switch':
-        specificImageInstruction = `Analyze the uploaded image. As a versatile switch, create a short, engaging caption (max 500 characters) that subtly blends elements of both dominance and submission. Hint at the dynamic power exchange or the allure of both roles.`;
+        specificImageInstruction = `Analyze the uploaded image. As a versatile switch, create a short, engaging caption (max 500 characters) that subtly blends elements of both dominance and submission. Hint at the dynamic power exchange or the allure of both roles, focusing on visual cues that support both aspects.`;
         break;
     }
 
-    // Combine the base persona context with the specific image instruction
-    // The baseSystemPrompt already includes instructions for emojis, hashtags, and no intro/outro.
     const fullPromptToSend = `${basePersonaContext} ${specificImageInstruction}`;
-    setUsedPrompt(fullPromptToSend); // Set the prompt being used for display and API call
+    setUsedPrompt(fullPromptToSend);
 
-    // IMPORTANT: This part requires a backend to handle image processing with Gemini Vision API.
-    // The current setup is client-side only and will not work without a server-side endpoint.
-    // You will need to implement a backend API at '/api/generate-image' that takes the image data
-    // and prompt, and then calls the Gemini Vision API.
     try {
-      // Placeholder for backend API call
       const response = await fetch('/api/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: fullPromptToSend, // Send the detailed prompt to the backend
+          prompt: fullPromptToSend,
           imageData: appData.uploadedImageData.data,
           imageMimeType: appData.uploadedImageData.mimeType,
         }),
@@ -110,7 +104,6 @@ const ImageVisionPage = () => {
       <p className="text-sm text-gray-400 mb-4">Upload a photo, choose a persona, and get a descriptive caption from the AI.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        {/* Left Side: Upload & Controls */}
         <div className="space-y-4">
           <Card className="bg-gray-800 border border-gray-700 p-4">
             <CardTitle className="text-lg font-semibold mb-2">1. Upload Photo</CardTitle>
@@ -157,7 +150,6 @@ const ImageVisionPage = () => {
           </Card>
         </div>
 
-        {/* Right Side: Output */}
         <div className="space-y-4">
           <Card className="bg-gray-800 border border-gray-700 p-4 min-h-[150px] flex flex-col justify-center items-center">
             <CardTitle className="text-lg font-semibold mb-3">Generated Description</CardTitle>
