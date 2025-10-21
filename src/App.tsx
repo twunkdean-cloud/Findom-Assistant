@@ -16,6 +16,7 @@ import PricingPage from "./pages/PricingPage";
 import SettingsPage from "./pages/SettingsPage";
 import ChecklistPage from "./pages/ChecklistPage";
 import TributeTrackerPage from "./pages/TributeTrackerPage"; // Import the new TributeTrackerPage
+import ChatAssistantPage from "./pages/ChatAssistantPage"; // Import the new ChatAssistantPage
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,11 +36,12 @@ const App = () => (
             <Route path="/image-vision" element={<ImageVisionPage />} />
             <Route path="/responses" element={<ResponseTemplatesPage />} />
             <Route path="/subs" element={<SubTrackerPage />} />
+            <Route path="/tributes" element={<TributeTrackerPage />} />
             <Route path="/tasks" element={<TaskGeneratorPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/checklist" element={<ChecklistPage />} />
-            <Route path="/tributes" element={<TributeTrackerPage />} /> {/* New route */}
+            <Route path="/chat-assistant" element={<ChatAssistantPage />} /> {/* New route */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

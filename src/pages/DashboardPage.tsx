@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { CalendarIcon, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import TributeChart from '@/components/TributeChart'; // Import the new chart component
 
 const DashboardPage = () => {
   const { appData, updateAppData } = useFindom();
@@ -117,6 +118,7 @@ const DashboardPage = () => {
   };
 
   const goalProgress = appData.goal.target > 0 ? (appData.goal.current / appData.goal.target) * 100 : 0;
+  const totalTributes = appData.tributes.reduce((sum, tribute) => sum + tribute.amount, 0);
 
   const sortedCalendar = [...appData.calendar].sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
 
@@ -124,14 +126,23 @@ const DashboardPage = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Dashboard</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> {/* Changed to 4 columns */}
         <Card className="bg-gray-800 border border-gray-700">
           <CardHeader>
             <CardTitle className="text-sm text-gray-400">Monthly Goal</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-400">${appData.goal.current} / ${appData.goal.target}</p>
+            <p className="text-2xl font-bold text-green-400">${appData.goal.current.toFixed(2)} / ${appData.goal.target.toFixed(2)}</p>
             <Progress value={Math.min(goalProgress, 100)} className="w-full h-2 mt-2 bg-gray-700 [&>*]:bg-green-500" />
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-800 border border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-sm text-gray-400">Total Tributes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-yellow-400">${totalTributes.toFixed(2)}</p>
           </CardContent>
         </Card>
 
@@ -156,6 +167,8 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <TributeChart tributes={appData.tributes} /> {/* Integrate the chart here */}
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardTitle className="text-lg font-semibold mb-3">Monthly Goal Settings</CardTitle>

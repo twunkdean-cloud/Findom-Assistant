@@ -16,8 +16,9 @@ const navItems = [
   { id: 'prompts', label: 'Image Vision', path: '/image-vision' },
   { id: 'responses', label: 'Responses', path: '/responses' },
   { id: 'subs', label: 'Sub Tracker', path: '/subs' },
-  { id: 'tributes', label: 'Tributes', path: '/tributes' }, // New navigation item
+  { id: 'tributes', label: 'Tributes', path: '/tributes' },
   { id: 'tasks', label: 'Tasks', path: '/tasks' },
+  { id: 'chat-assistant', label: 'Chat AI', path: '/chat-assistant' }, // New navigation item
   { id: 'pricing', label: 'Pricing', path: '/pricing' },
   { id: 'settings', label: 'Settings', path: '/settings' },
   { id: 'checklist', label: 'Checklist', path: '/checklist' },

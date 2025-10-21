@@ -122,6 +122,9 @@ interface FindomContextType {
   clearAllData: () => void;
   exportData: () => void;
   importData: (data: AppData) => void;
+  addChecklistTask: (task: string) => void; // New function
+  editChecklistTask: (oldTask: string, newTask: string) => void; // New function
+  deleteChecklistTask: (task: string) => void; // New function
 }
 
 const FindomContext = createContext<FindomContextType | undefined>(undefined);
@@ -237,8 +240,50 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addChecklistTask = (task: string) => {
+    if (!appData.checklist.tasks.includes(task)) {
+      const updatedTasks = [...appData.checklist.tasks, task];
+      updateAppData('checklist', { ...appData.checklist, tasks: updatedTasks });
+      toast.success('Task added!');
+    } else {
+      toast.error('Task already exists.');
+    }
+  };
+
+  const editChecklistTask = (oldTask: string, newTask: string) => {
+    if (oldTask === newTask) {
+      toast.info('No change made to task.');
+      return;
+    }
+    if (appData.checklist.tasks.includes(newTask)) {
+      toast.error('A task with this name already exists.');
+      return;
+    }
+    const updatedTasks = appData.checklist.tasks.map(t => (t === oldTask ? newTask : t));
+    const updatedCompleted = appData.checklist.completed.map(t => (t === oldTask ? newTask : t));
+    updateAppData('checklist', { ...appData.checklist, tasks: updatedTasks, completed: updatedCompleted });
+    toast.success('Task updated!');
+  };
+
+  const deleteChecklistTask = (task: string) => {
+    const updatedTasks = appData.checklist.tasks.filter(t => t !== task);
+    const updatedCompleted = appData.checklist.completed.filter(t => t !== task); // Also remove from completed if deleted
+    updateAppData('checklist', { ...appData.checklist, tasks: updatedTasks, completed: updatedCompleted });
+    toast.success('Task deleted!');
+  };
+
   return (
-    <FindomContext.Provider value={{ appData, updateAppData, saveAllAppData, clearAllData, exportData, importData }}>
+    <FindomContext.Provider value={{
+      appData,
+      updateAppData,
+      saveAllAppData,
+      clearAllData,
+      exportData,
+      importData,
+      addChecklistTask,
+      editChecklistTask,
+      deleteChecklistTask
+    }}>
       {children}
     </FindomContext.Provider>
   );
