@@ -15,6 +15,7 @@ import TaskGeneratorPage from "./pages/TaskGeneratorPage";
 import PricingPage from "./pages/PricingPage";
 import SettingsPage from "./pages/SettingsPage";
 import ChecklistPage from "./pages/ChecklistPage";
+import TributeTrackerPage from "./pages/TributeTrackerPage"; // Import the new TributeTrackerPage
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/checklist" element={<ChecklistPage />} />
+            <Route path="/tributes" element={<TributeTrackerPage />} /> {/* New route */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

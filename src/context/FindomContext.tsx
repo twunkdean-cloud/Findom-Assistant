@@ -47,6 +47,15 @@ export interface Checklist {
   completed: string[]; // Completed tasks for the current date
 }
 
+export interface Tribute {
+  id: number;
+  amount: number;
+  date: string; // YYYY-MM-DD format
+  from: string;
+  reason?: string;
+  notes?: string;
+}
+
 export interface AppData {
   apiKey: string;
   persona: Persona;
@@ -60,6 +69,7 @@ export interface AppData {
   timerStart: number | null; // Timestamp when timer started
   checklist: Checklist;
   uploadedImageData: { mimeType: string; data: string } | null;
+  tributes: Tribute[]; // New field for tribute tracking
 }
 
 // Define default values for the application data
@@ -101,6 +111,7 @@ const DEFAULT_APP_DATA: AppData = {
     completed: [],
   },
   uploadedImageData: null,
+  tributes: [], // Initialize new tributes array
 };
 
 // Define the context type
