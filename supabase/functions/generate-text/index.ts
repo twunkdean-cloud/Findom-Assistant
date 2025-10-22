@@ -32,9 +32,9 @@ serve(async (req) => {
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
+    const fullPrompt = `${systemPrompt}\n\n${prompt}`;
     const geminiPayload = {
-      contents: [{ parts: [{ text: prompt }] }],
-      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: fullPrompt }] }],
     };
 
     const geminiRes = await fetch(url, {
