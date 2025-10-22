@@ -41,8 +41,7 @@ export class TributesService extends BaseService<Tribute> {
   }
 
   async create(item: Omit<Tribute, 'id'>): Promise<Tribute> {
-    const dbItem = this.transformToDB(item as Tribute);
-    return super.create(dbItem);
+    return super.create(item);
   }
 
   async update(id: string, updates: Partial<Tribute>): Promise<Tribute> {

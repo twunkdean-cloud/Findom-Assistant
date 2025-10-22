@@ -26,7 +26,7 @@ export abstract class BaseService<T extends { id: string }> {
 
   async create(item: Omit<T, 'id'>): Promise<T> {
     const userId = this.getUserId();
-    const itemToInsert = { ...item, user_id: userId };
+    const itemToInsert = { ...this.transformToDB(item as T), user_id: userId };
     
     const { data, error } = await supabase
       .from(this.tableName)
@@ -43,7 +43,7 @@ export abstract class BaseService<T extends { id: string }> {
     
     const { data, error } = await supabase
       .from(this.tableName)
-      .update(updates)
+      .update(this.transformToDB(updates as T))
       .eq('id', id)
       .eq('user_id', userId)
       .select()

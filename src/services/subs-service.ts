@@ -41,8 +41,7 @@ export class SubsService extends BaseService<Sub> {
   }
 
   async create(item: Omit<Sub, 'id'>): Promise<Sub> {
-    const dbItem = this.transformToDB(item as Sub);
-    return super.create(dbItem);
+    return super.create(item);
   }
 
   async update(id: string, updates: Partial<Sub>): Promise<Sub> {
