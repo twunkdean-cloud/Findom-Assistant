@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 
 const TributeTrackerPage = () => {
-  const { appData, updateAppData, updateTributes } = useFindom();
+  const { appData, updateTributes } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentTribute, setCurrentTribute] = useState<Tribute | null>(null);
@@ -38,7 +38,7 @@ const TributeTrackerPage = () => {
     setCurrentTribute(null);
   };
 
-  const handleAddTribute = (e: React.FormEvent) => {
+  const handleAddTribute = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseFloat(tributeAmount as string);
     if (isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim() || !tributeSource) {
@@ -65,13 +65,13 @@ const TributeTrackerPage = () => {
       source: finalSource,
     };
 
-    updateAppData('tributes', [...appData.tributes, newTribute]);
+    await updateTributes([...appData.tributes, newTribute]);
     toast.success(`Tribute of $${newTribute.amount.toFixed(2)} added!`);
     setIsAddDialogOpen(false);
     resetForm();
   };
 
-  const handleEditTribute = (e: React.FormEvent) => {
+  const handleEditTribute = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseFloat(tributeAmount as string);
     if (!currentTribute || isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim() || !tributeSource) {
@@ -98,7 +98,7 @@ const TributeTrackerPage = () => {
       source: finalSource,
     };
 
-    updateAppData('tributes', appData.tributes.map(tribute =>
+    await updateTributes(appData.tributes.map(tribute =>
       tribute.id === updatedTribute.id ? updatedTribute : tribute
     ));
     toast.success(`Tribute from ${updatedTribute.from} updated!`);

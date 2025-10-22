@@ -285,23 +285,23 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateSubs = async (subs: Sub[]) => {
-    // Implementation here
+    updateAppData('subs', subs);
   };
 
   const updateTributes = async (tributes: Tribute[]) => {
-    // Implementation here
+    updateAppData('tributes', tributes);
   };
 
   const updateCustomPrices = async (customPrices: CustomPrice[]) => {
-    // Implementation here
+    updateAppData('customPrices', customPrices);
   };
 
   const updateCalendar = async (calendar: CalendarEvent[]) => {
-    // Implementation here
+    updateAppData('calendar', calendar);
   };
 
   const updateRedflags = async (redflags: RedFlag[]) => {
-    // Implementation here
+    updateAppData('redflags', redflags);
   };
 
   return (

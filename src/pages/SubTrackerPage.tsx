@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
 
 const SubTrackerPage = () => {
-  const { appData, updateAppData, updateSubs } = useFindom();
+  const { appData, updateSubs } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentSub, setCurrentSub] = useState<Sub | null>(null);
@@ -68,7 +68,7 @@ const SubTrackerPage = () => {
     }
   };
 
-  const handleAddSub = (e: React.FormEvent) => {
+  const handleAddSub = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subName.trim()) {
       toast.error('Sub name is required.');
@@ -86,13 +86,13 @@ const SubTrackerPage = () => {
       conversationHistory: subConversationHistory,
     };
 
-    updateAppData('subs', [...appData.subs, newSub]);
+    await updateSubs([...appData.subs, newSub]);
     toast.success(`${newSub.name} added to tracker!`);
     setIsAddDialogOpen(false);
     resetForm();
   };
 
-  const handleEditSub = (e: React.FormEvent) => {
+  const handleEditSub = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentSub || !subName.trim()) {
       toast.error('Sub name is required.');
@@ -110,7 +110,7 @@ const SubTrackerPage = () => {
       conversationHistory: subConversationHistory,
     };
 
-    updateAppData('subs', appData.subs.map(sub =>
+    await updateSubs(appData.subs.map(sub =>
       sub.id === updatedSub.id ? updatedSub : sub
     ));
     toast.success(`${updatedSub.name} updated!`);
