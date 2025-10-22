@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 
 const PricingPage = () => {
-  const { appData, updateAppData } = useFindom();
+  const { appData, updateCustomPrices } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPrice, setCurrentPrice] = useState<CustomPrice | null>(null);
@@ -26,7 +26,7 @@ const PricingPage = () => {
     setCurrentPrice(null);
   };
 
-  const handleAddPrice = (e: React.FormEvent) => {
+  const handleAddPrice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!serviceName.trim()) {
       toast.error('Service name is required.');
@@ -34,18 +34,19 @@ const PricingPage = () => {
     }
 
     const newPrice: CustomPrice = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       service: serviceName.trim(),
       price: priceAmount,
     };
 
-    updateAppData('customPrices', [...appData.customPrices, newPrice]);
+    const updatedPrices = [...appData.customPrices, newPrice];
+    await updateCustomPrices(updatedPrices);
     toast.success(`${newPrice.service} price added!`);
     setIsAddDialogOpen(false);
     resetForm();
   };
 
-  const handleEditPrice = (e: React.FormEvent) => {
+  const handleEditPrice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPrice || !serviceName.trim()) {
       toast.error('Service name is required.');
@@ -58,17 +59,19 @@ const PricingPage = () => {
       price: priceAmount,
     };
 
-    updateAppData('customPrices', appData.customPrices.map(item =>
-      item.id === updatedPrice.id ? updatedPrice : item
-    ));
+    const updatedPrices = appData.customPrices.map(item =>
+      item.id.toString() === updatedPrice.id.toString() ? updatedPrice : item
+    );
+    await updateCustomPrices(updatedPrices);
     toast.success(`${updatedPrice.service} price updated!`);
     setIsEditDialogOpen(false);
     resetForm();
   };
 
-  const handleDeletePrice = (id: number) => {
+  const handleDeletePrice = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this custom price?')) {
-      updateAppData('customPrices', appData.customPrices.filter(item => item.id !== id));
+      const updatedPrices = appData.customPrices.filter(item => item.id.toString() !== id);
+      await updateCustomPrices(updatedPrices);
       toast.success('Custom price deleted.');
     }
   };
@@ -156,7 +159,7 @@ const PricingPage = () => {
                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)} className="text-blue-400 hover:text-blue-300">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeletePrice(item.id)} className="text-red-400 hover:text-red-300">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeletePrice(item.id.toString())} className="text-red-400 hover:text-red-300">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>

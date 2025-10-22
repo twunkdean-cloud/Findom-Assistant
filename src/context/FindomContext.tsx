@@ -9,30 +9,30 @@ export interface Persona {
 }
 
 export interface Sub {
-  id: number;
+  id: string;
   name: string;
   total: number;
   lastTribute: string;
   preferences: string;
   notes: string;
-  conversationHistory?: string; // New field for conversation history
+  conversationHistory?: string;
 }
 
 export interface RedFlag {
-  id: number;
+  id: string;
   username: string;
   reason: string;
 }
 
 export interface CalendarEvent {
-  id: number;
+  id: string;
   datetime: string;
   platform: string;
   content: string;
 }
 
 export interface CustomPrice {
-  id: number;
+  id: string;
   service: string;
   price: number;
 }
@@ -49,13 +49,13 @@ export interface Checklist {
 }
 
 export interface Tribute {
-  id: number;
+  id: string;
   amount: number;
-  date: string; // YYYY-MM-DD format
+  date: string;
   from: string;
   reason?: string;
   notes?: string;
-  source: string; // New field for tribute source
+  source: string;
 }
 
 export interface AppData {
@@ -124,14 +124,20 @@ interface FindomContextType {
   clearAllData: () => void;
   exportData: () => void;
   importData: (data: AppData) => void;
-  addChecklistTask: (task: string) => void; // New function
-  editChecklistTask: (oldTask: string, newTask: string) => void; // New function
-  deleteChecklistTask: (task: string) => void; // New function
+  addChecklistTask: (task: string) => void;
+  editChecklistTask: (oldTask: string, newTask: string) => void;
+  deleteChecklistTask: (task: string) => void;
+  migrateFromLocalStorage: () => Promise<void>;
+  updateSubs: (subs: Sub[]) => Promise<void>;
+  updateTributes: (tributes: Tribute[]) => Promise<void>;
+  updateCustomPrices: (customPrices: CustomPrice[]) => Promise<void>;
+  updateCalendar: (calendar: CalendarEvent[]) => Promise<void>;
+  updateRedflags: (redflags: RedFlag[]) => Promise<void>;
 }
 
 const FindomContext = createContext<FindomContextType | undefined>(undefined);
 
-export const FindomProvider = ({ children }: { ReactNode }) => {
+export const FindomProvider = ({ children }: { children: ReactNode }) => {
   const [appData, setAppData] = useState<AppData>(DEFAULT_APP_DATA);
 
   // Helper to get today's date in YYYY-MM-DD format
@@ -147,7 +153,7 @@ export const FindomProvider = ({ children }: { ReactNode }) => {
       const storedValue = localStorage.getItem(`findom_${key}`);
       if (storedValue) {
         try {
-          loadedData[key as keyof AppData] = JSON.parse(storedValue);
+          (loadedData as any)[key] = JSON.parse(storedValue);
         } catch (e) {
           console.warn(`Could not parse stored value for ${key}, using default.`);
         }
@@ -274,6 +280,30 @@ export const FindomProvider = ({ children }: { ReactNode }) => {
     toast.success('Task deleted!');
   };
 
+  const migrateFromLocalStorage = async () => {
+    // Implementation here
+  };
+
+  const updateSubs = async (subs: Sub[]) => {
+    // Implementation here
+  };
+
+  const updateTributes = async (tributes: Tribute[]) => {
+    // Implementation here
+  };
+
+  const updateCustomPrices = async (customPrices: CustomPrice[]) => {
+    // Implementation here
+  };
+
+  const updateCalendar = async (calendar: CalendarEvent[]) => {
+    // Implementation here
+  };
+
+  const updateRedflags = async (redflags: RedFlag[]) => {
+    // Implementation here
+  };
+
   return (
     <FindomContext.Provider value={{
       appData,
@@ -284,7 +314,13 @@ export const FindomProvider = ({ children }: { ReactNode }) => {
       importData,
       addChecklistTask,
       editChecklistTask,
-      deleteChecklistTask
+      deleteChecklistTask,
+      migrateFromLocalStorage,
+      updateSubs,
+      updateTributes,
+      updateCustomPrices,
+      updateCalendar,
+      updateRedflags
     }}>
       {children}
     </FindomContext.Provider>

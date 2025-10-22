@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { MadeWithDyad } from './made-with-dyad';
+import MigrationHelper from './MigrationHelper';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +19,7 @@ const navItems = [
   { id: 'subs', label: 'Sub Tracker', path: '/subs' },
   { id: 'tributes', label: 'Tributes', path: '/tributes' },
   { id: 'tasks', label: 'Tasks', path: '/tasks' },
-  { id: 'chat-assistant', label: 'Chat AI', path: '/chat-assistant' }, // New navigation item
+  { id: 'chat-assistant', label: 'Chat AI', path: '/chat-assistant' },
   { id: 'pricing', label: 'Pricing', path: '/pricing' },
   { id: 'settings', label: 'Settings', path: '/settings' },
   { id: 'checklist', label: 'Checklist', path: '/checklist' },
@@ -54,6 +55,7 @@ const Layout = ({ children }: LayoutProps) => {
           ))}
         </TabsList>
         <main className="p-6">
+          <MigrationHelper />
           {children}
         </main>
       </Tabs>

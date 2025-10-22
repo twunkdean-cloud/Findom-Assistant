@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
 
 const SubTrackerPage = () => {
-  const { appData, updateAppData } = useFindom();
+  const { appData, updateAppData, updateSubs } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentSub, setCurrentSub] = useState<Sub | null>(null);
@@ -77,7 +77,7 @@ const SubTrackerPage = () => {
     const parsedTotal = parseFloat(subTotal as string) || 0;
 
     const newSub: Sub = {
-      id: Date.now(),
+      id: Date.now().toString(),
       name: subName.trim(),
       total: parsedTotal,
       lastTribute: subLastTribute,
@@ -118,9 +118,10 @@ const SubTrackerPage = () => {
     resetForm();
   };
 
-  const handleDeleteSub = (id: number) => {
+  const handleDeleteSub = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this sub?')) {
-      updateAppData('subs', appData.subs.filter(sub => sub.id !== id));
+      const updatedSubs = appData.subs.filter(sub => sub.id !== id);
+      await updateSubs(updatedSubs);
       toast.success('Sub deleted.');
     }
   };

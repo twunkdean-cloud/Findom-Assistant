@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
+import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Copy } from 'lucide-react';
 
 const RedditGeneratorPage = () => {
   const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
@@ -44,6 +45,16 @@ const RedditGeneratorPage = () => {
     }
   };
 
+  const handleCopyPost = () => {
+    if (generatedPost) {
+      const fullPost = `Title: ${generatedPost.title}\n\n${generatedPost.body}`;
+      navigator.clipboard.writeText(fullPost);
+      toast.success('Reddit post copied to clipboard!');
+    } else {
+      toast.error('No post to copy.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Reddit Post Generator</h2>
@@ -77,11 +88,35 @@ const RedditGeneratorPage = () => {
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generated Reddit Post</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-4">
           {generatedPost ? (
             <>
-              <h3 className="text-xl font-bold text-gray-100">{generatedPost.title}</h3>
-              <p className="whitespace-pre-wrap text-gray-300">{generatedPost.body}</p>
+              <div className="space-y-3">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-400 mb-1">Title:</h3>
+                  <Textarea
+                    value={generatedPost.title}
+                    readOnly
+                    rows={2}
+                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none font-semibold"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-400 mb-1">Body:</h3>
+                  <Textarea
+                    value={generatedPost.body}
+                    readOnly
+                    rows={6}
+                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={handleCopyPost}
+                className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
+              >
+                <Copy className="mr-2 h-4 w-4" /> Copy Reddit Post
+              </Button>
             </>
           ) : (
             <p className="text-gray-500 text-center">Your generated Reddit post will appear here...</p>

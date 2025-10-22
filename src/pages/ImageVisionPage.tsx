@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Copy, Image as ImageIcon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useGemini } from '@/hooks/use-gemini';
 
@@ -71,7 +71,9 @@ const ImageVisionPage = () => {
     setUsedPrompt(fullPromptToSend);
 
     try {
-      const response = await fetch('/api/generate-image', {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qttmhbtaguiioomcjqbt.supabase.co';
+      const functionUrl = `${supabaseUrl}/functions/v1/generate-image`;
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -91,10 +93,19 @@ const ImageVisionPage = () => {
       toast.success('Image description generated!');
     } catch (error: any) {
       console.error('Image Vision Error:', error);
-      setGeneratedDescription('Failed to generate description. This feature requires a backend API. Check console for details.');
+      setGeneratedDescription('Failed to generate description. Ensure the Supabase Edge Function is deployed and the GEMINI_API_KEY secret is set.');
       toast.error(`Error: ${error.message}. Backend API required.`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCopyDescription = () => {
+    if (generatedDescription.trim() && generatedDescription !== 'Generating description...') {
+      navigator.clipboard.writeText(generatedDescription.trim());
+      toast.success('Description copied to clipboard!');
+    } else {
+      toast.error('No description to copy.');
     }
   };
 
@@ -155,9 +166,26 @@ const ImageVisionPage = () => {
             <CardTitle className="text-lg font-semibold mb-3">Generated Description</CardTitle>
             <div className="w-full">
               {generatedDescription ? (
-                <p className="whitespace-pre-wrap text-gray-300">{generatedDescription}</p>
+                <div className="space-y-3">
+                  <Textarea
+                    value={generatedDescription}
+                    readOnly
+                    rows={4}
+                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+                  />
+                  <Button
+                    onClick={handleCopyDescription}
+                    disabled={!generatedDescription.trim() || generatedDescription === 'Generating description...'}
+                    className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
+                  >
+                    <Copy className="mr-2 h-4 w-4" /> Copy Description
+                  </Button>
+                </div>
               ) : (
-                <p className="text-gray-500 text-center">Your generated description will appear here...</p>
+                <div className="text-center py-8">
+                  <ImageIcon className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                  <p className="text-gray-500">Your generated description will appear here...</p>
+                </div>
               )}
             </div>
           </Card>

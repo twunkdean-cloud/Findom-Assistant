@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useGemini } from '@/hooks/use-gemini';
+import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Copy } from 'lucide-react';
 
 const TaskGeneratorPage = () => {
   const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
@@ -32,6 +33,15 @@ const TaskGeneratorPage = () => {
       toast.success('Task generated successfully!');
     } else if (error) {
       toast.error(`Failed to generate task: ${error}`);
+    }
+  };
+
+  const handleCopyTask = () => {
+    if (generatedTask.trim()) {
+      navigator.clipboard.writeText(generatedTask.trim());
+      toast.success('Task copied to clipboard!');
+    } else {
+      toast.error('No task to copy.');
     }
   };
 
@@ -85,12 +95,24 @@ const TaskGeneratorPage = () => {
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generated Task</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           {generatedTask ? (
-            <p className="whitespace-pre-wrap text-gray-300">{generatedTask}</p>
+            <Textarea
+              value={generatedTask}
+              readOnly
+              rows={6}
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+            />
           ) : (
             <p className="text-gray-500 text-center">Your generated task will appear here...</p>
           )}
+          <Button
+            onClick={handleCopyTask}
+            disabled={!generatedTask.trim()}
+            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
+          >
+            <Copy className="mr-2 h-4 w-4" /> Copy Task
+          </Button>
         </CardContent>
       </Card>
     </div>

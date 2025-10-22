@@ -1,13 +1,12 @@
-import React from "react"; // Added this import
-import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import "./globals.css";
-import { FindomProvider } from "./context/FindomContext.tsx";
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { Toaster } from 'sonner'
+import App from './App.tsx'
+import './globals.css'
 
-createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <FindomProvider>
-      <App />
-    </FindomProvider>
-  </React.StrictMode>
-);
+    <App />
+    <Toaster richColors position="top-center" />
+  </React.StrictMode>,
+)

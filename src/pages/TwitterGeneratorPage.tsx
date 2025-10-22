@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
+import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Copy } from 'lucide-react';
 
 const TwitterGeneratorPage = () => {
   const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
@@ -27,6 +28,15 @@ const TwitterGeneratorPage = () => {
       toast.success('Tweet generated successfully!');
     } else if (error) {
       toast.error(`Failed to generate tweet: ${error}`);
+    }
+  };
+
+  const handleCopyTweet = () => {
+    if (generatedTweet.trim()) {
+      navigator.clipboard.writeText(generatedTweet.trim());
+      toast.success('Tweet copied to clipboard!');
+    } else {
+      toast.error('No tweet to copy.');
     }
   };
 
@@ -63,12 +73,29 @@ const TwitterGeneratorPage = () => {
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generated Tweet</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           {generatedTweet ? (
-            <p className="whitespace-pre-wrap text-gray-300">{generatedTweet}</p>
+            <Textarea
+              value={generatedTweet}
+              readOnly
+              rows={4}
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+            />
           ) : (
             <p className="text-gray-500 text-center">Your generated tweet will appear here...</p>
           )}
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">
+              {generatedTweet.length}/280 characters
+            </span>
+            <Button
+              onClick={handleCopyTweet}
+              disabled={!generatedTweet.trim()}
+              className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center"
+            >
+              <Copy className="mr-2 h-4 w-4" /> Copy Tweet
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

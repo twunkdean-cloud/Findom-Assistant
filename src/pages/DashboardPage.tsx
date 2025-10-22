@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useFindom } from '@/context/FindomContext';
+import { useFindom, RedFlag, CalendarEvent } from '@/context/FindomContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -9,10 +9,10 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { CalendarIcon, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import TributeChart from '@/components/TributeChart'; // Import the new chart component
+import TributeChart from '@/components/TributeChart';
 
 const DashboardPage = () => {
-  const { appData, updateAppData } = useFindom();
+  const { appData, updateAppData, updateCalendar, updateRedflags } = useFindom();
   const [goalAmount, setGoalAmount] = useState(appData.goal.target);
   const [goalProgressInput, setGoalProgressInput] = useState(appData.goal.current);
   const [redflagUsername, setRedflagUsername] = useState('');
@@ -51,10 +51,15 @@ const DashboardPage = () => {
     toast.success('Goal updated!');
   };
 
-  const handleAddRedFlag = () => {
+  const handleAddRedFlag = async () => {
     if (redflagUsername.trim() && redflagReason.trim()) {
-      const newRedFlag = { id: Date.now(), username: redflagUsername.trim(), reason: redflagReason.trim() };
-      updateAppData('redflags', [...appData.redflags, newRedFlag]);
+      const newRedFlag: RedFlag = { 
+        id: crypto.randomUUID(),
+        username: redflagUsername.trim(), 
+        reason: redflagReason.trim() 
+      };
+      const updatedRedflags: RedFlag[] = [...appData.redflags, newRedFlag];
+      await updateRedflags(updatedRedflags);
       setRedflagUsername('');
       setRedflagReason('');
       toast.success('Red flag added!');
@@ -63,21 +68,23 @@ const DashboardPage = () => {
     }
   };
 
-  const handleRemoveRedFlag = (id: number) => {
-    updateAppData('redflags', appData.redflags.filter(flag => flag.id !== id));
+  const handleRemoveRedFlag = async (id: string) => {
+    const updatedRedflags = appData.redflags.filter(flag => flag.id !== id);
+    await updateRedflags(updatedRedflags);
     toast.success('Red flag removed.');
   };
 
-  const handleAddCalendarEvent = (e: React.FormEvent) => {
+  const handleAddCalendarEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (calendarDatetime && calendarPlatform && calendarContent) {
-      const newEvent = {
-        id: Date.now(),
+      const newEvent: CalendarEvent = {
+        id: crypto.randomUUID(),
         datetime: calendarDatetime,
         platform: calendarPlatform,
         content: calendarContent,
       };
-      updateAppData('calendar', [...appData.calendar, newEvent]);
+      const updatedCalendar: CalendarEvent[] = [...appData.calendar, newEvent];
+      await updateCalendar(updatedCalendar);
       setCalendarDatetime('');
       setCalendarPlatform('');
       setCalendarContent('');
@@ -88,8 +95,9 @@ const DashboardPage = () => {
     }
   };
 
-  const handleRemoveCalendarEvent = (id: number) => {
-    updateAppData('calendar', appData.calendar.filter(item => item.id !== id));
+  const handleRemoveCalendarEvent = async (id: string) => {
+    const updatedCalendar = appData.calendar.filter(item => item.id !== id);
+    await updateCalendar(updatedCalendar);
     toast.success('Schedule removed.');
   };
 
@@ -126,7 +134,7 @@ const DashboardPage = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Dashboard</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> {/* Changed to 4 columns */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-gray-800 border border-gray-700">
           <CardHeader>
             <CardTitle className="text-sm text-gray-400">Monthly Goal</CardTitle>
@@ -168,7 +176,7 @@ const DashboardPage = () => {
         </Card>
       </div>
 
-      <TributeChart tributes={appData.tributes} /> {/* Integrate the chart here */}
+      <TributeChart tributes={appData.tributes} />
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader>

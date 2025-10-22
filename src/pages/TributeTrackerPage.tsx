@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 
 const TributeTrackerPage = () => {
-  const { appData, updateAppData } = useFindom();
+  const { appData, updateAppData, updateTributes } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentTribute, setCurrentTribute] = useState<Tribute | null>(null);
@@ -56,7 +56,7 @@ const TributeTrackerPage = () => {
     }
 
     const newTribute: Tribute = {
-      id: Date.now(),
+      id: Date.now().toString(),
       amount: parsedAmount,
       date: tributeDate,
       from: tributeFrom.trim(),
@@ -106,9 +106,10 @@ const TributeTrackerPage = () => {
     resetForm();
   };
 
-  const handleDeleteTribute = (id: number) => {
+  const handleDeleteTribute = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this tribute record?')) {
-      updateAppData('tributes', appData.tributes.filter(tribute => tribute.id !== id));
+      const updatedTributes = appData.tributes.filter(tribute => tribute.id !== id);
+      await updateTributes(updatedTributes);
       toast.success('Tribute record deleted.');
     }
   };
