@@ -2,8 +2,18 @@ import React, { ReactNode } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { MadeWithDyad } from './made-with-dyad';
 import MigrationHelper from './MigrationHelper';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { LogOut, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface LayoutProps {
   children: ReactNode;
@@ -27,13 +37,44 @@ const navItems = [
 
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const currentTab = navItems.find(item => item.path === location.pathname)?.id || 'dashboard';
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <div className="max-w-6xl mx-auto min-h-screen bg-gray-900 text-gray-200">
-      <header className="bg-gradient-to-r from-indigo-700 to-purple-800 text-white p-6 text-center shadow-lg">
+      <header className="bg-gradient-to-r from-indigo-700 to-purple-800 text-white p-6 text-center shadow-lg relative">
         <h1 className="text-3xl font-bold tracking-wider">Switch Dean's Assistant</h1>
         <p className="text-sm mt-2 opacity-90">Complete Findom Automation Suite</p>
+        
+        {user && (
+          <div className="absolute top-4 right-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-white hover:bg-white/20">
+                  <User className="h-4 w-4 mr-2" />
+                  {user.email}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="text-gray-700">
+                  <User className="h-4 w-4 mr-2" />
+                  {user.email}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </header>
 
       <Tabs value={currentTab} className="w-full">
