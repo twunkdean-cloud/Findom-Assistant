@@ -7,6 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { FindomProvider } from "./context/FindomContext";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 import DashboardPage from "./pages/DashboardPage";
 import TwitterGeneratorPage from "./pages/TwitterGeneratorPage";
 import RedditGeneratorPage from "./pages/RedditGeneratorPage";
@@ -48,6 +49,7 @@ const AppContent = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/*" element={
         <ProtectedRoute>
           <Layout>
