@@ -37,7 +37,6 @@ export const useGemini = (options: UseGeminiOptions = {}) => {
             prompt: userPrompt,
             systemPrompt,
             conversationHistory,
-            apiKey: appData.apiKey,
           }),
         }
       );
