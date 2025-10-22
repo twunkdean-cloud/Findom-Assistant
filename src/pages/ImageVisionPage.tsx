@@ -112,7 +112,7 @@ const ImageVisionPage = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">AI Image Vision</h2>
-      <p className="text-sm text-gray-400 mb-4">Upload a photo, choose a persona, and get a descriptive caption from the AI.</p>
+      <p className="text-sm text-gray-400 mb-4">Upload a photo, choose a persona, and get an AI image editing prompt to transform your image with the desired energy.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="space-y-4">
@@ -131,7 +131,7 @@ const ImageVisionPage = () => {
           </Card>
 
           <Card className="bg-gray-800 border border-gray-700 p-4">
-            <CardTitle className="text-lg font-semibold mb-3">2. Choose Persona & Generate Description</CardTitle>
+            <CardTitle className="text-lg font-semibold mb-3">2. Choose Energy & Generate Prompt</CardTitle>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => handleGenerateDescription('dominant')}
@@ -163,14 +163,14 @@ const ImageVisionPage = () => {
 
         <div className="space-y-4">
           <Card className="bg-gray-800 border border-gray-700 p-4 min-h-[150px] flex flex-col justify-center items-center">
-            <CardTitle className="text-lg font-semibold mb-3">Generated Description</CardTitle>
+            <CardTitle className="text-lg font-semibold mb-3">Generated Image Editing Prompt</CardTitle>
             <div className="w-full">
               {generatedDescription ? (
                 <div className="space-y-3">
                   <Textarea
                     value={generatedDescription}
                     readOnly
-                    rows={4}
+                    rows={6}
                     className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
                   />
                   <Button
@@ -178,13 +178,13 @@ const ImageVisionPage = () => {
                     disabled={!generatedDescription.trim() || generatedDescription === 'Generating description...'}
                     className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
                   >
-                    <Copy className="mr-2 h-4 w-4" /> Copy Description
+                    <Copy className="mr-2 h-4 w-4" /> Copy Prompt
                   </Button>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <ImageIcon className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-                  <p className="text-gray-500">Your generated description will appear here...</p>
+                  <p className="text-gray-500">Your AI image editing prompt will appear here...</p>
                 </div>
               )}
             </div>
