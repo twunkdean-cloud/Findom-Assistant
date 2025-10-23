@@ -187,7 +187,7 @@ ${selectedSub ? `You are currently discussing ${selectedSub}. Use their conversa
                   <SelectValue placeholder="Choose a sub for personalized responses" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="">General Advice</SelectItem>
+                  <SelectItem value="general">General Advice</SelectItem>
                   {appData.subs.map((sub) => (
                     <SelectItem key={sub.id} value={sub.name}>
                       {sub.name} (${sub.total.toFixed(2)})
