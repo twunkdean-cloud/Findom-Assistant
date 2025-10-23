@@ -28,38 +28,59 @@ serve(async (req) => {
       );
     }
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            {
-              text: prompt
+    // Try different model names in order of preference
+    const modelNames = ['gemini-1.5-flash', 'gemini-1.5-flash-001', 'gemini-pro-vision'];
+    let response;
+    let lastError;
+    
+    for (const modelName of modelNames) {
+      try {
+        const modelEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        response = await fetch(modelEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                {
+                  text: prompt
+                },
+                {
+                  inline_data: {
+                    mime_type: mimeType,
+                    data: image
+                  }
+                }
+              ]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 1024,
             },
-            {
-              inline_data: {
-                mime_type: mimeType,
-                data: image
-              }
-            }
-          ]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
+          }),
+        });
+        
+        if (response.ok) {
+          break; // Success, exit loop
+        } else {
+          lastError = await response.json();
+          console.log(`Model ${modelName} failed:`, lastError);
+        }
+      } catch (err) {
+        lastError = { error: err.message };
+        console.log(`Model ${modelName} error:`, err);
+      }
+    }
+    
+    if (!response || !response.ok) {
       return new Response(
-        JSON.stringify({ error: `Gemini Vision API error: ${errorData.error?.message || 'Unknown error'}` }),
+        JSON.stringify({ 
+          error: `All vision models failed. Last error: ${lastError?.error?.message || lastError?.error || 'Unknown error'}`
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
