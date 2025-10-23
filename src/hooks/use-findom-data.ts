@@ -80,9 +80,9 @@ export const useFindomData = () => {
           calendar,
           redflags,
           checklist,
-          profile,
-          settings,
-          subscription,
+          profile: profile as any,
+          settings: settings as any,
+          subscription: subscription as string,
         });
       } catch (error) {
         console.error('Error loading data:', error);

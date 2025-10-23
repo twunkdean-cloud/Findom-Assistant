@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useFindom, CalendarEvent } from '@/types/index';
+import { useFindom } from '@/context/FindomContext';
+import { CalendarEvent } from '@/types/index';
 import { toast } from 'sonner';
 import { PlusCircle, Calendar, CheckSquare, Trash2, Edit } from 'lucide-react';
 
