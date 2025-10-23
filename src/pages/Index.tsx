@@ -30,8 +30,8 @@ const Index = () => {
 
   const totalTributes = appData.tributes.reduce((sum, tribute) => sum + tribute.amount, 0);
   const goalProgress = appData.goal.target > 0 ? (appData.goal.current / appData.goal.target) * 100 : 0;
-  const completedTasks = appData.checklist.completed?.length || 0;
-  const totalTasks = appData.checklist.tasks?.length || 0;
+  const completedTasks = appData.checklist.completed.length;
+  const totalTasks = appData.checklist.tasks.length;
   const taskProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
   const upcomingEvents = appData.calendar
     .filter(event => new Date(event.datetime) > currentTime)
