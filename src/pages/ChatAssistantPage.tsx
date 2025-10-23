@@ -165,15 +165,26 @@ ${selectedSub && selectedSub !== 'general' ? `You are currently discussing ${sel
 
         setMessages(prev => [...prev, assistantMessage]);
       } else if (error) {
-        toast.error(`Failed to get response: ${error}`);
+        console.error('Gemini API error:', error);
+        let errorMessage = 'Failed to get response';
+        
+        if (error.includes('MAX_TOKENS') || error.includes('token')) {
+          errorMessage = 'Response too long. Try asking a more specific question or clear the chat history.';
+        } else if (error.includes('API key') || error.includes('configuration')) {
+          errorMessage = 'API configuration error. Please check your settings.';
+        } else {
+          errorMessage = `API Error: ${error}`;
+        }
+        
+        toast.error(errorMessage);
         // Add error message to chat for debugging
-        const errorMessage: Message = {
+        const errorResponse: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: `Error: ${error}. Please check your API configuration.`,
+          content: errorMessage,
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages(prev => [...prev, errorResponse]);
       }
     } catch (err) {
       console.error('Chat error:', err);
