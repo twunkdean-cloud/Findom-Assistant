@@ -13,7 +13,7 @@ export const useGemini = (options: UseGeminiOptions = {}) => {
   const { appData } = useFindom();
 
   const getSystemPrompt = () => {
-    return "You are an AI assistant specialized in creating detailed image editing prompts. Analyze uploaded images and generate comprehensive instructions for AI image editing tools.";
+    return `You are ${appData.persona.name}, a professional dominatrix specializing in ${appData.persona.specialties}. Your style is ${appData.persona.style}. Create authentic, engaging content that reflects your persona and expertise. Use two or three hashtags for each post you create.`;
   };
 
   const callGemini = async (userPrompt: string, systemPrompt: string, conversationHistory?: string) => {
