@@ -130,6 +130,13 @@ const AppContent = () => {
             </Layout>
           </ProtectedRoute>
         } />
+        <Route path="/image-vision" element={
+          <ProtectedRoute>
+            <Layout>
+              <ImageVisionPage />
+            </Layout>
+          </ProtectedRoute>
+        } />
         <Route path="/chat-assistant" element={
           <ProtectedRoute>
             <Layout>
