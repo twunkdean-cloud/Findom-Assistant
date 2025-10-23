@@ -1,27 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { FindomProvider } from '@/context/FindomContext';
-import { Toaster } from '@/components/ui/sonner';
 import Layout from '@/components/Layout';
-import LoginPage from '@/pages/LoginPage';
-import DashboardPage from '@/pages/DashboardPage';
-import SubTrackerPage from '@/pages/SubTrackerPage';
-import TributeTrackerPage from '@/pages/TributeTrackerPage';
-import TaskGeneratorPage from '@/pages/TaskGeneratorPage';
-import ResponseTemplatesPage from '@/pages/ResponseTemplatesPage';
-import TwitterGeneratorPage from '@/pages/TwitterGeneratorPage';
-import RedditGeneratorPage from '@/pages/RedditGeneratorPage';
-import CaptionGeneratorPage from '@/pages/CaptionGeneratorPage';
-import ImageVisionPage from '@/pages/ImageVisionPage';
-import ChatAssistantPage from '@/pages/ChatAssistantPage';
-import ChecklistPage from '@/pages/ChecklistPage';
-import SettingsPage from '@/pages/SettingsPage';
-import PricingPage from '@/pages/PricingPage';
-import AuthCallbackPage from '@/pages/AuthCallbackPage';
-import NotFound from '@/pages/NotFound';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -41,36 +24,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AuthNavigationHandler = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth navigation handler:', event, session?.user?.email);
-
-        if (event === 'SIGNED_IN' && session) {
-          // Only redirect if not on auth callback page
-          if (!window.location.pathname.includes('/auth/callback')) {
-            navigate('/', { replace: true });
-          }
-        } else if (event === 'SIGNED_OUT') {
-          navigate('/login', { replace: true });
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  return null;
-};
-
 const AppContent = () => {
   return (
     <Router>
-      <AuthNavigationHandler />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
