@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Loader2, Copy, Image } from 'lucide-react';
 
 const CaptionGeneratorPage = () => {
-  const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
+  const { callGemini, isLoading, error } = useGemini();
   const [imageDescription, setImageDescription] = useState('');
   const [captionStyle, setCaptionStyle] = useState('dominant');
   const [generatedCaption, setGeneratedCaption] = useState('');

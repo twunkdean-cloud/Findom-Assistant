@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
 const TwitterGeneratorPage = () => {
-  const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
+  const { callGemini, isLoading, error } = useGemini();
   const [topic, setTopic] = useState('');
   const [generatedTweet, setGeneratedTweet] = useState('');
 

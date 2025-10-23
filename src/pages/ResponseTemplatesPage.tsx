@@ -33,7 +33,7 @@ const getSystemPrompt = (): string => {
 
 const ResponseTemplatesPage = () => {
   const { appData, updateAppData } = useFindom();
-  const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
+  const { callGemini, isLoading, error } = useGemini();
 
   const [responseType, setResponseType] = useState<string>('initial');
   const [context, setContext] = useState<string>('');
