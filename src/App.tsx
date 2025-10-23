@@ -122,24 +122,24 @@ const AppContent = () => {
             </Layout>
           </ProtectedRoute>
         } />
-        <Route path="/captions" element={
+        <Route path="/caption" element={
           <ProtectedRoute>
             <Layout>
               <CaptionGeneratorPage />
             </Layout>
           </ProtectedRoute>
         } />
-        <Route path="/image-vision" element={
-          <ProtectedRoute>
-            <Layout>
-              <ImageVisionPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/chat" element={
+        <Route path="/chat-assistant" element={
           <ProtectedRoute>
             <Layout>
               <ChatAssistantPage />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/pricing" element={
+          <ProtectedRoute>
+            <Layout>
+              <PricingPage />
             </Layout>
           </ProtectedRoute>
         } />
