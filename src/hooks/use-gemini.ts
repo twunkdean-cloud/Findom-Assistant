@@ -26,6 +26,8 @@ export const useGemini = (): UseGeminiReturn => {
     setError(null);
 
     try {
+      console.log('Calling Gemini API with prompt:', prompt.substring(0, 100) + '...');
+      
       // Call the edge function
       const response = await fetch('https://qttmhbtaguiioomcjqbt.supabase.co/functions/v1/gemini-chat', {
         method: 'POST',
@@ -38,11 +40,22 @@ export const useGemini = (): UseGeminiReturn => {
         }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error text:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
       return data.response || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -59,6 +72,8 @@ export const useGemini = (): UseGeminiReturn => {
     setError(null);
 
     try {
+      console.log('Calling Gemini Vision API...');
+      
       // Convert image to base64
       const base64Image = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -83,11 +98,21 @@ export const useGemini = (): UseGeminiReturn => {
         }),
       });
 
+      console.log('Vision response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Vision response error text:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Vision response data:', data);
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
       return data.response || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';

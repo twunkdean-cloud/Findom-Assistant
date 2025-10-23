@@ -71,7 +71,7 @@ const ChatAssistantPage = () => {
       let contextPrompt = currentInput;
       
       // If a sub is selected, include their conversation history and preferences
-      if (selectedSub) {
+      if (selectedSub && selectedSub !== 'general') {
         const sub = appData.subs.find(s => s.name === selectedSub);
         const conversationHistory = getSubConversationHistory(selectedSub);
         
@@ -101,7 +101,7 @@ Always maintain a respectful yet dominant tone.
 Do not generate any content that is illegal, harmful, or violates platform policies.
 Focus on empowerment, financial literacy, and consensual power dynamics.
 
-${selectedSub ? `You are currently discussing ${selectedSub}. Use their conversation history, preferences, and tribute history to craft a personalized, dominant response that aligns with their known interests and your established dynamic with them.` : 'Provide general findom advice and content creation help.'}`;
+${selectedSub && selectedSub !== 'general' ? `You are currently discussing ${selectedSub}. Use their conversation history, preferences, and tribute history to craft a personalized, dominant response that aligns with their known interests and your established dynamic with them.` : 'Provide general findom advice and content creation help.'}`;
 
       const result = await callGemini(contextPrompt, systemPrompt);
       
