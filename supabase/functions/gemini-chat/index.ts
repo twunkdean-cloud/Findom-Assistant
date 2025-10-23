@@ -57,9 +57,14 @@ serve(async (req) => {
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `${systemInstruction}\n\nUser: ${prompt}\n\nAssistant:`
+                text: prompt
               }]
             }],
+            systemInstruction: systemInstruction ? {
+              parts: [{
+                text: systemInstruction
+              }]
+            } : undefined,
             generationConfig: {
               temperature: 0.7,
               topK: 40,
