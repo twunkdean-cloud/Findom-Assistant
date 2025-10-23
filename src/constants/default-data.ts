@@ -40,6 +40,8 @@ export const DEFAULT_APP_DATA: AppData = {
       'Eat a healthy meal',
     ],
     completed: [],
+    weeklyTasks: DEFAULT_WEEKLY_TASKS,
+    weeklyCompleted: [],
   },
   uploadedImageData: null,
   tributes: [],

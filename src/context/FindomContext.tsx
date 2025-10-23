@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useFindomData } from '@/hooks/use-findom-data';
 import { useFindomActions } from '@/hooks/use-findom-actions';
 import { FindomContextType } from '@/types';
-import { DEFAULT_APP_DATA } from '@/data/default-app-data';
+import { DEFAULT_APP_DATA } from '@/constants/default-data';
 import { AppData } from '@/types';
 import { useAuth } from '@/hooks/use-auth';
 import { userDataService } from '@/services/user-data-service';
