@@ -96,6 +96,44 @@ export class UserDataService {
   async setUploadedImageData(userId: string, data: { mimeType: string; data: string } | null): Promise<void> {
     await this.set(userId, 'uploadedImageData', data);
   }
+
+  // Profile methods
+  async getProfile(userId: string) {
+    return await this.get(userId, 'profile') || {
+      displayName: '',
+      bio: '',
+      persona: 'dominant'
+    };
+  }
+
+  async setProfile(userId: string, profile: any): Promise<void> {
+    await this.set(userId, 'profile', profile);
+  }
+
+  // Settings methods
+  async getSettings(userId: string) {
+    return await this.get(userId, 'settings') || {
+      emailNotifications: true,
+      pushNotifications: true,
+      dailyReminders: true,
+      profileVisibility: 'private',
+      dataSharing: false,
+      theme: 'dark'
+    };
+  }
+
+  async setSettings(userId: string, settings: any): Promise<void> {
+    await this.set(userId, 'settings', settings);
+  }
+
+  // Subscription methods
+  async getSubscription(userId: string) {
+    return await this.get(userId, 'subscription') || 'free';
+  }
+
+  async setSubscription(userId: string, subscription: string): Promise<void> {
+    await this.set(userId, 'subscription', subscription);
+  }
 }
 
 export const userDataService = new UserDataService();

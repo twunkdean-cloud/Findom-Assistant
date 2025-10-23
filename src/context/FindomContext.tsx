@@ -253,6 +253,15 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
         case 'checklist':
           await checklistsService.update(userId, value);
           break;
+        case 'profile':
+          await userDataService.setProfile(userId, value);
+          break;
+        case 'settings':
+          await userDataService.setSettings(userId, value);
+          break;
+        case 'subscription':
+          await userDataService.setSubscription(userId, value);
+          break;
         default:
           console.warn('Unknown app data key:', key);
       }
