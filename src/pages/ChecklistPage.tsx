@@ -235,7 +235,7 @@ const ChecklistPage = () => {
                   </DialogTrigger>
                   <DialogContent className="bg-gray-800 border-gray-700">
                     <DialogHeader>
-                      <DialogTitle className="text-white">Add New Task</DialogTitle>
+                      <DialogTitle className="text-white">Add New Daily Task</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Input
@@ -318,53 +318,40 @@ const ChecklistPage = () => {
           </CardContent>
         </Card>
 
-        {/* Content Calendar */}
+        {/* Weekly Tasks */}
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-white flex items-center">
-              <Calendar className="mr-2 h-5 w-5 text-purple-400" />
-              Content Calendar
+              <Calendar className="mr-2 h-5 w-5 text-blue-400" />
+              Weekly Tasks
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {sortedEvents.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No scheduled events</p>
+            <div className="space-y-2">
+              {weeklyTasks.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">No weekly tasks</p>
               ) : (
-                sortedEvents.map((event) => (
-                  <div key={event.id} className="p-3 bg-gray-700 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-sm font-medium text-purple-400">{event.platform}</span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(event.datetime).toLocaleDateString()} {new Date(event.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-300">{event.content}</p>
-                      </div>
-                      <div className="flex space-x-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEditEvent(event)}
-                          className="text-blue-400 hover:text-blue-300"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteEvent(event.id)}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                weeklyTasks.map((task) => {
+                  const isCompleted = weeklyCompleted.includes(task);
+                  
+                  return (
+                    <div key={task} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-700">
+                      <Checkbox
+                        checked={isCompleted}
+                        onCheckedChange={() => handleToggleWeeklyTask(task)}
+                      />
+                      <span className={`flex-1 ${isCompleted ? 'line-through text-gray-500' : 'text-gray-200'}`}>
+                        {task}
+                      </span>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
+            </div>
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              <p className="text-sm text-gray-400">
+                Progress: {weeklyCompleted.length}/{weeklyTasks.length} weekly tasks completed
+              </p>
             </div>
           </CardContent>
         </Card>

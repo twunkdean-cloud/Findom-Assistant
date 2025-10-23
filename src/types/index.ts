@@ -57,6 +57,8 @@ export interface Checklist {
   date: string;
   tasks: string[];
   completed: string[];
+  weeklyTasks: string[];
+  weeklyCompleted: string[];
 }
 
 export interface Tribute {
