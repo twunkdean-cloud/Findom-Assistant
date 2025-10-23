@@ -47,15 +47,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Handle email confirmation
         if (event === 'SIGNED_IN' && session) {
-          // Check if this is from email confirmation
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.has('access_token')) {
-            navigate('/', { replace: true });
-          } else {
+          // Only redirect if not on auth callback page
+          if (!window.location.pathname.includes('/auth/callback')) {
             navigate('/', { replace: true });
           }
+        } else if (event === 'SIGNED_OUT') {
+          navigate('/login', { replace: true });
         }
       }
     );

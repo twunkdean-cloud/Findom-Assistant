@@ -14,7 +14,6 @@ import { toast } from 'sonner';
 const LoginPage = () => {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
