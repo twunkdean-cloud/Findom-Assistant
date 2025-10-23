@@ -59,10 +59,13 @@ export abstract class BaseService<T extends { id: string }> {
     
     // Insert new items
     if (items.length > 0) {
-      const itemsToInsert = items.map(item => ({
-        ...item,
-        user_id: userId
-      }));
+      const itemsToInsert = items.map(item => {
+        const transformed = this.transformToDB(item);
+        return {
+          ...transformed,
+          user_id: userId
+        };
+      });
       
       const { error } = await supabase.from(this.tableName).insert(itemsToInsert);
       if (error) throw error;
