@@ -27,6 +27,7 @@ export const useGemini = (): UseGeminiReturn => {
 
     try {
       console.log('Calling Gemini API with prompt:', prompt.substring(0, 100) + '...');
+      console.log('System instruction:', systemInstruction?.substring(0, 100) + '...');
       
       // Call the edge function
       const response = await fetch('https://qttmhbtaguiioomcjqbt.supabase.co/functions/v1/gemini-chat', {
