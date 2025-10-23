@@ -22,6 +22,7 @@ const ChatAssistantPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedSub, setSelectedSub] = useState<string>('');
+  const [isProcessingSub, setIsProcessingSub] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
