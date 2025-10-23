@@ -221,6 +221,20 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
     toast.success('Task deleted!');
   };
 
+  const handleToggleWeeklyTask = (task: string) => {
+    const isCompleted = appData.checklist.weeklyCompleted?.includes(task) || false;
+    
+    if (isCompleted) {
+      // Remove from completed
+      const updatedWeeklyCompleted = (appData.checklist.weeklyCompleted || []).filter(t => t !== task);
+      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
+    } else {
+      // Add to completed
+      const updatedWeeklyCompleted = [...(appData.checklist.weeklyCompleted || []), task];
+      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
+    }
+  };
+
   const migrateFromLocalStorage = async (): Promise<void> => {
     try {
       await migrationService.migrateFromLocalStorage();
