@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useFindom, Sub } from '@/context/FindomContext';
+import { useFindom, Sub } from '@/types/index';
 import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
 

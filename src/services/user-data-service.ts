@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Persona, Goal } from '@/context/FindomContext';
+import { Persona, Goal } from '@/types/index';
 
 export class UserDataService {
   async get<T>(userId: string, key: string): Promise<T | null> {

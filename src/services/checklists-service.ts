@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Checklist } from '@/context/FindomContext';
+import { Checklist } from '@/types/index';
 
 interface DBChecklist {
   id: string;

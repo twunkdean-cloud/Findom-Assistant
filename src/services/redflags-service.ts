@@ -1,5 +1,5 @@
 import { BaseService } from './base-service';
-import { RedFlag } from '@/context/FindomContext';
+import { RedFlag } from '@/types/index';
 
 export class RedflagsService extends BaseService<RedFlag> {
   constructor() {

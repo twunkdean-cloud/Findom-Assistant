@@ -1,5 +1,5 @@
 import { BaseService } from './base-service';
-import { CustomPrice } from '@/context/FindomContext';
+import { CustomPrice } from '@/types/index';
 
 export class CustomPricesService extends BaseService<CustomPrice> {
   constructor() {

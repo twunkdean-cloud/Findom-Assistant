@@ -1,5 +1,5 @@
 import { BaseService } from './base-service';
-import { Sub } from '@/context/FindomContext';
+import { Sub } from '@/types/index';
 
 interface DBSub {
   id: string;

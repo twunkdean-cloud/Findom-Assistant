@@ -1,5 +1,5 @@
 import { BaseService } from './base-service';
-import { CalendarEvent } from '@/context/FindomContext';
+import { CalendarEvent } from '@/types/index';
 
 export class CalendarService extends BaseService<CalendarEvent> {
   constructor() {

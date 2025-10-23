@@ -1,5 +1,5 @@
 import { BaseService } from './base-service';
-import { Tribute } from '@/context/FindomContext';
+import { Tribute } from '@/types/index';
 
 interface DBTribute {
   id: string;

@@ -3,7 +3,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tribute } from '@/context/FindomContext';
+import { Tribute } from '@/types/index';
 import { TrendingUp } from 'lucide-react';
 
 interface TributeChartProps {

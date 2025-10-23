@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { Sub, Tribute, CustomPrice, CalendarEvent, RedFlag, Checklist, Persona, Goal } from '@/context/FindomContext';
+import { Sub, Tribute, CustomPrice, CalendarEvent, RedFlag, Checklist, Persona, Goal } from '@/types/index';
 import { subsService } from './subs-service';
 import { tributesService } from './tributes-service';
 import { customPricesService } from './custom-prices-service';

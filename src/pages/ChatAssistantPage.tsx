@@ -7,6 +7,7 @@ import { useGemini } from '@/hooks/use-gemini';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Loader2, Send, Copy, Bot, User, History } from 'lucide-react';
+import ChatTest from '@/components/ChatTest';
 
 interface Message {
   id: string;

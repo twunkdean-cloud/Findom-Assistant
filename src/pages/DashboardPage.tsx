@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useFindom, RedFlag, CalendarEvent } from '@/context/FindomContext';
+import { useFindom, RedFlag, CalendarEvent } from '@/types/index';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
