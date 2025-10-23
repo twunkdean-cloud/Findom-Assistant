@@ -7,10 +7,18 @@ import { calendarService } from './calendar-service';
 import { redflagsService } from './redflags-service';
 import { checklistsService } from './checklists-service';
 import { userDataService } from './user-data-service';
+import { supabase } from '@/integrations/supabase/client';
 
 export class MigrationService {
   async migrateFromLocalStorage(): Promise<void> {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const userId = user.id;
       const keys = [
         'findom_subs', 
         'findom_tributes', 
@@ -42,47 +50,47 @@ export class MigrationService {
       const migrationPromises: Promise<void>[] = [];
 
       if (migrationData.apiKey) {
-        migrationPromises.push(userDataService.setApiKey(migrationData.apiKey));
+        migrationPromises.push(userDataService.setApiKey(userId, migrationData.apiKey));
       }
       
       if (migrationData.persona) {
-        migrationPromises.push(userDataService.setPersona(migrationData.persona));
+        migrationPromises.push(userDataService.setPersona(userId, migrationData.persona));
       }
       
       if (migrationData.goal) {
-        migrationPromises.push(userDataService.setGoal(migrationData.goal));
+        migrationPromises.push(userDataService.setGoal(userId, migrationData.goal));
       }
       
       if (migrationData.responses) {
-        migrationPromises.push(userDataService.setResponses(migrationData.responses));
+        migrationPromises.push(userDataService.setResponses(userId, migrationData.responses));
       }
       
       if (migrationData.screenTime) {
-        migrationPromises.push(userDataService.setScreenTime(migrationData.screenTime));
+        migrationPromises.push(userDataService.setScreenTime(userId, migrationData.screenTime));
       }
       
       if (migrationData.subs) {
-        migrationPromises.push(subsService.updateAll(migrationData.subs));
+        migrationPromises.push(subsService.updateAll(userId, migrationData.subs));
       }
       
       if (migrationData.tributes) {
-        migrationPromises.push(tributesService.updateAll(migrationData.tributes));
+        migrationPromises.push(tributesService.updateAll(userId, migrationData.tributes));
       }
       
       if (migrationData.customPrices) {
-        migrationPromises.push(customPricesService.updateAll(migrationData.customPrices));
+        migrationPromises.push(customPricesService.updateAll(userId, migrationData.customPrices));
       }
       
       if (migrationData.calendar) {
-        migrationPromises.push(calendarService.updateAll(migrationData.calendar));
+        migrationPromises.push(calendarService.updateAll(userId, migrationData.calendar));
       }
       
       if (migrationData.redflags) {
-        migrationPromises.push(redflagsService.updateAll(migrationData.redflags));
+        migrationPromises.push(redflagsService.updateAll(userId, migrationData.redflags));
       }
       
       if (migrationData.checklist) {
-        migrationPromises.push(checklistsService.update(migrationData.checklist));
+        migrationPromises.push(checklistsService.update(userId, migrationData.checklist));
       }
 
       await Promise.all(migrationPromises);
