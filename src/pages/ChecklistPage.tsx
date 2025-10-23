@@ -9,6 +9,7 @@ import { useFindom } from '@/context/FindomContext';
 import { CalendarEvent } from '@/types/index';
 import { toast } from 'sonner';
 import { PlusCircle, Calendar, CheckSquare, Trash2, Edit } from 'lucide-react';
+import { DEFAULT_WEEKLY_TASKS } from '@/constants/default-data';
 
 const ChecklistPage = () => {
   const { appData, updateChecklist, updateCalendar } = useFindom();
