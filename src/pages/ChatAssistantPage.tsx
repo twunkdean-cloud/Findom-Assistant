@@ -158,16 +158,6 @@ ${selectedSub && selectedSub !== 'general' ? `You are currently discussing ${sel
 
   return (
     <div className="space-y-6 h-[calc(100vh-200px)]">
-      {/* Test Component - Remove this after debugging */}
-      <Card className="bg-yellow-900 border border-yellow-700">
-        <CardHeader>
-          <CardTitle className="text-yellow-300">🧪 Debug Test Component</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChatTest />
-        </CardContent>
-      </Card>
-
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-100">AI Chat Assistant</h2>
