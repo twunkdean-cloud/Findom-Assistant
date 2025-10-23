@@ -17,6 +17,7 @@ import ImageVisionPage from '@/pages/ImageVisionPage';
 import ChatAssistantPage from '@/pages/ChatAssistantPage';
 import ChecklistPage from '@/pages/ChecklistPage';
 import SettingsPage from '@/pages/SettingsPage';
+import PricingPage from '@/pages/PricingPage';
 import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import NotFound from '@/pages/NotFound';
 import { useNavigate } from 'react-router-dom';
