@@ -3,52 +3,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
-import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
 const RedditGeneratorPage = () => {
   const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
   const [topic, setTopic] = useState('');
-  const [generatedPost, setGeneratedPost] = useState<{ title: string; body: string } | null>(null);
+  const [generatedPost, setGeneratedPost] = useState('');
 
-  const handleGenerateRedditPost = async () => {
+  const handleGeneratePost = async () => {
     if (!topic.trim()) {
       toast.error('Please enter a topic for the Reddit post.');
       return;
     }
 
-    setGeneratedPost(null);
-    const systemPrompt = getSystemPrompt() + " Generate a Reddit post. Provide a catchy title and a short, engaging body. Format your response with 'Title: [Your Title]' and 'Body: [Your Body]'. Do not include any introductory or concluding remarks.";
+    setGeneratedPost('');
+    const systemPrompt = getSystemPrompt() + " Generate a Reddit post based on the user's topic. Make it engaging and appropriate for Reddit. Include relevant formatting. Do not include any introductory or concluding remarks, just the post content.";
     const userPrompt = `Generate a Reddit post about: ${topic}`;
 
     const result = await callGemini(userPrompt, systemPrompt);
     if (result) {
-      const titleMatch = result.match(/Title:\s*(.*)/i);
-      const bodyMatch = result.match(/Body:\s*([\s\S]*)/i);
-
-      if (titleMatch && bodyMatch) {
-        setGeneratedPost({
-          title: titleMatch[1].trim(),
-          body: bodyMatch[1].trim(),
-        });
-        toast.success('Reddit post generated successfully!');
-      } else {
-        setGeneratedPost({
-          title: 'Generation Error',
-          body: 'Could not parse the generated post. Please try again or refine your topic.',
-        });
-        toast.error('Failed to parse generated Reddit post.');
-      }
+      setGeneratedPost(result);
+      toast.success('Reddit post generated successfully!');
     } else if (error) {
       toast.error(`Failed to generate Reddit post: ${error}`);
     }
   };
 
   const handleCopyPost = () => {
-    if (generatedPost) {
-      const fullPost = `Title: ${generatedPost.title}\n\n${generatedPost.body}`;
-      navigator.clipboard.writeText(fullPost);
+    if (generatedPost.trim()) {
+      navigator.clipboard.writeText(generatedPost.trim());
       toast.success('Reddit post copied to clipboard!');
     } else {
       toast.error('No post to copy.');
@@ -58,7 +42,7 @@ const RedditGeneratorPage = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Reddit Post Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">Generate engaging Reddit posts with titles and body content based on your persona.</p>
+      <p className="text-sm text-gray-400 mb-4">Generate engaging Reddit posts based on your persona and topic.</p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader>
@@ -66,7 +50,7 @@ const RedditGeneratorPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <Textarea
-            placeholder="Enter the topic for your Reddit post (e.g., 'a new rule for my subs', 'my latest conquest', 'a public humiliation')"
+            placeholder="Enter the topic for your Reddit post (e.g., 'findom lifestyle', 'financial domination experiences', 'sub training')"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             rows={3}
@@ -74,7 +58,7 @@ const RedditGeneratorPage = () => {
             disabled={isLoading}
           />
           <Button
-            onClick={handleGenerateRedditPost}
+            onClick={handleGeneratePost}
             disabled={isLoading || !topic.trim()}
             className="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 w-full flex items-center justify-center"
           >
@@ -90,37 +74,22 @@ const RedditGeneratorPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {generatedPost ? (
-            <>
-              <div className="space-y-3">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-1">Title:</h3>
-                  <Textarea
-                    value={generatedPost.title}
-                    readOnly
-                    rows={2}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none font-semibold"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-1">Body:</h3>
-                  <Textarea
-                    value={generatedPost.body}
-                    readOnly
-                    rows={6}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={handleCopyPost}
-                className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
-              >
-                <Copy className="mr-2 h-4 w-4" /> Copy Reddit Post
-              </Button>
-            </>
+            <Textarea
+              value={generatedPost}
+              readOnly
+              rows={8}
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+            />
           ) : (
             <p className="text-gray-500 text-center">Your generated Reddit post will appear here...</p>
           )}
+          <Button
+            onClick={handleCopyPost}
+            disabled={!generatedPost.trim()}
+            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
+          >
+            <Copy className="mr-2 h-4 w-4" /> Copy Post
+          </Button>
         </CardContent>
       </Card>
     </div>

@@ -1,142 +1,195 @@
-"use client";
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useGemini } from '@/hooks/use-gemini';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { Loader2, Copy } from 'lucide-react';
+import { Loader2, Send, Copy, Bot, User } from 'lucide-react';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
 
 const ChatAssistantPage = () => {
-  const { appData } = useFindom();
   const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
+  const { appData } = useFindom();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const [selectedSubId, setSelectedSubId] = useState<string>('');
-  const [chatContext, setChatContext] = useState('');
-  const [generatedMessage, setGeneratedMessage] = useState('');
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-  const handleGenerateMessage = async () => {
-    if (!selectedSubId) {
-      toast.error('Please select a sub first.');
-      return;
-    }
-    if (!chatContext.trim()) {
-      toast.error('Please provide some context for the message.');
-      return;
-    }
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    setGeneratedMessage('');
-    const selectedSub = appData.subs.find(sub => sub.id.toString() === selectedSubId);
-
-    if (!selectedSub) {
-      toast.error('Selected sub not found.');
+  const handleSendMessage = async () => {
+    if (!input.trim()) {
+      toast.error('Please enter a message');
       return;
     }
 
-    // Get the base system prompt and remove the hashtag instruction
-    let baseSystemPrompt = getSystemPrompt();
-    baseSystemPrompt = baseSystemPrompt.replace(/Use two or three hashtags for each post you create\./, '');
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date(),
+    };
 
-    const subDetails = `Sub's Name: ${selectedSub.name}. Last Tribute: ${selectedSub.lastTribute || 'N/A'}. Preferences: ${selectedSub.preferences || 'None specified'}. Notes: ${selectedSub.notes || 'None specified'}.`;
-    const userPrompt = `Generate a personalized chat message for ${selectedSub.name} based on the following context: "${chatContext}". Consider their preferences and notes.`;
-    
-    // Combine the modified base prompt with specific chat assistant instructions
-    const systemInstruction = baseSystemPrompt + ` Your response should be a concise, engaging, and in-character chat message. Incorporate details about the sub if relevant. Sub details: ${subDetails}. Do not include any introductory or concluding remarks, just the message content.`;
+    setMessages(prev => [...prev, userMessage]);
+    const newHistory = [...conversationHistory, `User: ${input.trim()}`];
+    setConversationHistory(newHistory);
+    setInput('');
 
-    const result = await callGemini(userPrompt, systemInstruction, selectedSub.conversationHistory);
-    if (result) {
-      setGeneratedMessage(result);
-      toast.success('Message generated successfully!');
-    } else if (error) {
-      toast.error(`Failed to generate message: ${error}`);
+    try {
+      const systemPrompt = getSystemPrompt() + ' You are a helpful AI assistant for a findom. Provide advice, generate content, and help with findom-related tasks. Be professional yet maintain the dominant persona.';
+      const conversationContext = newHistory.slice(-10).join('\n');
+      const userPrompt = `Recent conversation:\n${conversationContext}\n\nCurrent user message: ${input.trim()}`;
+
+      const result = await callGemini(userPrompt, systemPrompt);
+      
+      if (result) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: result,
+          timestamp: new Date(),
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+        setConversationHistory(prev => [...prev, `Assistant: ${result}`]);
+      } else if (error) {
+        toast.error(`Failed to get response: ${error}`);
+      }
+    } catch (err) {
+      toast.error('Failed to send message');
     }
   };
 
-  const handleCopyMessage = () => {
-    if (generatedMessage.trim()) {
-      navigator.clipboard.writeText(generatedMessage.trim());
-      toast.success('Message copied to clipboard!');
-    } else {
-      toast.error('No message to copy.');
+  const handleCopyMessage = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast.success('Message copied to clipboard!');
+  };
+
+  const handleClearChat = () => {
+    setMessages([]);
+    setConversationHistory([]);
+    toast.success('Chat cleared');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-100">AI Chat Assistant</h2>
-      <p className="text-sm text-gray-400 mb-4">Generate personalized chat messages for your subs using AI.</p>
+    <div className="space-y-6 h-[calc(100vh-200px)]">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-100">AI Chat Assistant</h2>
+          <p className="text-sm text-gray-400 mt-1">Get help with content, advice, and findom strategies</p>
+        </div>
+        <Button
+          onClick={handleClearChat}
+          variant="outline"
+          className="border-gray-600 text-gray-300 hover:bg-gray-700"
+        >
+          Clear Chat
+        </Button>
+      </div>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Generate Chat Message</CardTitle>
+      <Card className="bg-gray-800 border border-gray-700 flex flex-col h-[calc(100%-80px)]">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold flex items-center">
+            <Bot className="mr-2 h-5 w-5 text-indigo-400" />
+            Conversation
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="select-sub">Select Sub</Label>
-            <Select value={selectedSubId} onValueChange={setSelectedSubId} disabled={isLoading || appData.subs.length === 0}>
-              <SelectTrigger id="select-sub" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
-                <SelectValue placeholder="Select a sub" />
-              </SelectTrigger>
-              <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
-                {appData.subs.length === 0 ? (
-                  <SelectItem value="no-subs" disabled>No subs available. Add some in Sub Tracker!</SelectItem>
+        <CardContent className="flex-1 flex flex-col p-0">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.length === 0 ? (
+              <div className="text-center py-8">
+                <Bot className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-500">Start a conversation with your AI assistant</p>
+                <p className="text-sm text-gray-600 mt-2">Ask for content ideas, advice, or help with tasks</p>
+              </div>
+            ) : (
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg p-3 ${
+                      message.role === 'user'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-700 text-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-start space-x-2">
+                      {message.role === 'assistant' && (
+                        <Bot className="h-4 w-4 mt-0.5 text-indigo-400 flex-shrink-0" />
+                      )}
+                      {message.role === 'user' && (
+                        <User className="h-4 w-4 mt-0.5 text-indigo-200 flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-xs opacity-70">
+                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleCopyMessage(message.content)}
+                            className="h-6 w-6 p-0 opacity-70 hover:opacity-100"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="border-t border-gray-700 p-4">
+            <div className="flex space-x-2">
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me anything about findom, content creation, or strategies..."
+                rows={2}
+                className="flex-1 p-2 bg-gray-900 border-gray-600 text-gray-200 resize-none"
+                disabled={isLoading}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={isLoading || !input.trim()}
+                className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 self-end"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  appData.subs.map(sub => (
-                    <SelectItem key={sub.id} value={sub.id.toString()}>{sub.name}</SelectItem>
-                  ))
+                  <Send className="h-4 w-4" />
                 )}
-              </SelectContent>
-            </Select>
+              </Button>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="chat-context">Message Context</Label>
-            <Textarea
-              id="chat-context"
-              placeholder="What do you want to say? (e.g., 'thank them for tribute', 'assign a new task', 'remind them of their place')"
-              value={chatContext}
-              onChange={(e) => setChatContext(e.target.value)}
-              rows={4}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-              disabled={isLoading}
-            />
-          </div>
-          <Button
-            onClick={handleGenerateMessage}
-            disabled={isLoading || !selectedSubId || !chatContext.trim()}
-            className="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 w-full flex items-center justify-center"
-          >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate Message
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-gray-800 border border-gray-700 p-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Generated Message</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {generatedMessage ? (
-            <Textarea
-              value={generatedMessage}
-              readOnly
-              rows={6}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
-            />
-          ) : (
-            <p className="text-gray-500 text-center">Your generated message will appear here...</p>
-          )}
-          <Button
-            onClick={handleCopyMessage}
-            disabled={!generatedMessage.trim()}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
-          >
-            <Copy className="mr-2 h-4 w-4" /> Copy Message
-          </Button>
         </CardContent>
       </Card>
     </div>

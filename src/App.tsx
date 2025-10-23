@@ -1,10 +1,29 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { FindomProvider } from '@/context/FindomContext';
-import Layout from '@/components/Layout';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { FindomProvider } from './context/FindomContext';
+import Layout from './components/Layout';
+import { LoadingSpinner } from './components/ui/loading-spinner';
+
+// Pages
+import Index from './pages/Index';
+import DashboardPage from './pages/DashboardPage';
+import SubTrackerPage from './pages/SubTrackerPage';
+import TributeTrackerPage from './pages/TributeTrackerPage';
+import TaskGeneratorPage from './pages/TaskGeneratorPage';
+import ResponseTemplatesPage from './pages/ResponseTemplatesPage';
+import TwitterGeneratorPage from './pages/TwitterGeneratorPage';
+import RedditGeneratorPage from './pages/RedditGeneratorPage';
+import CaptionGeneratorPage from './pages/CaptionGeneratorPage';
+import ImageVisionPage from './pages/ImageVisionPage';
+import ChatAssistantPage from './pages/ChatAssistantPage';
+import ChecklistPage from './pages/ChecklistPage';
+import PricingPage from './pages/PricingPage';
+import SettingsPage from './pages/SettingsPage';
+import LoginPage from './pages/LoginPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
+import NotFound from './pages/NotFound';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();

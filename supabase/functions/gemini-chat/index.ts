@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, systemPrompt, conversationHistory } = await req.json();
+    const { prompt, systemInstruction } = await req.json();
 
     if (!prompt) {
       return new Response(
@@ -28,13 +28,6 @@ serve(async (req) => {
       );
     }
 
-    // Construct the full prompt
-    let fullPrompt = systemPrompt || '';
-    if (conversationHistory) {
-      fullPrompt += `\n\nConversation History:\n${conversationHistory}`;
-    }
-    fullPrompt += `\n\nUser: ${prompt}\n\nAssistant:`;
-
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
@@ -43,7 +36,7 @@ serve(async (req) => {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: fullPrompt
+            text: `${systemInstruction}\n\nUser: ${prompt}\n\nAssistant:`
           }]
         }],
         generationConfig: {
@@ -68,11 +61,11 @@ serve(async (req) => {
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     return new Response(
-      JSON.stringify({ text: generatedText }),
+      JSON.stringify({ response: generatedText }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in generate-text function:', error);
+    console.error('Error in gemini-chat function:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
