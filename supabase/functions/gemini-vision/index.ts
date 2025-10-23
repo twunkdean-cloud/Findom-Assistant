@@ -29,7 +29,7 @@ serve(async (req) => {
     }
     
     // Try different model names in order of preference
-    const modelNames = ['gemini-1.5-flash', 'gemini-1.5-flash-001', 'gemini-pro-vision'];
+    const modelNames = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest', 'gemini-pro-latest'];
     let response;
     let lastError;
     
