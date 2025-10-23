@@ -40,13 +40,13 @@ export class TributesService extends BaseService<Tribute> {
     };
   }
 
-  async create(item: Omit<Tribute, 'id'>): Promise<Tribute> {
-    return super.create(item);
+  async create(userId: string, item: Omit<Tribute, 'id'>): Promise<Tribute> {
+    return super.create(userId, item);
   }
 
-  async update(id: string, updates: Partial<Tribute>): Promise<Tribute> {
+  async update(userId: string, id: string, updates: Partial<Tribute>): Promise<Tribute> {
     const dbUpdates = this.transformToDB(updates as Tribute);
-    return super.update(id, dbUpdates);
+    return super.update(userId, id, dbUpdates);
   }
 }
 

@@ -162,6 +162,7 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     const loadData = async () => {
       try {
         setLoading(true);
+        const userId = user.id;
         
         // Load all data in parallel
         const [
@@ -179,19 +180,19 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
           redflags,
           checklist,
         ] = await Promise.all([
-          userDataService.getApiKey(),
-          userDataService.getPersona(),
-          userDataService.getGoal(),
-          userDataService.getResponses(),
-          userDataService.getScreenTime(),
-          userDataService.getTimerStart(),
-          userDataService.getUploadedImageData(),
-          subsService.getAll(),
-          tributesService.getAll(),
-          customPricesService.getAll(),
-          calendarService.getAll(),
-          redflagsService.getAll(),
-          checklistsService.getToday(),
+          userDataService.getApiKey(userId),
+          userDataService.getPersona(userId),
+          userDataService.getGoal(userId),
+          userDataService.getResponses(userId),
+          userDataService.getScreenTime(userId),
+          userDataService.getTimerStart(userId),
+          userDataService.getUploadedImageData(userId),
+          subsService.getAll(userId),
+          tributesService.getAll(userId),
+          customPricesService.getAll(userId),
+          calendarService.getAll(userId),
+          redflagsService.getAll(userId),
+          checklistsService.getToday(userId),
         ]);
 
         setAppData({
@@ -224,32 +225,33 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
 
     setAppData(prev => ({ ...prev, [key]: value }));
+    const userId = user.id;
 
     try {
       switch (key) {
         case 'apiKey':
-          await userDataService.setApiKey(value);
+          await userDataService.setApiKey(userId, value);
           break;
         case 'persona':
-          await userDataService.setPersona(value);
+          await userDataService.setPersona(userId, value);
           break;
         case 'goal':
-          await userDataService.setGoal(value);
+          await userDataService.setGoal(userId, value);
           break;
         case 'responses':
-          await userDataService.setResponses(value);
+          await userDataService.setResponses(userId, value);
           break;
         case 'screenTime':
-          await userDataService.setScreenTime(value);
+          await userDataService.setScreenTime(userId, value);
           break;
         case 'timerStart':
-          await userDataService.setTimerStart(value);
+          await userDataService.setTimerStart(userId, value);
           break;
         case 'uploadedImageData':
-          await userDataService.setUploadedImageData(value);
+          await userDataService.setUploadedImageData(userId, value);
           break;
         case 'checklist':
-          await checklistsService.update(value);
+          await checklistsService.update(userId, value);
           break;
         default:
           console.warn('Unknown app data key:', key);
@@ -264,7 +266,7 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     setAppData(prev => ({ ...prev, subs }));
     try {
-      await subsService.updateAll(subs);
+      await subsService.updateAll(user.id, subs);
     } catch (error) {
       console.error('Error updating subs:', error);
       toast.error('Error saving subs');
@@ -275,7 +277,7 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     setAppData(prev => ({ ...prev, tributes }));
     try {
-      await tributesService.updateAll(tributes);
+      await tributesService.updateAll(user.id, tributes);
     } catch (error) {
       console.error('Error updating tributes:', error);
       toast.error('Error saving tributes');
@@ -286,7 +288,7 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     setAppData(prev => ({ ...prev, customPrices }));
     try {
-      await customPricesService.updateAll(customPrices);
+      await customPricesService.updateAll(user.id, customPrices);
     } catch (error) {
       console.error('Error updating custom prices:', error);
       toast.error('Error saving custom prices');
@@ -297,7 +299,7 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     setAppData(prev => ({ ...prev, calendar }));
     try {
-      await calendarService.updateAll(calendar);
+      await calendarService.updateAll(user.id, calendar);
     } catch (error) {
       console.error('Error updating calendar:', error);
       toast.error('Error saving calendar');
@@ -308,7 +310,7 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     setAppData(prev => ({ ...prev, redflags }));
     try {
-      await redflagsService.updateAll(redflags);
+      await redflagsService.updateAll(user.id, redflags);
     } catch (error) {
       console.error('Error updating redflags:', error);
       toast.error('Error saving redflags');
@@ -325,20 +327,22 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
     
     if (window.confirm('Are you sure you want to clear all data? This cannot be undone.')) {
       try {
+        const userId = user.id;
+        
         // Clear all data
         await Promise.all([
-          userDataService.setApiKey(''),
-          userDataService.setPersona(DEFAULT_APP_DATA.persona),
-          userDataService.setGoal(DEFAULT_APP_DATA.goal),
-          userDataService.setResponses(DEFAULT_APP_DATA.responses),
-          userDataService.setScreenTime(0),
-          userDataService.setTimerStart(null),
-          userDataService.setUploadedImageData(null),
-          subsService.updateAll([]),
-          tributesService.updateAll([]),
-          customPricesService.updateAll([]),
-          calendarService.updateAll([]),
-          redflagsService.updateAll([]),
+          userDataService.setApiKey(userId, ''),
+          userDataService.setPersona(userId, DEFAULT_APP_DATA.persona),
+          userDataService.setGoal(userId, DEFAULT_APP_DATA.goal),
+          userDataService.setResponses(userId, DEFAULT_APP_DATA.responses),
+          userDataService.setScreenTime(userId, 0),
+          userDataService.setTimerStart(userId, null),
+          userDataService.setUploadedImageData(userId, null),
+          subsService.updateAll(userId, []),
+          tributesService.updateAll(userId, []),
+          customPricesService.updateAll(userId, []),
+          calendarService.updateAll(userId, []),
+          redflagsService.updateAll(userId, []),
         ]);
 
         setAppData(DEFAULT_APP_DATA);

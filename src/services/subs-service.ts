@@ -40,13 +40,13 @@ export class SubsService extends BaseService<Sub> {
     };
   }
 
-  async create(item: Omit<Sub, 'id'>): Promise<Sub> {
-    return super.create(item);
+  async create(userId: string, item: Omit<Sub, 'id'>): Promise<Sub> {
+    return super.create(userId, item);
   }
 
-  async update(id: string, updates: Partial<Sub>): Promise<Sub> {
+  async update(userId: string, id: string, updates: Partial<Sub>): Promise<Sub> {
     const dbUpdates = this.transformToDB(updates as Sub);
-    return super.update(id, dbUpdates);
+    return super.update(userId, id, dbUpdates);
   }
 }
 

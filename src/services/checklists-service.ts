@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
 import { Checklist } from '@/context/FindomContext';
 
 interface DBChecklist {
@@ -11,14 +10,7 @@ interface DBChecklist {
 }
 
 export class ChecklistsService {
-  private getUserId() {
-    const { user } = useAuth();
-    if (!user) throw new Error('User not authenticated');
-    return user.id;
-  }
-
-  async getToday(): Promise<Checklist> {
-    const userId = this.getUserId();
+  async getToday(userId: string): Promise<Checklist> {
     const today = new Date().toISOString().split('T')[0];
     
     const { data, error } = await supabase
@@ -63,9 +55,7 @@ export class ChecklistsService {
     };
   }
 
-  async update(checklist: Checklist): Promise<void> {
-    const userId = this.getUserId();
-    
+  async update(userId: string, checklist: Checklist): Promise<void> {
     const { error } = await supabase
       .from('checklists')
       .upsert({
@@ -80,8 +70,7 @@ export class ChecklistsService {
     if (error) throw error;
   }
 
-  async createDefault(): Promise<Checklist> {
-    const userId = this.getUserId();
+  async createDefault(userId: string): Promise<Checklist> {
     const today = new Date().toISOString().split('T')[0];
     const defaultTasks = [
       '30 minute workout',
@@ -106,7 +95,7 @@ export class ChecklistsService {
       completed: [],
     };
 
-    await this.update(checklist);
+    await this.update(userId, checklist);
     return checklist;
   }
 }

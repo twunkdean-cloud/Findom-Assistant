@@ -1,20 +1,13 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
 
 export abstract class BaseService<T extends { id: string }> {
   protected tableName: string;
-  protected getUserId() {
-    const { user } = useAuth();
-    if (!user) throw new Error('User not authenticated');
-    return user.id;
-  }
 
   constructor(tableName: string) {
     this.tableName = tableName;
   }
 
-  async getAll(): Promise<T[]> {
-    const userId = this.getUserId();
+  async getAll(userId: string): Promise<T[]> {
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
@@ -24,8 +17,7 @@ export abstract class BaseService<T extends { id: string }> {
     return this.transformFromDB(data || []);
   }
 
-  async create(item: Omit<T, 'id'>): Promise<T> {
-    const userId = this.getUserId();
+  async create(userId: string, item: Omit<T, 'id'>): Promise<T> {
     const itemToInsert = { ...this.transformToDB(item as T), user_id: userId };
     
     const { data, error } = await supabase
@@ -38,9 +30,7 @@ export abstract class BaseService<T extends { id: string }> {
     return this.transformFromDB([data])[0];
   }
 
-  async update(id: string, updates: Partial<T>): Promise<T> {
-    const userId = this.getUserId();
-    
+  async update(userId: string, id: string, updates: Partial<T>): Promise<T> {
     const { data, error } = await supabase
       .from(this.tableName)
       .update(this.transformToDB(updates as T))
@@ -53,9 +43,7 @@ export abstract class BaseService<T extends { id: string }> {
     return this.transformFromDB([data])[0];
   }
 
-  async delete(id: string): Promise<void> {
-    const userId = this.getUserId();
-    
+  async delete(userId: string, id: string): Promise<void> {
     const { error } = await supabase
       .from(this.tableName)
       .delete()
@@ -65,9 +53,7 @@ export abstract class BaseService<T extends { id: string }> {
     if (error) throw error;
   }
 
-  async updateAll(items: T[]): Promise<void> {
-    const userId = this.getUserId();
-    
+  async updateAll(userId: string, items: T[]): Promise<void> {
     // Delete existing items
     await supabase.from(this.tableName).delete().eq('user_id', userId);
     

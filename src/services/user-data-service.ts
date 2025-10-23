@@ -1,17 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
 import { Persona, Goal } from '@/context/FindomContext';
 
 export class UserDataService {
-  private getUserId() {
-    const { user } = useAuth();
-    if (!user) throw new Error('User not authenticated');
-    return user.id;
-  }
-
-  async get<T>(key: string): Promise<T | null> {
-    const userId = this.getUserId();
-    
+  async get<T>(userId: string, key: string): Promise<T | null> {
     const { data, error } = await supabase
       .from('user_data')
       .select('data')
@@ -26,9 +17,7 @@ export class UserDataService {
     return data?.data || null;
   }
 
-  async set<T>(key: string, value: T): Promise<void> {
-    const userId = this.getUserId();
-    
+  async set<T>(userId: string, key: string, value: T): Promise<void> {
     const { error } = await supabase
       .from('user_data')
       .upsert({
@@ -42,36 +31,36 @@ export class UserDataService {
     if (error) throw error;
   }
 
-  async getApiKey(): Promise<string> {
-    return await this.get<string>('apiKey') || '';
+  async getApiKey(userId: string): Promise<string> {
+    return await this.get<string>(userId, 'apiKey') || '';
   }
 
-  async setApiKey(apiKey: string): Promise<void> {
-    await this.set('apiKey', apiKey);
+  async setApiKey(userId: string, apiKey: string): Promise<void> {
+    await this.set(userId, 'apiKey', apiKey);
   }
 
-  async getPersona(): Promise<Persona> {
-    return await this.get<Persona>('persona') || { 
+  async getPersona(userId: string): Promise<Persona> {
+    return await this.get<Persona>(userId, 'persona') || { 
       name: 'Switch Dean', 
       specialties: 'male findom, foot worship, wallet drain', 
       style: 'strict' 
     };
   }
 
-  async setPersona(persona: Persona): Promise<void> {
-    await this.set('persona', persona);
+  async setPersona(userId: string, persona: Persona): Promise<void> {
+    await this.set(userId, 'persona', persona);
   }
 
-  async getGoal(): Promise<Goal> {
-    return await this.get<Goal>('goal') || { target: 0, current: 0 };
+  async getGoal(userId: string): Promise<Goal> {
+    return await this.get<Goal>(userId, 'goal') || { target: 0, current: 0 };
   }
 
-  async setGoal(goal: Goal): Promise<void> {
-    await this.set('goal', goal);
+  async setGoal(userId: string, goal: Goal): Promise<void> {
+    await this.set(userId, 'goal', goal);
   }
 
-  async getResponses(): Promise<Record<string, string>> {
-    return await this.get<Record<string, string>>('responses') || {
+  async getResponses(userId: string): Promise<Record<string, string>> {
+    return await this.get<Record<string, string>>(userId, 'responses') || {
       initial: 'Loading...',
       tribute: 'Loading...',
       excuse: 'Loading...',
@@ -80,32 +69,32 @@ export class UserDataService {
     };
   }
 
-  async setResponses(responses: Record<string, string>): Promise<void> {
-    await this.set('responses', responses);
+  async setResponses(userId: string, responses: Record<string, string>): Promise<void> {
+    await this.set(userId, 'responses', responses);
   }
 
-  async getScreenTime(): Promise<number> {
-    return await this.get<number>('screenTime') || 0;
+  async getScreenTime(userId: string): Promise<number> {
+    return await this.get<number>(userId, 'screenTime') || 0;
   }
 
-  async setScreenTime(screenTime: number): Promise<void> {
-    await this.set('screenTime', screenTime);
+  async setScreenTime(userId: string, screenTime: number): Promise<void> {
+    await this.set(userId, 'screenTime', screenTime);
   }
 
-  async getTimerStart(): Promise<number | null> {
-    return await this.get<number | null>('timerStart') || null;
+  async getTimerStart(userId: string): Promise<number | null> {
+    return await this.get<number | null>(userId, 'timerStart') || null;
   }
 
-  async setTimerStart(timerStart: number | null): Promise<void> {
-    await this.set('timerStart', timerStart);
+  async setTimerStart(userId: string, timerStart: number | null): Promise<void> {
+    await this.set(userId, 'timerStart', timerStart);
   }
 
-  async getUploadedImageData(): Promise<{ mimeType: string; data: string } | null> {
-    return await this.get<{ mimeType: string; data: string } | null>('uploadedImageData') || null;
+  async getUploadedImageData(userId: string): Promise<{ mimeType: string; data: string } | null> {
+    return await this.get<{ mimeType: string; data: string } | null>(userId, 'uploadedImageData') || null;
   }
 
-  async setUploadedImageData(data: { mimeType: string; data: string } | null): Promise<void> {
-    await this.set('uploadedImageData', data);
+  async setUploadedImageData(userId: string, data: { mimeType: string; data: string } | null): Promise<void> {
+    await this.set(userId, 'uploadedImageData', data);
   }
 }
 
