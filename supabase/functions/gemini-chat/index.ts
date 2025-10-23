@@ -6,23 +6,14 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Received request:', req.method);
-    
-    const body = await req.json();
-    console.log('Request body keys:', Object.keys(body));
-    console.log('Prompt length:', body.prompt?.length || 0);
-    console.log('System instruction length:', body.systemInstruction?.length || 0);
-
-    const { prompt, systemInstruction } = body;
+    const { prompt, systemInstruction } = await req.json();
 
     if (!prompt) {
-      console.error('No prompt provided');
       return new Response(
         JSON.stringify({ error: 'Prompt is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -30,17 +21,13 @@ serve(async (req) => {
     }
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
-    console.log('API Key present:', !!apiKey);
-    
     if (!apiKey) {
-      console.error('GEMINI_API_KEY not found in environment');
       return new Response(
-        JSON.stringify({ error: 'GEMINI_API_KEY is not configured' }),
+        JSON.stringify({ error: 'API key not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    console.log('Calling Gemini API...');
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
@@ -61,42 +48,31 @@ serve(async (req) => {
       }),
     });
 
-    console.log('Gemini API response status:', response.status);
-
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
       return new Response(
-        JSON.stringify({ error: `Gemini API error: ${errorData.error?.message || 'Unknown error'}` }),
+        JSON.stringify({ error: `API error: ${errorData.error?.message || 'Unknown error'}` }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    console.log('Gemini API response data keys:', Object.keys(data));
-    
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    console.log('Generated text length:', generatedText.length);
     
     if (!generatedText) {
-      console.error('No text generated from Gemini');
       return new Response(
-        JSON.stringify({ error: 'No response generated from Gemini' }),
+        JSON.stringify({ error: 'No response generated' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const result = JSON.stringify({ response: generatedText });
-    console.log('Returning response of length:', result.length);
-
     return new Response(
-      result,
+      JSON.stringify({ response: generatedText }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Edge function error:', error);
     return new Response(
-      JSON.stringify({ error: `Internal server error: ${error.message}` }),
+      JSON.stringify({ error: `Server error: ${error.message}` }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
