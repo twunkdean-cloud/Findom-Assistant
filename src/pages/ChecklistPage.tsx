@@ -14,10 +14,13 @@ const ChecklistPage = () => {
   const { appData, updateChecklist, updateCalendar } = useFindom();
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [isWeeklyDialogOpen, setIsWeeklyDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState('');
+  const [newWeeklyTask, setNewWeeklyTask] = useState('');
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
   const [editTaskText, setEditTaskText] = useState('');
+  const [editTaskIsWeekly, setEditTaskIsWeekly] = useState(false);
 
   // Calendar event state
   const [eventDatetime, setEventDatetime] = useState('');

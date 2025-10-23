@@ -127,8 +127,8 @@ const DashboardPage = () => {
 
   const goalProgress = appData.goal.target > 0 ? (appData.goal.current / appData.goal.target) * 100 : 0;
   const totalTributes = appData.tributes.reduce((sum, tribute) => sum + tribute.amount, 0);
-  const completedTasks = appData.checklist.completed.length;
-  const totalTasks = appData.checklist.tasks.length;
+  const completedTasks = appData.checklist.completed?.length || 0;
+  const totalTasks = appData.checklist.tasks?.length || 0;
   const taskProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   const sortedCalendar = [...appData.calendar].sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
