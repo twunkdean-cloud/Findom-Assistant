@@ -29,7 +29,7 @@ const ChecklistPage = () => {
   const today = new Date().toISOString().split('T')[0];
   const todayTasks = appData.checklist.tasks[currentDate] || [];
   const todayCompleted = appData.checklist.completed[currentDate] || [];
-  const weeklyTasks = appData.checklist.weeklyTasks || [];
+  const weeklyTasks = appData.checklist.weeklyTasks || DEFAULT_WEEKLY_TASKS;
   const weeklyCompleted = appData.checklist.weeklyCompleted || [];
 
   const handleAddTask = () => {
