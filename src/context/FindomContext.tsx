@@ -248,8 +248,8 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
           calendar,
           redflags,
           checklist,
-          profile: profile || DEFAULT_APP_DATA.profile,
-          settings: settings || DEFAULT_APP_DATA.settings,
+          profile: (profile as Profile) || DEFAULT_APP_DATA.profile,
+          settings: (settings as Settings) || DEFAULT_APP_DATA.settings,
           subscription: (subscription as string) || DEFAULT_APP_DATA.subscription,
         });
       } catch (error) {
