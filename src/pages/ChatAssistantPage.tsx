@@ -34,21 +34,69 @@ const ChatAssistantPage = () => {
   }, [messages]);
 
   const getSubConversationHistory = (subName: string): string => {
+    console.log('Getting conversation history for:', subName);
     const sub = appData.subs.find(s => s.name === subName);
-    if (!sub?.conversationHistory) return '';
+    console.log('Found sub:', sub ? 'yes' : 'no');
+    
+    if (!sub?.conversationHistory) {
+      console.log('No conversation history found');
+      return '';
+    }
+    
+    console.log('Conversation history type:', typeof sub.conversationHistory);
+    console.log('Conversation history raw:', sub.conversationHistory);
     
     try {
-      const history = JSON.parse(sub.conversationHistory);
-      if (Array.isArray(history)) {
-        return history
-          .slice(-10) // Last 10 messages
-          .map((msg: any) => `${msg.role || msg.sender}: ${msg.content || msg.message}`)
-          .join('\n');
+      // If it's already a string, use it directly
+      if (typeof sub.conversationHistory === 'string') {
+        console.log('Processing as string');
+        // Try to parse it as JSON to see if it's a structured format
+        try {
+          const parsed = JSON.parse(sub.conversationHistory);
+          console.log('Parsed JSON successfully, type:', Array.isArray(parsed) ? 'array' : typeof parsed);
+          if (Array.isArray(parsed)) {
+            const result = parsed
+              .slice(-10) // Last 10 messages
+              .map((msg: any) => `${msg.role || msg.sender || 'unknown'}: ${msg.content || msg.message || 'no content'}`)
+              .join('\n');
+            console.log('Array processing result length:', result.length);
+            return result;
+          }
+          // If it's not an array, return the string as-is
+          console.log('Not an array, returning raw string');
+          return sub.conversationHistory;
+        } catch (parseError) {
+          console.log('JSON parse failed, returning raw string');
+          return sub.conversationHistory;
+        }
       }
-      return '';
+      // If it's an object, stringify it first
+      if (typeof sub.conversationHistory === 'object') {
+        console.log('Processing as object');
+        const historyStr = JSON.stringify(sub.conversationHistory);
+        try {
+          const parsed = JSON.parse(historyStr);
+          if (Array.isArray(parsed)) {
+            const result = parsed
+              .slice(-10)
+              .map((msg: any) => `${msg.role || msg.sender || 'unknown'}: ${msg.content || msg.message || 'no content'}`)
+              .join('\n');
+            console.log('Object array processing result length:', result.length);
+            return result;
+          }
+          console.log('Object not array, returning stringified');
+          return historyStr;
+        } catch (parseError) {
+          console.log('Object JSON parse failed, returning stringified');
+          return historyStr;
+        }
+      }
+      console.log('Processing as other type, converting to string');
+      return String(sub.conversationHistory);
     } catch (e) {
       console.error('Error parsing conversation history:', e);
-      return '';
+      // Return the raw value if parsing fails
+      return String(sub.conversationHistory || '');
     }
   };
 
