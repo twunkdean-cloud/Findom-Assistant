@@ -250,6 +250,7 @@ const SubTrackerPage = () => {
                     <TableHead className="text-gray-300">Name</TableHead>
                     <TableHead className="text-gray-300">Total Tributed</TableHead>
                     <TableHead className="text-gray-300">Last Tribute</TableHead>
+                    <TableHead className="text-gray-300">History</TableHead>
                     <TableHead className="text-gray-300">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -259,6 +260,13 @@ const SubTrackerPage = () => {
                       <TableCell className="font-medium text-gray-200">{sub.name}</TableCell>
                       <TableCell className="text-green-400">${sub.total.toFixed(2)}</TableCell>
                       <TableCell className="text-gray-400">{sub.lastTribute || 'N/A'}</TableCell>
+                      <TableCell>
+                        {sub.conversationHistory ? (
+                          <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">Has History</span>
+                        ) : (
+                          <span className="text-xs text-gray-500">No History</span>
+                        )}
+                      </TableCell>
                       <TableCell className="flex space-x-2">
                         <Button variant="ghost" size="icon" onClick={() => openEditDialog(sub)} className="text-blue-400 hover:text-blue-300">
                           <Edit className="h-4 w-4" />
