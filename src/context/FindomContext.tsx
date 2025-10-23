@@ -248,9 +248,9 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
           calendar,
           redflags,
           checklist,
-          profile,
-          settings,
-          subscription,
+          profile: profile || DEFAULT_APP_DATA.profile,
+          settings: settings || DEFAULT_APP_DATA.settings,
+          subscription: (subscription as string) || DEFAULT_APP_DATA.subscription,
         });
       } catch (error) {
         console.error('Error loading data:', error);
