@@ -91,11 +91,24 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log('Gemini API response:', JSON.stringify(data, null, 2));
+    
+    // Handle different response formats
+    let generatedText = '';
+    if (data.candidates && data.candidates.length > 0) {
+      const candidate = data.candidates[0];
+      if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+        generatedText = candidate.content.parts[0].text;
+      }
+    } else if (data.text) {
+      // Some models return text directly
+      generatedText = data.text;
+    }
     
     if (!generatedText) {
+      console.error('No text found in response:', data);
       return new Response(
-        JSON.stringify({ error: 'No response generated' }),
+        JSON.stringify({ error: 'No response generated from Gemini API', debug: data }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
