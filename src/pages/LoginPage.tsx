@@ -63,11 +63,26 @@ const LoginPage = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password);
+    
+    const { error, data } = await signUp(email, password);
+    
     if (error) {
-      toast.error(error.message);
+      toast.error('Signup error: ' + error.message);
     } else {
-      toast.success('Account created! Please check your email to verify.');
+      // Check if user was created successfully but needs confirmation
+      if (data?.user && !data.user.email_confirmed_at) {
+        toast.success('Account created! Please check your email to confirm your account.');
+        // Also provide a manual confirmation option
+        setTimeout(() => {
+          toast.info('If you don\'t receive an email, please check your spam folder or try signing in after a few minutes.');
+        }, 2000);
+      } else if (data?.user) {
+        // User is already confirmed
+        toast.success('Account created and confirmed successfully!');
+        navigate('/');
+      } else {
+        toast.success('Account created! Please check your email to verify.');
+      }
     }
     setLoading(false);
   };
@@ -94,6 +109,7 @@ const LoginPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    placeholder="Enter your email"
                   />
                 </div>
                 <div>
@@ -104,6 +120,7 @@ const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    placeholder="Enter your password"
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
@@ -121,6 +138,7 @@ const LoginPage = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    placeholder="Enter your email"
                   />
                 </div>
                 <div>
@@ -131,11 +149,16 @@ const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    placeholder="Create a password"
+                    minLength={6}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Creating account...' : 'Create Account'}
                 </Button>
+                <p className="text-xs text-gray-400 text-center">
+                  You'll receive a confirmation email after signing up
+                </p>
               </form>
             </TabsContent>
           </Tabs>
