@@ -79,7 +79,11 @@ export const useFindomData = () => {
           customPrices,
           calendar,
           redflags,
-          checklist,
+          checklist: {
+            ...checklist,
+            weeklyTasks: checklist.weeklyTasks || [],
+            weeklyCompleted: checklist.weeklyCompleted || [],
+          },
           profile: profile as any,
           settings: settings as any,
           subscription: subscription as string,

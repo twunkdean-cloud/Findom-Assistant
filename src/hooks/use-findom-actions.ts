@@ -246,5 +246,6 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
     updateCalendar,
     updateRedflags,
     updateChecklist,
+    handleToggleWeeklyTask,
   };
 };

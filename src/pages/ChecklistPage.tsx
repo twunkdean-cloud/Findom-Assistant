@@ -12,7 +12,7 @@ import { PlusCircle, Calendar, CheckSquare, Trash2, Edit } from 'lucide-react';
 import { DEFAULT_WEEKLY_TASKS } from '@/constants/default-data';
 
 const ChecklistPage = () => {
-  const { appData, updateChecklist, updateCalendar } = useFindom();
+  const { appData, updateChecklist, updateCalendar, handleToggleWeeklyTask } = useFindom();
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState('');

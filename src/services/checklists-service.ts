@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Checklist } from '@/types/index';
+import { DEFAULT_WEEKLY_TASKS } from '@/constants/default-data';
 
 interface DBChecklist {
   id: string;
