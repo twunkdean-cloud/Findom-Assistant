@@ -19,6 +19,8 @@ import ChecklistPage from '@/pages/ChecklistPage';
 import SettingsPage from '@/pages/SettingsPage';
 import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import NotFound from '@/pages/NotFound';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -38,9 +40,36 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AuthNavigationHandler = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth navigation handler:', event, session?.user?.email);
+
+        if (event === 'SIGNED_IN' && session) {
+          // Only redirect if not on auth callback page
+          if (!window.location.pathname.includes('/auth/callback')) {
+            navigate('/', { replace: true });
+          }
+        } else if (event === 'SIGNED_OUT') {
+          navigate('/login', { replace: true });
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  return null;
+};
+
 const AppContent = () => {
   return (
     <Router>
+      <AuthNavigationHandler />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
