@@ -19,6 +19,21 @@ export interface Persona {
   style: 'strict' | 'playful' | 'cruel' | 'sensual';
 }
 
+export interface Profile {
+  displayName: string;
+  bio: string;
+  persona: string;
+}
+
+export interface Settings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  dailyReminders: boolean;
+  profileVisibility: string;
+  dataSharing: boolean;
+  theme: string;
+}
+
 export interface Sub {
   id: string;
   name: string;
@@ -83,6 +98,9 @@ export interface AppData {
   checklist: Checklist;
   uploadedImageData: { mimeType: string; data: string } | null;
   tributes: Tribute[];
+  profile: Profile;
+  settings: Settings;
+  subscription: string;
 }
 
 const DEFAULT_APP_DATA: AppData = {
@@ -124,6 +142,20 @@ const DEFAULT_APP_DATA: AppData = {
   },
   uploadedImageData: null,
   tributes: [],
+  profile: {
+    displayName: '',
+    bio: '',
+    persona: 'dominant'
+  },
+  settings: {
+    emailNotifications: true,
+    pushNotifications: true,
+    dailyReminders: true,
+    profileVisibility: 'private',
+    dataSharing: false,
+    theme: 'dark'
+  },
+  subscription: 'free'
 };
 
 interface FindomContextType {
@@ -142,6 +174,7 @@ interface FindomContextType {
   updateCustomPrices: (customPrices: CustomPrice[]) => Promise<void>;
   updateCalendar: (calendar: CalendarEvent[]) => Promise<void>;
   updateRedflags: (redflags: RedFlag[]) => Promise<void>;
+  updateChecklist: (key: keyof Checklist, value: any) => void;
 }
 
 const FindomContext = createContext<FindomContextType | undefined>(undefined);
@@ -179,6 +212,9 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
           calendar,
           redflags,
           checklist,
+          profile,
+          settings,
+          subscription,
         ] = await Promise.all([
           userDataService.getApiKey(userId),
           userDataService.getPersona(userId),
@@ -193,6 +229,9 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
           calendarService.getAll(userId),
           redflagsService.getAll(userId),
           checklistsService.getToday(userId),
+          userDataService.getProfile(userId),
+          userDataService.getSettings(userId),
+          userDataService.getSubscription(userId),
         ]);
 
         setAppData({
@@ -209,6 +248,9 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
           calendar,
           redflags,
           checklist,
+          profile,
+          settings,
+          subscription,
         });
       } catch (error) {
         console.error('Error loading data:', error);
@@ -324,6 +366,16 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error updating redflags:', error);
       toast.error('Error saving redflags');
     }
+  };
+
+  const updateChecklist = (key: keyof Checklist, value: any) => {
+    setAppData(prev => ({
+      ...prev,
+      checklist: {
+        ...prev.checklist,
+        [key]: value
+      }
+    }));
   };
 
   const saveAllAppData = (newData?: AppData): void => {
@@ -442,7 +494,8 @@ export const FindomProvider = ({ children }: { children: ReactNode }) => {
       updateTributes,
       updateCustomPrices,
       updateCalendar,
-      updateRedflags
+      updateRedflags,
+      updateChecklist
     }}>
       {children}
     </FindomContext.Provider>
