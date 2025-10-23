@@ -107,4 +107,5 @@ export interface FindomContextType {
   updateCalendar: (calendar: CalendarEvent[]) => Promise<void>;
   updateRedflags: (redflags: RedFlag[]) => Promise<void>;
   updateChecklist: (key: keyof Checklist, value: any) => void;
+  handleToggleWeeklyTask: (task: string) => void;
 }

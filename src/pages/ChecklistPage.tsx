@@ -17,7 +17,7 @@ const ChecklistPage = () => {
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [newTask, setNewTask] = useState('');
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
-  const [editTaskId, setEditTaskId] = useState<string | null>(null);
+  const [editTaskIndex, setEditTaskIndex] = useState<number | null>(null);
   const [editTaskText, setEditTaskText] = useState('');
 
   // Calendar event state
@@ -27,8 +27,8 @@ const ChecklistPage = () => {
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
-  const todayTasks = appData.checklist.tasks[currentDate] || [];
-  const todayCompleted = appData.checklist.completed[currentDate] || [];
+  const todayTasks = appData.checklist.tasks;
+  const todayCompleted = appData.checklist.completed;
   const weeklyTasks = appData.checklist.weeklyTasks || DEFAULT_WEEKLY_TASKS;
   const weeklyCompleted = appData.checklist.weeklyCompleted || [];
 
@@ -38,72 +38,57 @@ const ChecklistPage = () => {
       return;
     }
 
-    const updatedTasks = {
-      ...appData.checklist.tasks,
-      [currentDate]: [...todayTasks, newTask.trim()]
-    };
-
+    const updatedTasks = [...todayTasks, newTask.trim()];
     updateChecklist('tasks', updatedTasks);
     setNewTask('');
     setIsTaskDialogOpen(false);
     toast.success('Task added!');
   };
 
-  const handleToggleTask = (task: string) => {
+  const handleToggleTask = (taskIndex: number) => {
+    const task = todayTasks[taskIndex];
     const isCompleted = todayCompleted.includes(task);
     
     if (isCompleted) {
       // Remove from completed
-      const updatedCompleted = {
-        ...appData.checklist.completed,
-        [currentDate]: todayCompleted.filter(t => t !== task)
-      };
+      const updatedCompleted = todayCompleted.filter(t => t !== task);
       updateChecklist('completed', updatedCompleted);
     } else {
       // Add to completed
-      const updatedCompleted = {
-        ...appData.checklist.completed,
-        [currentDate]: [...todayCompleted, task]
-      };
+      const updatedCompleted = [...todayCompleted, task];
       updateChecklist('completed', updatedCompleted);
     }
   };
 
-  const handleDeleteTask = (task: string) => {
-    const updatedTasks = {
-      ...appData.checklist.tasks,
-      [currentDate]: todayTasks.filter(t => t !== task)
-    };
-    const updatedCompleted = {
-      ...appData.checklist.completed,
-      [currentDate]: todayCompleted.filter(t => t !== task)
-    };
+  const handleDeleteTask = (taskIndex: number) => {
+    const task = todayTasks[taskIndex];
+    const updatedTasks = todayTasks.filter((_, i) => i !== taskIndex);
+    const updatedCompleted = todayCompleted.filter(t => t !== task);
 
     updateChecklist('tasks', updatedTasks);
     updateChecklist('completed', updatedCompleted);
     toast.success('Task deleted');
   };
 
-  const handleEditTask = (taskId: string, taskText: string) => {
-    setEditTaskId(taskId);
-    setEditTaskText(taskText);
+  const handleEditTask = (taskIndex: number) => {
+    setEditTaskIndex(taskIndex);
+    setEditTaskText(todayTasks[taskIndex]);
   };
 
   const handleSaveEdit = () => {
-    if (!editTaskText.trim()) return;
+    if (!editTaskText.trim() || editTaskIndex === null) return;
 
-    const updatedTasks = {
-      ...appData.checklist.tasks,
-      [currentDate]: todayTasks.map(t => t === editTaskId ? editTaskText.trim() : t)
-    };
-    const updatedCompleted = {
-      ...appData.checklist.completed,
-      [currentDate]: todayCompleted.map(t => t === editTaskId ? editTaskText.trim() : t)
-    };
+    const oldTask = todayTasks[editTaskIndex];
+    const updatedTasks = [...todayTasks];
+    updatedTasks[editTaskIndex] = editTaskText.trim();
+    
+    const updatedCompleted = todayCompleted.map(t => 
+      t === oldTask ? editTaskText.trim() : t
+    );
 
     updateChecklist('tasks', updatedTasks);
     updateChecklist('completed', updatedCompleted);
-    setEditTaskId(null);
+    setEditTaskIndex(null);
     setEditTaskText('');
     toast.success('Task updated');
   };
@@ -223,56 +208,48 @@ const ChecklistPage = () => {
                 <CheckSquare className="mr-2 h-5 w-5 text-green-400" />
                 Daily Tasks
               </CardTitle>
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="date"
-                  value={currentDate}
-                  onChange={(e) => setCurrentDate(e.target.value)}
-                  className="w-40 bg-gray-900 border-gray-600 text-gray-200"
-                />
-                <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                      <PlusCircle className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-gray-800 border-gray-700">
-                    <DialogHeader>
-                      <DialogTitle className="text-white">Add New Daily Task</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Input
-                        placeholder="Enter task..."
-                        value={newTask}
-                        onChange={(e) => setNewTask(e.target.value)}
-                        className="bg-gray-900 border-gray-600 text-gray-200"
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
-                      />
-                      <DialogFooter>
-                        <Button onClick={handleAddTask} className="bg-green-600 hover:bg-green-700">
-                          Add Task
-                        </Button>
-                      </DialogFooter>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+              <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-800 border-gray-700">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Add New Daily Task</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Enter task..."
+                      value={newTask}
+                      onChange={(e) => setNewTask(e.target.value)}
+                      className="bg-gray-900 border-gray-600 text-gray-200"
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
+                    />
+                    <DialogFooter>
+                      <Button onClick={handleAddTask} className="bg-green-600 hover:bg-green-700">
+                        Add Task
+                      </Button>
+                    </DialogFooter>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {todayTasks.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No tasks for this day</p>
+                <p className="text-gray-500 text-center py-4">No tasks for today</p>
               ) : (
-                todayTasks.map((task) => {
+                todayTasks.map((task, index) => {
                   const isCompleted = todayCompleted.includes(task);
-                  const isEditing = editTaskId === task;
+                  const isEditing = editTaskIndex === index;
                   
                   return (
-                    <div key={task} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-700">
+                    <div key={index} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-700">
                       <Checkbox
                         checked={isCompleted}
-                        onCheckedChange={() => handleToggleTask(task)}
+                        onCheckedChange={() => handleToggleTask(index)}
                       />
                       {isEditing ? (
                         <div className="flex-1 flex space-x-2">
@@ -293,7 +270,7 @@ const ChecklistPage = () => {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleEditTask(task, task)}
+                            onClick={() => handleEditTask(index)}
                             className="text-blue-400 hover:text-blue-300"
                           >
                             <Edit className="h-4 w-4" />
@@ -301,7 +278,7 @@ const ChecklistPage = () => {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleDeleteTask(task)}
+                            onClick={() => handleDeleteTask(index)}
                             className="text-red-400 hover:text-red-300"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -334,11 +311,11 @@ const ChecklistPage = () => {
               {weeklyTasks.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">No weekly tasks</p>
               ) : (
-                weeklyTasks.map((task) => {
+                weeklyTasks.map((task, index) => {
                   const isCompleted = weeklyCompleted.includes(task);
                   
                   return (
-                    <div key={task} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-700">
+                    <div key={index} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-700">
                       <Checkbox
                         checked={isCompleted}
                         onCheckedChange={() => handleToggleWeeklyTask(task)}
@@ -359,6 +336,53 @@ const ChecklistPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Calendar Events */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-white flex items-center">
+            <Calendar className="mr-2 h-5 w-5 text-purple-400" />
+            Scheduled Events
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {sortedEvents.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No scheduled events</p>
+            ) : (
+              sortedEvents.map((event) => (
+                <div key={event.id} className="flex items-center justify-between p-3 rounded bg-gray-700">
+                  <div className="flex-1">
+                    <p className="text-white font-medium">{event.platform}</p>
+                    <p className="text-gray-400 text-sm">{event.content}</p>
+                    <p className="text-gray-500 text-xs">
+                      {new Date(event.datetime).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEditEvent(event)}
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
