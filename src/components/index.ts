@@ -11,7 +11,7 @@ export { default as MobileLoadingSpinner } from './MobileLoadingSpinner';
 export { default as PushNotificationManager } from './PushNotificationManager';
 export { default as MigrationHelper } from './MigrationHelper';
 export { default as ChatTest } from './ChatTest';
-export { default as LoadingSpinner } from './ui/loading-spinner';
+export { LoadingSpinner } from './ui/loading-spinner';
 export { default as VoiceInput } from './ui/voice-input';
 export { default as PerformanceMonitor } from './PerformanceMonitor';
 export { default as OfflineIndicator } from './OfflineIndicator';
