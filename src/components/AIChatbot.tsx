@@ -158,9 +158,9 @@ Target audience: ${getTargetAudience()}`;
   };
 
   return (
-    <Card className="bg-gray-800 border border-gray-700">
+    <Card className="bg-dark-card border-dark">
       <CardHeader>
-        <CardTitle className="flex items-center">
+        <CardTitle className="flex items-center text-high-contrast">
           <Bot className="mr-2 h-5 w-5 text-indigo-400" />
           AI Chatbot
           <Badge className={`ml-2 ${isMale ? 'bg-blue-600' : 'bg-pink-600'}`}>
@@ -172,12 +172,12 @@ Target audience: ${getTargetAudience()}`;
         {/* Chat Configuration */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-sm text-gray-300 mb-2 block">Chat Mode</label>
+            <label className="text-sm text-muted-high-contrast mb-2 block">Chat Mode</label>
             <Select value={chatMode} onValueChange={(value: any) => setChatMode(value)}>
-              <SelectTrigger className="bg-gray-900 border-gray-700">
+              <SelectTrigger className="bg-dark-input border-dark text-medium-contrast">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-dark-card border-dark">
                 <SelectItem value="general">General</SelectItem>
                 <SelectItem value="sub">Sub Management</SelectItem>
                 <SelectItem value="task">Task Creation</SelectItem>
@@ -187,12 +187,12 @@ Target audience: ${getTargetAudience()}`;
           </div>
 
           <div>
-            <label className="text-sm text-gray-300 mb-2 block">Bot Personality</label>
+            <label className="text-sm text-muted-high-contrast mb-2 block">Bot Personality</label>
             <Select value={botPersonality} onValueChange={(value: any) => setBotPersonality(value)}>
-              <SelectTrigger className="bg-gray-900 border-gray-700">
+              <SelectTrigger className="bg-dark-input border-dark text-medium-contrast">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-dark-card border-dark">
                 <SelectItem value="dominant">Dominant</SelectItem>
                 <SelectItem value="caring">Caring</SelectItem>
                 <SelectItem value="strict">Strict</SelectItem>
@@ -202,13 +202,12 @@ Target audience: ${getTargetAudience()}`;
           </div>
 
           <div>
-            <label className="text-sm text-gray-300 mb-2 block">Context</label>
+            <label className="text-sm text-muted-high-contrast mb-2 block">Context</label>
             <Select value={selectedSub} onValueChange={setSelectedSub}>
-              <SelectTrigger className="bg-gray-900 border-gray-700">
+              <SelectTrigger className="bg-dark-input border-dark text-medium-contrast">
                 <SelectValue placeholder="Select sub for context" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="general">General</SelectItem>
+              <SelectContent className="bg-dark-card border-dark">
                 <SelectItem value="general">General</SelectItem>
                 {appData.subs.map((sub) => (
                   <SelectItem key={sub.id} value={sub.name}>
@@ -220,34 +219,18 @@ Target audience: ${getTargetAudience()}`;
           </div>
         </div>
 
-        {/* Current Configuration Display */}
-        <div className="flex flex-wrap gap-2">
-          <Badge className={getPersonalityColor(botPersonality)}>
-            {botPersonality}
-          </Badge>
-          <Badge className="bg-indigo-600">
-            {getModeIcon(chatMode)}
-            <span className="ml-1">{chatMode}</span>
-          </Badge>
-          {selectedSub && selectedSub !== 'general' && (
-            <Badge className="bg-green-600">
-              {selectedSub}
-            </Badge>
-          )}
-        </div>
-
         {/* Chat Messages */}
-        <div className={`border border-gray-700 rounded-lg bg-gray-900 ${isMobile ? 'h-[50vh]' : 'h-[400px]'} overflow-y-auto p-4 space-y-4`}>
+        <div className={`border-dark rounded-lg bg-dark-input ${isMobile ? 'h-[50vh]' : 'h-[400px]'} overflow-y-auto p-4 space-y-4`}>
           {messages.length === 0 ? (
             <div className="text-center py-8">
               <Bot className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-500">
+              <p className="text-muted-high-contrast">
                 Start a conversation with your AI assistant
               </p>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-muted-high-contrast mt-2">
                 Ask for advice, content ideas, or help with tasks
               </p>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-muted-high-contrast mt-1">
                 Currently configured for: {isMale ? 'Male Findom (Male for Male)' : 'Female Femdom (Female for Male)'}
               </p>
             </div>
@@ -261,7 +244,7 @@ Target audience: ${getTargetAudience()}`;
                   className={`max-w-[80%] rounded-lg p-3 ${
                     message.role === 'user'
                       ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-700 text-gray-200'
+                      : 'bg-gray-700 text-high-contrast'
                   }`}
                 >
                   <div className="flex items-start space-x-2">
@@ -307,7 +290,7 @@ Target audience: ${getTargetAudience()}`;
                 : `Ask me anything about ${isMale ? 'findom' : 'femdom'}, content creation, or strategies...`
             }
             rows={isMobile ? 2 : 3}
-            className="w-full p-3 bg-gray-900 border-gray-600 text-gray-200 resize-none"
+            className="w-full p-3 bg-dark-input border-dark text-high-contrast resize-none placeholder:text-gray-400"
             disabled={isLoading}
           />
           <div className="flex space-x-2">
@@ -325,7 +308,7 @@ Target audience: ${getTargetAudience()}`;
             <Button
               onClick={handleClearChat}
               variant="outline"
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="border-dark text-medium-contrast hover:bg-gray-700"
             >
               Clear
             </Button>
