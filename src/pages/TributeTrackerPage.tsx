@@ -1,416 +1,336 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useFindom } from '@/context/FindomContext';
-import { Tribute } from '@/types/index';
 import { toast } from 'sonner';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, DollarSign, Calendar } from 'lucide-react';
+import { Tribute } from '@/types';
 
 const TributeTrackerPage = () => {
   const { appData, updateTributes } = useFindom();
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [currentTribute, setCurrentTribute] = useState<Tribute | null>(null);
-
-  const [tributeAmount, setTributeAmount] = useState<string | number>(0);
-  const [tributeDate, setTributeDate] = useState('');
+  const [editingTribute, setEditingTribute] = useState<Tribute | null>(null);
+  
+  // Form states
+  const [tributeAmount, setTributeAmount] = useState('');
+  const [tributeDate, setTributeDate] = useState(new Date().toISOString().split('T')[0]);
   const [tributeFrom, setTributeFrom] = useState('');
   const [tributeReason, setTributeReason] = useState('');
-  const [tributeNotes, setTributeNotes] = useState('');
-  const [tributeSource, setTributeSource] = useState('');
-  const [tributeSourceDetail, setTributeSourceDetail] = useState('');
+  const [tributeSource, setTributeSource] = useState('cashapp');
 
   const resetForm = () => {
-    setTributeAmount(0);
-    setTributeDate('');
+    setTributeAmount('');
+    setTributeDate(new Date().toISOString().split('T')[0]);
     setTributeFrom('');
     setTributeReason('');
-    setTributeNotes('');
-    setTributeSource('');
-    setTributeSourceDetail('');
-    setCurrentTribute(null);
+    setTributeSource('cashapp');
   };
 
-  const handleAddTribute = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const parsedAmount = parseFloat(tributeAmount as string);
-    if (isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim() || !tributeSource) {
-      toast.error('Amount (must be greater than 0), Date, From, and Source fields are required.');
+  const handleAddTribute = async () => {
+    if (!tributeAmount || !tributeFrom) {
+      toast.error('Please fill in all required fields');
       return;
-    }
-
-    let finalSource = tributeSource;
-    if (tributeSource === 'Wishlist Gift' || tributeSource === 'Other') {
-      if (!tributeSourceDetail.trim()) {
-        toast.error(`Please specify the ${tributeSource.toLowerCase()}.`);
-        return;
-      }
-      finalSource = `${tributeSource}: ${tributeSourceDetail.trim()}`;
     }
 
     const newTribute: Tribute = {
       id: Date.now().toString(),
-      amount: parsedAmount,
+      amount: parseFloat(tributeAmount),
       date: tributeDate,
-      from: tributeFrom.trim(),
+      from_sub: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
-      notes: tributeNotes.trim() || undefined,
-      source: finalSource,
+      source: tributeSource,
     };
 
-    await updateTributes([...appData.tributes, newTribute]);
-    toast.success(`Tribute of $${newTribute.amount.toFixed(2)} added!`);
-    setIsAddDialogOpen(false);
+    const updatedTributes = [...appData.tributes, newTribute];
+    await updateTributes(updatedTributes);
+    
     resetForm();
+    setIsDialogOpen(false);
+    toast.success('Tribute added successfully!');
   };
 
-  const handleEditTribute = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const parsedAmount = parseFloat(tributeAmount as string);
-    if (!currentTribute || isNaN(parsedAmount) || parsedAmount <= 0 || !tributeDate || !tributeFrom.trim() || !tributeSource) {
-      toast.error('Amount (must be greater than 0), Date, From, and Source fields are required.');
+  const handleEditTribute = async () => {
+    if (!editingTribute || !tributeAmount || !tributeFrom) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
-    let finalSource = tributeSource;
-    if (tributeSource === 'Wishlist Gift' || tributeSource === 'Other') {
-      if (!tributeSourceDetail.trim()) {
-        toast.error(`Please specify the ${tributeSource.toLowerCase()}.`);
-        return;
-      }
-      finalSource = `${tributeSource}: ${tributeSourceDetail.trim()}`;
-    }
-
     const updatedTribute: Tribute = {
-      ...currentTribute,
-      amount: parsedAmount,
+      ...editingTribute,
+      amount: parseFloat(tributeAmount),
       date: tributeDate,
-      from: tributeFrom.trim(),
+      from_sub: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
-      notes: tributeNotes.trim() || undefined,
-      source: finalSource,
+      source: tributeSource,
     };
 
-    await updateTributes(appData.tributes.map(tribute =>
-      tribute.id === updatedTribute.id ? updatedTribute : tribute
-    ));
-    toast.success(`Tribute from ${updatedTribute.from} updated!`);
-    setIsEditDialogOpen(false);
+    const updatedTributes = appData.tributes.map(t => 
+      t.id === editingTribute.id ? updatedTribute : t
+    );
+    
+    await updateTributes(updatedTributes);
+    
     resetForm();
+    setIsEditDialogOpen(false);
+    setEditingTribute(null);
+    toast.success(`Tribute from ${updatedTribute.from_sub} updated!`);
   };
 
   const handleDeleteTribute = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this tribute record?')) {
-      const updatedTributes = appData.tributes.filter(tribute => tribute.id !== id);
+    if (window.confirm('Are you sure you want to delete this tribute?')) {
+      const updatedTributes = appData.tributes.filter(t => t.id !== id);
       await updateTributes(updatedTributes);
-      toast.success('Tribute record deleted.');
+      toast.success('Tribute deleted successfully!');
     }
   };
 
   const openEditDialog = (tribute: Tribute) => {
-    setCurrentTribute(tribute);
+    setEditingTribute(tribute);
     setTributeAmount(tribute.amount.toString());
     setTributeDate(tribute.date);
-    setTributeFrom(tribute.from);
+    setTributeFrom(tribute.from_sub);
     setTributeReason(tribute.reason || '');
-    setTributeNotes(tribute.notes || '');
-
-    // Parse source for editing
-    if (tribute.source.startsWith('Wishlist Gift:')) {
-      setTributeSource('Wishlist Gift');
-      setTributeSourceDetail(tribute.source.replace('Wishlist Gift:', '').trim());
-    } else if (tribute.source.startsWith('Other:')) {
-      setTributeSource('Other');
-      setTributeSourceDetail(tribute.source.replace('Other:', '').trim());
-    } else {
-      setTributeSource(tribute.source);
-      setTributeSourceDetail('');
-    }
+    setTributeSource(tribute.source);
     setIsEditDialogOpen(true);
   };
 
-  const sortedTributes = [...appData.tributes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // Calculate totals
+  const totalTributes = appData.tributes.reduce((sum, t) => sum + t.amount, 0);
+  const monthlyTotal = appData.tributes
+    .filter(t => {
+      const tributeDate = new Date(t.date);
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      return tributeDate.getMonth() === currentMonth && tributeDate.getFullYear() === currentYear;
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-100">Tribute Tracker</h2>
-      <p className="text-sm text-gray-400 mb-4">Keep a detailed record of all tributes received.</p>
-
-      <Card className="bg-gray-800 border border-gray-700 p-4">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-semibold">All Tributes</CardTitle>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                <PlusCircle className="mr-2 h-4 w-4" /> Add New Tribute
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-white">Tribute Tracker</h2>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-indigo-600 hover:bg-indigo-700">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Tribute
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-gray-800 border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-white">Add New Tribute</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  value={tributeAmount}
+                  onChange={(e) => setTributeAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="bg-gray-900 border-gray-600 text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="from">From</Label>
+                <Input
+                  id="from"
+                  value={tributeFrom}
+                  onChange={(e) => setTributeFrom(e.target.value)}
+                  placeholder="Sub name"
+                  className="bg-gray-900 border-gray-600 text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={tributeDate}
+                  onChange={(e) => setTributeDate(e.target.value)}
+                  className="bg-gray-900 border-gray-600 text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="source">Source</Label>
+                <Select value={tributeSource} onValueChange={setTributeSource}>
+                  <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="cashapp">Cash App</SelectItem>
+                    <SelectItem value="venmo">Venmo</SelectItem>
+                    <SelectItem value="paypal">PayPal</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="reason">Reason (Optional)</Label>
+                <Textarea
+                  id="reason"
+                  value={tributeReason}
+                  onChange={(e) => setTributeReason(e.target.value)}
+                  placeholder="Reason for tribute..."
+                  rows={3}
+                  className="bg-gray-900 border-gray-600 text-white"
+                />
+              </div>
+              <Button onClick={handleAddTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">
+                Add Tribute
               </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-gray-800 border border-gray-700 text-gray-200">
-              <DialogHeader>
-                <DialogTitle className="text-lg font-semibold">Add New Tribute</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddTribute} className="space-y-4">
-                <div>
-                  <Label htmlFor="tribute-amount">Amount ($)</Label>
-                  <Input
-                    id="tribute-amount"
-                    type="number"
-                    placeholder="0.00"
-                    value={tributeAmount}
-                    onChange={(e) => setTributeAmount(e.target.value)}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="tribute-date">Date of Tribute</Label>
-                  <Input
-                    id="tribute-date"
-                    type="date"
-                    value={tributeDate}
-                    onChange={(e) => setTributeDate(e.target.value)}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="tribute-from">From (Sub's Name/Alias)</Label>
-                  <Select value={tributeFrom} onValueChange={setTributeFrom} disabled={appData.subs.length === 0}>
-                    <SelectTrigger id="tribute-from" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
-                      <SelectValue placeholder="Select a sub" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
-                        {appData.subs.length === 0 ? (
-                            <SelectItem value="no-subs" disabled>No subs available. Add some in Sub Tracker!</SelectItem>
-                        ) : (
-                            appData.subs.map(sub => (
-                                <SelectItem key={sub.id} value={sub.name}>{sub.name}</SelectItem>
-                            ))
-                        )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="tribute-source">Source</Label>
-                  <Select value={tributeSource} onValueChange={setTributeSource}>
-                    <SelectTrigger id="tribute-source" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
-                      <SelectValue placeholder="Select source" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
-                      <SelectItem value="PayPal">PayPal</SelectItem>
-                      <SelectItem value="CashApp">CashApp</SelectItem>
-                      <SelectItem value="Revolut">Revolut</SelectItem>
-                      <SelectItem value="Wise">Wise</SelectItem>
-                      <SelectItem value="Venmo">Venmo</SelectItem>
-                      <SelectItem value="Throne">Throne</SelectItem>
-                      <SelectItem value="Wishlist Gift">Wishlist Gift</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {(tributeSource === 'Wishlist Gift' || tributeSource === 'Other') && (
-                  <div>
-                    <Label htmlFor="tribute-source-detail">{tributeSource === 'Wishlist Gift' ? 'Gift Description' : 'Specify Other Source'}</Label>
-                    <Input
-                      id="tribute-source-detail"
-                      placeholder={tributeSource === 'Wishlist Gift' ? 'e.g., new phone, designer bag' : 'e.g., Bank Transfer, Crypto'}
-                      value={tributeSourceDetail}
-                      onChange={(e) => setTributeSourceDetail(e.target.value)}
-                      className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                      required
-                    />
-                  </div>
-                )}
-                <div>
-                  <Label htmlFor="tribute-reason">Reason (Optional)</Label>
-                  <Input
-                    id="tribute-reason"
-                    placeholder="e.g., for a task, just because"
-                    value={tributeReason}
-                    onChange={(e) => setTributeReason(e.target.value)}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="tribute-notes">Notes (Optional)</Label>
-                  <Textarea
-                    id="tribute-notes"
-                    placeholder="Any specific notes about this tribute"
-                    value={tributeNotes}
-                    onChange={(e) => setTributeNotes(e.target.value)}
-                    rows={3}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                  />
-                </div>
-                <DialogFooter className="flex gap-3 pt-4">
-                  <Button type="submit" className="flex-1 bg-green-600 px-4 py-2 rounded hover:bg-green-700">
-                    Add Tribute
-                  </Button>
-                  <Button type="button" variant="secondary" onClick={() => setIsAddDialogOpen(false)} className="flex-1 bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">
-                    Cancel
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-400">Total Tributes</CardTitle>
+            <DollarSign className="h-4 w-4 text-green-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">${totalTributes.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-400">Monthly Total</CardTitle>
+            <Calendar className="h-4 w-4 text-blue-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">${monthlyTotal.toFixed(2)}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tributes List */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white">Recent Tributes</CardTitle>
         </CardHeader>
         <CardContent>
           {appData.tributes.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No tributes tracked yet. Add your first tribute!</p>
+            <p className="text-gray-500 text-center py-8">No tributes yet. Add your first tribute!</p>
           ) : (
-            <div className="overflow-x-auto">
-              <Table className="min-w-full">
-                <TableHeader>
-                  <TableRow className="bg-gray-700 hover:bg-gray-700">
-                    <TableHead className="text-gray-300">Amount</TableHead>
-                    <TableHead className="text-gray-300">Date</TableHead>
-                    <TableHead className="text-gray-300">From</TableHead>
-                    <TableHead className="text-gray-300">Source</TableHead>
-                    <TableHead className="text-gray-300">Reason</TableHead>
-                    <TableHead className="text-gray-300">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sortedTributes.map((tribute) => (
-                    <TableRow key={tribute.id} className="border-b border-gray-700 hover:bg-gray-700">
-                      <TableCell className="font-medium text-green-400">${tribute.amount.toFixed(2)}</TableCell>
-                      <TableCell className="text-gray-400">{tribute.date}</TableCell>
-                      <TableCell className="text-gray-200">{tribute.from}</TableCell>
-                      <TableCell className="text-gray-400">{tribute.source}</TableCell>
-                      <TableCell className="text-gray-400">{tribute.reason || 'N/A'}</TableCell>
-                      <TableCell className="flex space-x-2">
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(tribute)} className="text-blue-400 hover:text-blue-300">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteTribute(tribute.id)} className="text-red-400 hover:text-red-300">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="space-y-4">
+              {appData.tributes
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map((tribute) => (
+                  <div key={tribute.id} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg">
+                    <div>
+                      <p className="text-white font-medium">{tribute.from_sub}</p>
+                      <p className="text-gray-400 text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
+                      {tribute.reason && (
+                        <p className="text-gray-500 text-sm">{tribute.reason}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-green-400 font-bold">${tribute.amount.toFixed(2)}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => openEditDialog(tribute)}
+                        className="text-gray-400 hover:text-white"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteTribute(tribute.id)}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Edit Tribute Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-800 border border-gray-700 text-gray-200">
+        <DialogContent className="bg-gray-800 border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Edit Tribute</DialogTitle>
+            <DialogTitle className="text-white">Edit Tribute</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleEditTribute} className="space-y-4">
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="edit-tribute-amount">Amount ($)</Label>
+              <Label htmlFor="edit-amount">Amount</Label>
               <Input
-                id="edit-tribute-amount"
+                id="edit-amount"
                 type="number"
-                placeholder="0.00"
+                step="0.01"
                 value={tributeAmount}
                 onChange={(e) => setTributeAmount(e.target.value)}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                required
+                placeholder="0.00"
+                className="bg-gray-900 border-gray-600 text-white"
               />
             </div>
             <div>
-              <Label htmlFor="edit-tribute-date">Date of Tribute</Label>
+              <Label htmlFor="edit-from">From</Label>
               <Input
-                id="edit-tribute-date"
+                id="edit-from"
+                value={tributeFrom}
+                onChange={(e) => setTributeFrom(e.target.value)}
+                placeholder="Sub name"
+                className="bg-gray-900 border-gray-600 text-white"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-date">Date</Label>
+              <Input
+                id="edit-date"
                 type="date"
                 value={tributeDate}
                 onChange={(e) => setTributeDate(e.target.value)}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                required
+                className="bg-gray-900 border-gray-600 text-white"
               />
             </div>
             <div>
-              <Label htmlFor="edit-tribute-from">From (Sub's Name/Alias)</Label>
-              <Select value={tributeFrom} onValueChange={setTributeFrom} disabled={appData.subs.length === 0}>
-                <SelectTrigger id="edit-tribute-from" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
-                  <SelectValue placeholder="Select a sub" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
-                    {appData.subs.length === 0 ? (
-                        <SelectItem value="no-subs" disabled>No subs available. Add some in Sub Tracker!</SelectItem>
-                    ) : (
-                        appData.subs.map(sub => (
-                            <SelectItem key={sub.id} value={sub.name}>{sub.name}</SelectItem>
-                        ))
-                    )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="edit-tribute-source">Source</Label>
+              <Label htmlFor="edit-source">Source</Label>
               <Select value={tributeSource} onValueChange={setTributeSource}>
-                <SelectTrigger id="edit-tribute-source" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
-                  <SelectValue placeholder="Select source" />
+                <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
+                  <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
-                  <SelectItem value="PayPal">PayPal</SelectItem>
-                  <SelectItem value="CashApp">CashApp</SelectItem>
-                  <SelectItem value="Revolut">Revolut</SelectItem>
-                  <SelectItem value="Wise">Wise</SelectItem>
-                  <SelectItem value="Venmo">Venmo</SelectItem>
-                  <SelectItem value="Throne">Throne</SelectItem>
-                  <SelectItem value="Wishlist Gift">Wishlist Gift</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  <SelectItem value="cashapp">Cash App</SelectItem>
+                  <SelectItem value="venmo">Venmo</SelectItem>
+                  <SelectItem value="paypal">PayPal</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            {(tributeSource === 'Wishlist Gift' || tributeSource === 'Other') && (
-              <div>
-                <Label htmlFor="edit-tribute-source-detail">{tributeSource === 'Wishlist Gift' ? 'Gift Description' : 'Specify Other Source'}</Label>
-                <Input
-                  id="edit-tribute-source-detail"
-                  placeholder={tributeSource === 'Wishlist Gift' ? 'e.g., new phone, designer bag' : 'e.g., Bank Transfer, Crypto'}
-                  value={tributeSourceDetail}
-                  onChange={(e) => setTributeSourceDetail(e.target.value)}
-                  className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-                  required
-                />
-              </div>
-            )}
             <div>
-              <Label htmlFor="edit-tribute-reason">Reason (Optional)</Label>
-              <Input
-                id="edit-tribute-reason"
-                placeholder="e.g., for a task, just because"
+              <Label htmlFor="edit-reason">Reason (Optional)</Label>
+              <Textarea
+                id="edit-reason"
                 value={tributeReason}
                 onChange={(e) => setTributeReason(e.target.value)}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-tribute-notes">Notes (Optional)</Label>
-              <Textarea
-                id="edit-tribute-notes"
-                placeholder="Any specific notes about this tribute"
-                value={tributeNotes}
-                onChange={(e) => setTributeNotes(e.target.value)}
+                placeholder="Reason for tribute..."
                 rows={3}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                className="bg-gray-900 border-gray-600 text-white"
               />
             </div>
-            <DialogFooter className="flex gap-3 pt-4">
-              <Button type="submit" className="flex-1 bg-green-600 px-4 py-2 rounded hover:bg-green-700">
-                Save Changes
-              </Button>
-              <Button type="button" variant="secondary" onClick={() => setIsEditDialogOpen(false)} className="flex-1 bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">
-                Cancel
-              </Button>
-            </DialogFooter>
-          </form>
+            <Button onClick={handleEditTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">
+              Update Tribute
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

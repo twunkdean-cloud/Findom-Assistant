@@ -1,20 +1,21 @@
 import { BaseService } from './base-service';
-import { Tribute } from '@/types/index';
+import { Tribute } from '@/types';
 
 interface DBTribute {
   id: string;
-  user_id: string;
   amount: number;
   date: string;
-  from_sub: string;
-  reason: string | null;
-  notes: string | null;
+  from: string;
+  reason?: string;
+  notes?: string;
   source: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export class TributesService extends BaseService<Tribute> {
-  constructor() {
-    super('tributes');
+  protected getTableName(): string {
+    return 'tributes';
   }
 
   protected transformFromDB(items: DBTribute[]): Tribute[] {
@@ -22,31 +23,27 @@ export class TributesService extends BaseService<Tribute> {
       id: item.id,
       amount: item.amount,
       date: item.date,
-      from: item.from_sub,
-      reason: item.reason || '',
-      notes: item.notes || '',
-      source: item.source,
-    }));
-  }
-
-  protected transformToDB(item: Tribute): Omit<DBTribute, 'id' | 'user_id'> {
-    return {
-      amount: item.amount,
-      date: item.date,
       from_sub: item.from,
       reason: item.reason || null,
       notes: item.notes || null,
       source: item.source,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+    }));
+  }
+
+  protected transformToDB(item: Tribute): DBTribute {
+    return {
+      id: item.id,
+      amount: item.amount,
+      date: item.date,
+      from: item.from_sub,
+      reason: item.reason || undefined,
+      notes: item.notes || undefined,
+      source: item.source,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
     };
-  }
-
-  async create(userId: string, item: Omit<Tribute, 'id'>): Promise<Tribute> {
-    return super.create(userId, item);
-  }
-
-  async update(userId: string, id: string, updates: Partial<Tribute>): Promise<Tribute> {
-    const dbUpdates = this.transformToDB(updates as Tribute);
-    return super.update(userId, id, dbUpdates);
   }
 }
 

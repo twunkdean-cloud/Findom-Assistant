@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useFindomActions } from '@/hooks/use-findom-actions';
-import { FindomContextType } from '@/types';
+import { FindomContextType, AppData } from '@/types';
 import { DEFAULT_APP_DATA } from '@/constants/default-data';
-import { AppData } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import {
   subsService,
@@ -89,12 +88,12 @@ export const FindomProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           subs,
           tributes,
           customPrices,
-          calendar,
+          calendarEvents: calendar,
           redflags,
           checklist: {
             ...checklist,
-            weeklyTasks: checklist.weeklyTasks || [],
-            weeklyCompleted: checklist.weeklyCompleted || [],
+            weeklyTasks: (checklist as any).weeklyTasks || [],
+            weeklyCompleted: (checklist as any).weeklyCompleted || [],
           },
           profile: profile as any,
           settings: settings as any,

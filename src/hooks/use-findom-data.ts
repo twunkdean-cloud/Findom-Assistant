@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { AppData } from '@/types';
 import { DEFAULT_APP_DATA } from '@/constants/default-data';
 import {
+  userDataService,
   subsService,
   tributesService,
   customPricesService,
   calendarService,
   redflagsService,
   checklistsService,
-  userDataService,
 } from '@/services';
 
 export const useFindomData = () => {
@@ -77,12 +76,12 @@ export const useFindomData = () => {
           subs,
           tributes,
           customPrices,
-          calendar,
+          calendarEvents: calendar,
           redflags,
           checklist: {
             ...checklist,
-            weeklyTasks: checklist.weeklyTasks || [],
-            weeklyCompleted: checklist.weeklyCompleted || [],
+            weeklyTasks: (checklist as any).weeklyTasks || [],
+            weeklyCompleted: (checklist as any).weeklyCompleted || [],
           },
           profile: profile as any,
           settings: settings as any,
@@ -90,7 +89,6 @@ export const useFindomData = () => {
         });
       } catch (error) {
         console.error('Error loading data:', error);
-        toast.error('Error loading data');
       } finally {
         setLoading(false);
       }

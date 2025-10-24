@@ -35,6 +35,8 @@ export interface Checklist {
   date: string;
   tasks: any;
   completed: any;
+  weeklyTasks?: string[];
+  weeklyCompleted?: string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -94,6 +96,14 @@ export interface AppData {
   responses?: {
     [key: string]: string;
   };
+  // Additional properties for user data
+  apiKey?: string;
+  persona?: string;
+  screenTime?: number;
+  timerStart?: string | null;
+  uploadedImageData?: string | null;
+  checklist?: Checklist;
+  subscription?: string;
 }
 
 export interface AIContentSuggestion {
@@ -115,4 +125,26 @@ export interface PerformanceMetrics {
   renderTime: number;
   memoryUsage: number;
   bundleSize: number;
+}
+
+export interface FindomContextType {
+  appData: AppData;
+  setAppData: React.Dispatch<React.SetStateAction<AppData>>;
+  loading: boolean;
+  updateAppData: (key: keyof AppData, value: any) => Promise<void>;
+  saveAllAppData: (newData?: AppData) => void;
+  clearAllData: () => Promise<void>;
+  exportData: () => void;
+  importData: (data: AppData) => void;
+  addChecklistTask: (task: string) => Promise<void>;
+  editChecklistTask: (oldTask: string, newTask: string) => Promise<void>;
+  deleteChecklistTask: (task: string) => Promise<void>;
+  migrateFromLocalStorage: () => Promise<void>;
+  updateSubs: (subs: Sub[]) => Promise<void>;
+  updateTributes: (tributes: Tribute[]) => Promise<void>;
+  updateCustomPrices: (customPrices: CustomPrice[]) => Promise<void>;
+  updateCalendar: (calendar: CalendarEvent[]) => Promise<void>;
+  updateRedflags: (redflags: RedFlag[]) => Promise<void>;
+  updateChecklist: (key: keyof Checklist, value: any) => void;
+  handleToggleWeeklyTask: (task: string) => void;
 }

@@ -17,7 +17,7 @@ import {
 export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<React.SetStateAction<AppData>>) => {
   const { user } = useAuth();
 
-  const updateAppData = async (key: keyof AppData, value: any): Promise<void> => {
+  const updateAppData = async (key: string, value: any): Promise<void> => {
     if (!user) return;
 
     setAppData(prev => ({ ...prev, [key]: value }));
@@ -102,7 +102,7 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
 
   const updateCalendar = async (calendar: CalendarEvent[]): Promise<void> => {
     if (!user) return;
-    setAppData(prev => ({ ...prev, calendar }));
+    setAppData(prev => ({ ...prev, calendarEvents: calendar }));
     try {
       await calendarService.updateAll(user.id, calendar);
     } catch (error) {
@@ -146,7 +146,7 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
         
         await Promise.all([
           userDataService.setApiKey(userId, ''),
-          userDataService.setPersona(userId, DEFAULT_APP_DATA.persona),
+          userDataService.setPersona(userId, DEFAULT_APP_DATA.persona || 'dominant'),
           userDataService.setGoal(userId, DEFAULT_APP_DATA.goal),
           userDataService.setResponses(userId, DEFAULT_APP_DATA.responses),
           userDataService.setScreenTime(userId, 0),
@@ -190,8 +190,8 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
   };
 
   const addChecklistTask = async (task: string): Promise<void> => {
-    if (!appData.checklist.tasks.includes(task)) {
-      const updatedTasks = [...appData.checklist.tasks, task];
+    if (!appData.checklist?.tasks.includes(task)) {
+      const updatedTasks = [...(appData.checklist?.tasks || []), task];
       await updateAppData('checklist', { ...appData.checklist, tasks: updatedTasks });
       toast.success('Task added!');
     } else {
@@ -204,34 +204,34 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
       toast.info('No change made to task.');
       return;
     }
-    if (appData.checklist.tasks.includes(newTask)) {
+    if (appData.checklist?.tasks.includes(newTask)) {
       toast.error('A task with this name already exists.');
       return;
     }
-    const updatedTasks = appData.checklist.tasks.map(t => (t === oldTask ? newTask : t));
-    const updatedCompleted = appData.checklist.completed.map(t => (t === oldTask ? newTask : t));
+    const updatedTasks = (appData.checklist?.tasks || []).map(t => (t === oldTask ? newTask : t));
+    const updatedCompleted = (appData.checklist?.completed || []).map(t => (t === oldTask ? newTask : t));
     await updateAppData('checklist', { ...appData.checklist, tasks: updatedTasks, completed: updatedCompleted });
     toast.success('Task updated!');
   };
 
   const deleteChecklistTask = async (task: string): Promise<void> => {
-    const updatedTasks = appData.checklist.tasks.filter(t => t !== task);
-    const updatedCompleted = appData.checklist.completed.filter(t => t !== task);
+    const updatedTasks = (appData.checklist?.tasks || []).filter(t => t !== task);
+    const updatedCompleted = (appData.checklist?.completed || []).filter(t => t !== task);
     await updateAppData('checklist', { ...appData.checklist, tasks: updatedTasks, completed: updatedCompleted });
     toast.success('Task deleted!');
   };
 
   const handleToggleWeeklyTask = (task: string) => {
-    const isCompleted = appData.checklist.weeklyCompleted?.includes(task) || false;
+    const isCompleted = appData.checklist?.weeklyCompleted?.includes(task) || false;
     
     if (isCompleted) {
       // Remove from completed
-      const updatedWeeklyCompleted = (appData.checklist.weeklyCompleted || []).filter(t => t !== task);
-      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
+      const updatedWeeklyCompleted = (appData.checklist?.weeklyCompleted || []).filter(t => t !== task);
+      updateChecklist('weeklyCompleted' as keyof Checklist, updatedWeeklyCompleted);
     } else {
       // Add to completed
-      const updatedWeeklyCompleted = [...(appData.checklist.weeklyCompleted || []), task];
-      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
+      const updatedWeeklyCompleted = [...(appData.checklist?.weeklyCompleted || []), task];
+      updateChecklist('weeklyCompleted' as keyof Checklist, updatedWeeklyCompleted);
     }
   };
 

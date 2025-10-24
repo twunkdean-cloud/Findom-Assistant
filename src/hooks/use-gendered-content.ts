@@ -8,8 +8,7 @@ export const useGenderedContent = () => {
   const energy = appData.profile?.energy || (gender === 'male' ? 'masculine' : 'feminine');
   const persona = appData.profile?.persona || 'dominant';
 
-  const genderedSystemPrompts = useMemo(() => {
-    const basePrompt = `You are a confident, experienced dominant content creator who knows how to write compelling content.
+  const basePrompt = `You are a confident, experienced dominant content creator who knows how to write compelling content.
     Write naturally, conversationally, and authentically - like you're talking to a friend or client.
     Use contractions (you're, can't, won't) and natural language patterns.
     Avoid corporate-speak, overly formal language, or AI-like phrases.
@@ -18,9 +17,9 @@ export const useGenderedContent = () => {
     Keep it real, keep it authentic, and always maintain that dominant but natural energy.
     No "as an AI" or similar phrases - just straight, authentic content.`;
 
+  const genderedSystemPrompts = useMemo(() => {
     if (gender === 'male') {
       return {
-        ...basePrompt,
         findom: `${basePrompt}
         
         This is specifically for MALE DOMINANTS and MALE SUBMISSIVES in the findom lifestyle.
@@ -79,11 +78,12 @@ export const useGenderedContent = () => {
         - Use masculine, assertive language
         - Focus on male-male dynamics
         - Maintain dominant but authentic tone
-        - Reference typical findom scenarios between men`
+        - Reference typical findom scenarios between men`,
+        
+        general: basePrompt
       };
     } else {
       return {
-        ...basePrompt,
         femdom: `${basePrompt}
         
         This is specifically for FEMALE DOMINANTS and MALE SUBMISSIVES in the femdom lifestyle.
@@ -142,7 +142,9 @@ export const useGenderedContent = () => {
         - Use feminine, elegant language
         - Focus on female-male dynamics
         - Maintain goddess-like but authentic tone
-        - Reference typical femdom scenarios`
+        - Reference typical femdom scenarios`,
+        
+        general: basePrompt
       };
     }
   }, [gender]);
