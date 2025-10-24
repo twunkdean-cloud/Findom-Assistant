@@ -59,6 +59,15 @@ export const useGemini = (): UseGeminiReturn => {
     setError(null);
 
     try {
+      // Extract base64 data and mime type from data URL
+      const matches = imageData.match(/^data:([^;]+);base64,(.+)$/);
+      if (!matches) {
+        throw new Error('Invalid image data format');
+      }
+      
+      const mimeType = matches[1];
+      const base64Data = matches[2];
+
       const response = await fetch('https://qttmhbtaguiioomcjqbt.supabase.co/functions/v1/gemini-vision', {
         method: 'POST',
         headers: {
@@ -66,7 +75,8 @@ export const useGemini = (): UseGeminiReturn => {
           'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0dG1oYnRhZ3VpaW9vbWNqcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MjQ5MDMsImV4cCI6MjA3NjMwMDkwM30.M4AiSRnA0xfmDgmtxYaKr4GT7bvzoFS3ukxpsN3b8K0`,
         },
         body: JSON.stringify({
-          image: imageData,
+          image: base64Data,
+          mimeType: mimeType,
           prompt: prompt || 'Analyze this image and provide a detailed description.',
         }),
       });
