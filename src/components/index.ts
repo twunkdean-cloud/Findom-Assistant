@@ -23,3 +23,5 @@ export { MigrationHelper } from './MigrationHelper';
 export { ChatTest } from './ChatTest';
 export { LoadingSpinner } from './ui/loading-spinner';
 export { VoiceInput } from './ui/voice-input';
+export { PerformanceMonitor } from './PerformanceMonitor';
+export { OfflineIndicator } from './OfflineIndicator';

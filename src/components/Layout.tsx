@@ -32,6 +32,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import PullToRefresh from '@/components/PullToRefresh';
+import PerformanceMonitor from '@/components/PerformanceMonitor';
+import OfflineIndicator from '@/components/OfflineIndicator';
 
 interface LayoutProps {
   children: ReactNode;
@@ -204,6 +206,12 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-black">
+      {/* Performance Monitor */}
+      <PerformanceMonitor />
+      
+      {/* Offline Indicator */}
+      <OfflineIndicator />
+
       {/* Header */}
       <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-xl border-b border-gray-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

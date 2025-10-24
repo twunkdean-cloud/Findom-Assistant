@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppToast } from './use-app-toast';
+import { offlineQueue } from '@/utils/offline-queue';
 
 export const useOffline = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -7,10 +8,18 @@ export const useOffline = () => {
   const toast = useAppToast();
 
   useEffect(() => {
-    const handleOnline = () => {
+    const handleOnline = async () => {
       setIsOffline(false);
-      toast.showSuccess('Back online!');
-      processQueue();
+      toast.showSuccess('Back online! Syncing queued actions...');
+      
+      try {
+        await offlineQueue.processQueue();
+        await updateQueueDisplay();
+        toast.showSuccess('All actions synced successfully!');
+      } catch (error) {
+        console.error('Failed to sync queued actions:', error);
+        toast.showError('Some actions failed to sync');
+      }
     };
 
     const handleOffline = () => {
@@ -18,46 +27,72 @@ export const useOffline = () => {
       toast.showError('You\'re offline. Changes will sync when you\'re back online.');
     };
 
-    const addToQueue = (action: any) => {
-      setQueue(prev => [...prev, { ...action, timestamp: Date.now() }]);
-    };
-
-    const processQueue = async () => {
-      if (queue.length === 0) return;
-      
-      for (const action of queue) {
-        try {
-          // Process queued actions based on type
-          await processAction(action);
-        } catch (error) {
-          console.error('Failed to process queued action:', error);
-        }
+    const updateQueueDisplay = async () => {
+      try {
+        const queuedActions = await offlineQueue.getQueue();
+        setQueue(queuedActions);
+      } catch (error) {
+        console.error('Failed to update queue display:', error);
       }
-      
-      setQueue([]);
     };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
+    // Initial queue update
+    updateQueueDisplay();
+
+    // Update queue display periodically
+    const interval = setInterval(updateQueueDisplay, 5000);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      clearInterval(interval);
     };
-  }, [queue, toast]);
+  }, [toast]);
 
-  const addToQueue = (action: any) => {
-    setQueue(prev => [...prev, { ...action, timestamp: Date.now() }]);
+  const addToQueue = async (action: {
+    url: string;
+    method: string;
+    headers: Record<string, string>;
+    body?: string;
+  }) => {
+    try {
+      await offlineQueue.addToQueue(action);
+      await updateQueueDisplay();
+      toast.showInfo('Action queued for when you\'re back online');
+    } catch (error) {
+      console.error('Failed to add action to queue:', error);
+      toast.showError('Failed to queue action');
+    }
+  };
+
+  const updateQueueDisplay = async () => {
+    try {
+      const queuedActions = await offlineQueue.getQueue();
+      setQueue(queuedActions);
+    } catch (error) {
+      console.error('Failed to update queue display:', error);
+    }
+  };
+
+  const clearQueue = async () => {
+    try {
+      await offlineQueue.clearQueue();
+      setQueue([]);
+      toast.showSuccess('Queue cleared');
+    } catch (error) {
+      console.error('Failed to clear queue:', error);
+      toast.showError('Failed to clear queue');
+    }
   };
 
   return {
     isOffline,
     queue,
     addToQueue,
+    clearQueue,
+    queueLength: queue.length,
   };
-};
-
-const processAction = async (action: any) => {
-  // Implementation depends on your action structure
-  console.log('Processing queued action:', action);
 };
