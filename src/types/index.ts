@@ -51,6 +51,7 @@ export interface CustomPrice {
 export interface Goal {
   target: number;
   current: number;
+  weekly?: number;
 }
 
 export interface Checklist {

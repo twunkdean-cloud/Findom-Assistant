@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAppToast } from '@/hooks/use-app-toast';
 import { useOffline } from '@/hooks/use-offline';
 
-export abstract class BaseServiceV2 {
+export abstract class BaseServiceV2<T = any> {
   protected tableName: string;
   protected toast = useAppToast();
   protected offline = useOffline();
@@ -46,54 +46,59 @@ export abstract class BaseServiceV2 {
   }
 
   async getAll(): Promise<T[]> {
-    return this.handleOperation(
-      () => supabase
-        .from(this.tableName)
-        .select('*')
-        .eq('user_id', this.userId)
-    ) as Promise<T[]>;
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('user_id', this.userId);
+    
+    if (error) throw error;
+    return data as T[];
   }
 
   async getById(id: string): Promise<T | null> {
-    return this.handleOperation(
-      () => supabase
-        .from(this.tableName)
-        .select('*')
-        .eq('user_id', this.userId)
-        .eq('id', id)
-        .single()
-    ) as Promise<T | null>;
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('user_id', this.userId)
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data as T;
   }
 
   async create(data: Partial<T>): Promise<T> {
-    return this.handleOperation(
-      () => supabase
-        .from(this.tableName)
-        .insert({ ...data, user_id: this.userId })
-        .select('*')
-        .single()
-    ) as Promise<T>;
+    const { data: result, error } = await supabase
+      .from(this.tableName)
+      .insert({ ...data, user_id: this.userId })
+      .select('*')
+      .single();
+    
+    if (error) throw error;
+    return result as T;
   }
 
   async update(id: string, data: Partial<T>): Promise<T> {
-    return this.handleOperation(
-      () => supabase
-        .from(this.tableName)
-        .update(data)
-        .eq('user_id', this.userId)
-        .eq('id', id)
-        .select('*')
-        .single()
-    ) as Promise<T>;
+    const { data: result, error } = await supabase
+      .from(this.tableName)
+      .update(data)
+      .eq('user_id', this.userId)
+      .eq('id', id)
+      .select('*')
+      .single();
+    
+    if (error) throw error;
+    return result as T;
   }
 
   async delete(id: string): Promise<boolean> {
-    return this.handleOperation(
-      () => supabase
-        .from(this.tableName)
-        .delete()
-        .eq('user_id', this.userId)
-        .eq('id', id)
-    ) as Promise<boolean>;
+    const { error } = await supabase
+      .from(this.tableName)
+      .delete()
+      .eq('user_id', this.userId)
+      .eq('id', id);
+    
+    if (error) throw error;
+    return true;
   }
 }
