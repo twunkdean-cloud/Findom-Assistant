@@ -33,9 +33,19 @@ class OfflineQueue {
     const db = await this.openDB();
     const transaction = db.transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);
-    const actions = await store.getAll();
-    db.close();
-    return actions as QueuedAction[];
+    const request = store.getAll();
+    
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        const actions = request.result as QueuedAction[];
+        db.close();
+        resolve(actions);
+      };
+      request.onerror = () => {
+        db.close();
+        reject(request.error);
+      };
+    });
   }
 
   async removeFromQueue(id: string): Promise<void> {
