@@ -11,11 +11,36 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, systemInstruction } = await req.json();
+    let requestBody;
+    try {
+      const text = await req.text();
+      console.log('Raw request body:', text);
+      requestBody = JSON.parse(text);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Parsed request body:', requestBody);
+    console.log('Request body keys:', Object.keys(requestBody));
+
+    const { prompt, systemInstruction } = requestBody;
 
     if (!prompt) {
+      console.error('Prompt is missing. Available keys:', Object.keys(requestBody));
       return new Response(
-        JSON.stringify({ error: 'Prompt is required' }),
+        JSON.stringify({ 
+          error: 'Prompt is required',
+          debug: {
+            receivedKeys: Object.keys(requestBody),
+            hasPrompt: 'prompt' in requestBody,
+            promptValue: prompt,
+            fullBody: requestBody
+          }
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -123,6 +148,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
+    console.error('Edge function error:', error);
     return new Response(
       JSON.stringify({ error: `Server error: ${error.message}` }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
