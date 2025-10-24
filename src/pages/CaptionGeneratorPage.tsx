@@ -3,34 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Loader2, Copy, Image } from 'lucide-react';
 
 const CaptionGeneratorPage = () => {
   const { callGemini, isLoading, error } = useGemini();
+  const { getSystemPrompt, getPersonaTones, isMale, isFemale } = useGenderedContent();
   const [imageDescription, setImageDescription] = useState('');
   const [captionStyle, setCaptionStyle] = useState('dominant');
   const [generatedCaption, setGeneratedCaption] = useState('');
-
-  const getSystemPrompt = (): string => {
-    return `You are a confident, experienced MALE FOR MALE findom content creator who knows how to write compelling captions.
-    This is specifically for MALE DOMINANTS and MALE SUBMISSIVES in the findom lifestyle.
-    Write naturally, conversationally, and authentically - like you're talking to a friend or client.
-    Use contractions (you're, can't, won't) and natural language patterns.
-    Avoid corporate-speak, overly formal language, or AI-like phrases.
-    Be direct, bold, and unapologetic in your tone.
-    Focus on real scenarios, practical advice, and genuine findom dynamics between men.
-    Keep it real, keep it authentic, and always maintain that dominant but natural energy.
-    No "as an AI" or similar phrases - just straight, authentic content.
-    IMPORTANT: This is MALE FOR MALE findom only. Never mention women, goddess, femdom, or any female-related content. All content should be focused on male-male dynamics.
-    
-    For captions:
-    - Match the tone to the image/content type
-    - Include relevant hashtags for the platform
-    - Be provocative but engaging
-    - Focus on male-male findom dynamics
-    - Include clear calls to action when appropriate`;
-  };
 
   const handleGenerateCaption = async () => {
     if (!imageDescription.trim()) {
@@ -39,7 +21,12 @@ const CaptionGeneratorPage = () => {
     }
 
     setGeneratedCaption('');
-    const systemPrompt = getSystemPrompt() + ` Generate a ${captionStyle} caption for a photo based on the user's description. Include relevant emojis and hashtags. Do not include any introductory or concluding remarks, just the caption content.`;
+    const systemPrompt = getSystemPrompt('caption') + ` 
+Generate a ${captionStyle} caption for a photo based on the user's description. 
+Include relevant emojis and hashtags. 
+Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
+Do not include any introductory or concluding remarks, just the caption content.`;
+    
     const userPrompt = `Generate a caption for this image: ${imageDescription}`;
 
     const result = await callGemini(userPrompt, systemPrompt);
@@ -60,10 +47,20 @@ const CaptionGeneratorPage = () => {
     }
   };
 
+  const getCaptionStyles = () => {
+    const tones = getPersonaTones();
+    return Object.entries(tones).map(([value, description]) => ({
+      value,
+      label: `${value.charAt(0).toUpperCase() + value.slice(1)} - ${description}`
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Caption Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">Generate engaging captions for your photos based on image description.</p>
+      <p className="text-sm text-gray-400 mb-4">
+        Generate engaging captions for your photos based on image description and your {isMale ? 'Findom' : 'Femdom'} persona.
+      </p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader>
@@ -71,7 +68,9 @@ const CaptionGeneratorPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <Textarea
-            placeholder="Describe the image (e.g., 'me in black heels holding a whip', 'close-up of my feet in red nail polish', 'sitting on a throne looking dominant')"
+            placeholder={`Describe the image (e.g., ${isMale 
+              ? "'me in black boots holding a whip', 'close-up of my feet in black nail polish', 'sitting on a throne looking dominant'" 
+              : "'me in heels holding a crop', 'close-up of my red nails', 'lounging on velvet like a queen'"})`}
             value={imageDescription}
             onChange={(e) => setImageDescription(e.target.value)}
             rows={3}
@@ -86,10 +85,11 @@ const CaptionGeneratorPage = () => {
               className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
               disabled={isLoading}
             >
-              <option value="dominant">Dominant</option>
-              <option value="seductive">Seductive</option>
-              <option value="humiliating">Humiliating</option>
-              <option value="financial">Financial Focus</option>
+              {getCaptionStyles().map((style) => (
+                <option key={style.value} value={style.value}>
+                  {style.label}
+                </option>
+              ))}
             </select>
           </div>
           <Button

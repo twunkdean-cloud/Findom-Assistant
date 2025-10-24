@@ -5,12 +5,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useFindom } from '@/context/FindomContext';
 import { useAIAnalytics } from '@/hooks/use-ai-analytics';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Brain, Copy, Sparkles, Target, MessageSquare, CheckSquare } from 'lucide-react';
 
 const AIContentSuggestions = () => {
   const { appData } = useFindom();
   const { generatePersonalizedContent, isLoading } = useAIAnalytics();
+  const { getPersonaTones, isMale, isFemale } = useGenderedContent();
   const [selectedSub, setSelectedSub] = useState('');
   const [contentType, setContentType] = useState<'caption' | 'task' | 'message'>('message');
   const [tone, setTone] = useState<'dominant' | 'caring' | 'strict' | 'playful'>('dominant');
@@ -57,6 +59,14 @@ const AIContentSuggestions = () => {
     }
   };
 
+  const getToneOptions = () => {
+    const tones = getPersonaTones();
+    return Object.entries(tones).map(([value, description]) => ({
+      value,
+      label: `${value.charAt(0).toUpperCase() + value.slice(1)} - ${description.split(',')[0]}`
+    }));
+  };
+
   return (
     <Card className="bg-gray-800 border border-gray-700">
       <CardHeader>
@@ -68,10 +78,10 @@ const AIContentSuggestions = () => {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-sm text-gray-300 mb-2 block">Select Sub</label>
+            <label className="text-sm text-gray-300 mb-2 block">Select {isMale ? 'Sub' : 'Worshipper'}</label>
             <Select value={selectedSub} onValueChange={setSelectedSub}>
               <SelectTrigger className="bg-gray-900 border-gray-700">
-                <SelectValue placeholder="Choose a sub" />
+                <SelectValue placeholder={`Choose a ${isMale ? 'sub' : 'worshipper'}`} />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
                 {appData.subs.map((sub) => (
@@ -104,10 +114,11 @@ const AIContentSuggestions = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="dominant">Dominant</SelectItem>
-                <SelectItem value="caring">Caring</SelectItem>
-                <SelectItem value="strict">Strict</SelectItem>
-                <SelectItem value="playful">Playful</SelectItem>
+                {getToneOptions().map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

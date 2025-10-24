@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAIAnalytics } from '@/hooks/use-ai-analytics';
 import { useFindom } from '@/context/FindomContext';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Bot, Send, Copy, User, BotIcon } from 'lucide-react';
 import VoiceInput from '@/components/ui/voice-input';
@@ -19,6 +20,7 @@ interface ChatMessage {
 const AIChatbot = () => {
   const { generateAutomatedResponse, isLoading } = useAIAnalytics();
   const { appData } = useFindom();
+  const { isMale, isFemale } = useGenderedContent();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [selectedSub, setSelectedSub] = useState('');
@@ -86,7 +88,7 @@ const AIChatbot = () => {
   const getContextFromSub = () => {
     const sub = appData.subs.find(s => s.name === selectedSub);
     if (sub) {
-      return `Sub profile: Total contributed: $${sub.total}, Preferences: ${sub.preferences}, Notes: ${sub.notes}`;
+      return `${isMale ? 'Sub' : 'Worshipper'} profile: Total contributed: $${sub.total}, Preferences: ${sub.preferences}, Notes: ${sub.notes}`;
     }
     return 'General inquiry';
   };
@@ -109,10 +111,10 @@ const AIChatbot = () => {
         <div className="p-4 border-b border-gray-700 space-y-3">
           <div className="flex space-x-4">
             <div className="flex-1">
-              <label className="text-sm text-gray-300 mb-2 block">Related Sub (Optional)</label>
+              <label className="text-sm text-gray-300 mb-2 block">Related {isMale ? 'Sub' : 'Worshipper'} (Optional)</label>
               <Select value={selectedSub} onValueChange={setSelectedSub}>
                 <SelectTrigger className="bg-gray-900 border-gray-700">
-                  <SelectValue placeholder="Select sub for context" />
+                  <SelectValue placeholder={`Select ${isMale ? 'sub' : 'worshipper'} for context`} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
                   <SelectItem value="">General</SelectItem>

@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { FindomProvider } from './context/FindomContext';
+import { FindomProvider, useFindom } from './context/FindomContext';
 import Layout from './components/Layout';
 import { LoadingSpinner } from './components/ui/loading-spinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -29,11 +29,13 @@ import {
 // Regular pages (kept non-lazy for critical paths)
 import Index from './pages/Index';
 import LoginPage from './pages/LoginPage';
+import OnboardingPage from './pages/OnboardingPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import NotFound from './pages/NotFound';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const { appData } = useFindom();
   
   if (loading) {
     return (
@@ -45,6 +47,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check if user has completed onboarding
+  if (!appData.profile?.gender) {
+    return <Navigate to="/onboarding" replace />;
   }
   
   return <>{children}</>;
@@ -59,6 +66,7 @@ const AppContent = () => {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/" element={
             <ProtectedRoute>

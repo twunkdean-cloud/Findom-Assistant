@@ -9,7 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/context/AuthContext';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { Save, User, Bell, Shield, Palette, Download, Upload } from 'lucide-react';
+import { Save, User, Bell, Shield, Palette, Download, Upload, Crown } from 'lucide-react';
+import GenderSelector from '@/components/ui/gender-selector';
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -20,6 +21,7 @@ const SettingsPage = () => {
   const [displayName, setDisplayName] = useState(appData.profile?.displayName || '');
   const [bio, setBio] = useState(appData.profile?.bio || '');
   const [persona, setPersona] = useState(appData.profile?.persona || 'dominant');
+  const [gender, setGender] = useState<'male' | 'female'>(appData.profile?.gender || 'male');
   
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(appData.settings?.emailNotifications ?? true);
@@ -41,7 +43,9 @@ const SettingsPage = () => {
       await updateAppData('profile', {
         displayName,
         bio,
-        persona
+        persona,
+        gender,
+        energy: gender === 'male' ? 'masculine' : 'feminine'
       });
       
       // Update settings
@@ -98,12 +102,33 @@ const SettingsPage = () => {
     toast.success('Signed out successfully');
   };
 
+  const getPersonaOptions = () => {
+    if (gender === 'male') {
+      return [
+        { value: 'dominant', label: 'Dominant - Commanding, assertive, direct' },
+        { value: 'seductive', label: 'Seductive - Charismatic, confident, alluring' },
+        { value: 'strict', label: 'Strict - Authoritative, demanding, uncompromising' },
+        { value: 'caring', label: 'Caring - Protective, guiding, firm but fair' }
+      ];
+    } else {
+      return [
+        { value: 'dominant', label: 'Dominant - Goddess-like, supreme, commanding' },
+        { value: 'seductive', label: 'Seductive - Enchanting, captivating, irresistible' },
+        { value: 'strict', label: 'Strict - Demanding, unforgiving, exacting' },
+        { value: 'caring', label: 'Caring - Nurturing, guiding, maternal dominance' }
+      ];
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-white">Settings</h2>
         <p className="text-gray-400 mt-1">Manage your account and application preferences</p>
       </div>
+
+      {/* Gender Selection */}
+      <GenderSelector />
 
       {/* Profile Settings */}
       <Card className="bg-gray-800 border-gray-700">
@@ -135,15 +160,16 @@ const SettingsPage = () => {
           </div>
           <div>
             <Label className="text-gray-300">Persona</Label>
-            <Select value={persona} onValueChange={setPersona}>
+            <Select value={persona} onValueChange={(value: any) => setPersona(value)}>
               <SelectTrigger className="bg-gray-900 border-gray-600 text-gray-200">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="dominant">Dominant</SelectItem>
-                <SelectItem value="seductive">Seductive</SelectItem>
-                <SelectItem value="strict">Strict</SelectItem>
-                <SelectItem value="caring">Caring</SelectItem>
+                {getPersonaOptions().map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

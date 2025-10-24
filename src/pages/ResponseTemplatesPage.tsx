@@ -7,33 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useGemini } from '@/hooks/use-gemini';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Loader2, Save, Copy } from 'lucide-react';
 
-const getSystemPrompt = (): string => {
-  return `You are a confident, experienced MALE FOR MALE findom content creator who knows how to craft effective response templates.
-  This is specifically for MALE DOMINANTS and MALE SUBMISSIVES in the findom lifestyle.
-  Write naturally, conversationally, and authentically - like you're talking to a friend or client.
-  Use contractions (you're, can't, won't) and natural language patterns.
-  Avoid corporate-speak, overly formal language, or AI-like phrases.
-  Be direct, bold, and unapologetic in your tone.
-  Focus on real scenarios, practical advice, and genuine findom dynamics between men.
-  Keep it real, keep it authentic, and always maintain that dominant but natural energy.
-  No "as an AI" or similar phrases - just straight, authentic content.
-  IMPORTANT: This is MALE FOR MALE findom only. Never mention women, goddess, femdom, or any female-related content. All content should be focused on male-male dynamics.
-  
-  For response templates:
-  - Create templates that can be easily customized
-  - Include placeholders for personalization
-  - Focus on common findom scenarios between men
-  - Be direct and commanding but authentic
-  - Cover various situations: first contact, tribute requests, punishments, rewards`;
-};
-
 const ResponseTemplatesPage = () => {
   const { appData, updateAppData } = useFindom();
   const { callGemini, isLoading, error } = useGemini();
+  const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
 
   const [responseType, setResponseType] = useState<string>('initial');
   const [context, setContext] = useState<string>('');
@@ -41,7 +23,7 @@ const ResponseTemplatesPage = () => {
 
   // Load saved response for the current type when type changes
   useEffect(() => {
-    setGeneratedResponse(appData.responses[responseType] || '');
+    setGeneratedResponse(appData.responses?.[responseType] || '');
   }, [responseType, appData.responses]);
 
   const handleGenerateResponse = async () => {
@@ -52,32 +34,35 @@ const ResponseTemplatesPage = () => {
 
     setGeneratedResponse('');
     let userPrompt = '';
-    let systemInstruction = getSystemPrompt();
+    let systemInstruction = getSystemPrompt('response') + ` 
+Generate a ${responseType} response based on the user's topic. 
+Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
+Do not include any introductory or concluding remarks, just the response content.`;
 
     switch (responseType) {
       case 'initial':
         userPrompt = `Generate an initial greeting message for a new sub. Context: ${context}`;
-        systemInstruction += " Generate a concise, dominant initial greeting for a new sub. Do not include any introductory or concluding remarks, just the message content.";
+        systemInstruction += " Generate a concise, dominant initial greeting for a new sub.";
         break;
       case 'tribute':
         userPrompt = `Generate a response to a sub sending tribute. Context: ${context}`;
-        systemInstruction += " Generate a concise, dominant response to a sub sending tribute. Do not include any introductory or concluding remarks, just the message content.";
+        systemInstruction += " Generate a concise, dominant response to a sub sending tribute.";
         break;
       case 'excuse':
         userPrompt = `Generate a response to a sub making an excuse. Context: ${context}`;
-        systemInstruction += " Generate a concise, dominant, and dismissive response to a sub making an excuse. Do not include any introductory or concluding remarks, just the message content.";
+        systemInstruction += " Generate a concise, dominant, and dismissive response to a sub making an excuse.";
         break;
       case 'task':
         userPrompt = `Generate a message assigning a task to a sub. Context: ${context}`;
-        systemInstruction += " Generate a concise, dominant message assigning a task to a sub. Do not include any introductory or concluding remarks, just the message content.";
+        systemInstruction += " Generate a concise, dominant message assigning a task to a sub.";
         break;
       case 'punishment':
         userPrompt = `Generate a message delivering a punishment to a sub. Context: ${context}`;
-        systemInstruction += " Generate a concise, dominant message delivering a punishment to a sub. Do not include any introductory or concluding remarks, just the message content.";
+        systemInstruction += " Generate a concise, dominant message delivering a punishment to a sub.";
         break;
       default:
         userPrompt = `Generate a response for the following scenario: ${context}`;
-        systemInstruction += " Generate a concise, dominant response for the given scenario. Do not include any introductory or concluding remarks, just the message content.";
+        systemInstruction += " Generate a concise, dominant response for the given scenario.";
         break;
     }
 
@@ -114,7 +99,9 @@ const ResponseTemplatesPage = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Response Templates</h2>
-      <p className="text-sm text-gray-400 mb-4">Generate and save AI-powered responses for common interactions with your subs.</p>
+      <p className="text-sm text-gray-400 mb-4">
+        Generate and save AI-powered responses for common interactions with your {isMale ? 'subs' : 'worshippers'}.
+      </p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader>
@@ -124,10 +111,10 @@ const ResponseTemplatesPage = () => {
           <div className="space-y-2">
             <Label htmlFor="response-type">Response Type</Label>
             <Select value={responseType} onValueChange={setResponseType} disabled={isLoading}>
-              <SelectTrigger id="response-type" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+              <SelectTrigger id="response-type" className="w-full p-2 bg-gray-900 border-gray-700 rounded text-gray-200">
                 <SelectValue placeholder="Select a response type" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
+              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                 <SelectItem value="initial">Initial Greeting</SelectItem>
                 <SelectItem value="tribute">Tribute Received</SelectItem>
                 <SelectItem value="excuse">Excuse Rejected</SelectItem>
@@ -140,11 +127,13 @@ const ResponseTemplatesPage = () => {
             <Label htmlFor="context">Context / Details</Label>
             <Textarea
               id="context"
-              placeholder="Provide any specific details or context for the response (e.g., 'sub's name is John', 'tribute amount was $50', 'excuse was being busy with work')"
+              placeholder={`Provide any specific details or context for the response (e.g., ${isMale 
+                ? "'sub's name is John', 'tribute amount was $50', 'excuse was being busy with work'" 
+                : "'worshipper's name is pet', 'tribute amount was $100', 'excuse was being unworthy'"})`}
               value={context}
               onChange={(e) => setContext(e.target.value)}
               rows={3}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+              className="w-full p-2 bg-gray-900 border-gray-700 rounded text-gray-200"
               disabled={isLoading}
             />
           </div>

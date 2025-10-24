@@ -3,33 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
 const RedditGeneratorPage = () => {
   const { callGemini, isLoading, error } = useGemini();
+  const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
   const [topic, setTopic] = useState('');
   const [generatedPost, setGeneratedPost] = useState('');
-
-  const getSystemPrompt = (): string => {
-    return `You are a confident, experienced MALE FOR MALE findom content creator who knows how to write compelling Reddit content.
-    This is specifically for MALE DOMINANTS and MALE SUBMISSIVES in the findom lifestyle.
-    Write naturally, conversationally, and authentically - like you're talking to a friend or client.
-    Use contractions (you're, can't, won't) and natural language patterns.
-    Avoid corporate-speak, overly formal language, or AI-like phrases.
-    Be direct, bold, and unapologetic in your tone.
-    Focus on real scenarios, practical advice, and genuine findom dynamics between men.
-    Keep it real, keep it authentic, and always maintain that dominant but natural energy.
-    No "as an AI" or similar phrases - just straight, authentic content.
-    IMPORTANT: This is MALE FOR MALE findom only. Never mention women, goddess, femdom, or any female-related content. All content should be focused on male-male dynamics.
-    
-    For Reddit content:
-    - Follow subreddit rules and formatting
-    - Use appropriate flairs when required
-    - Be engaging and authentic to the Reddit community
-    - Include relevant details about male-male findom dynamics
-    - Focus on genuine experiences and advice for men in findom`;
-  };
 
   const handleGeneratePost = async () => {
     if (!topic.trim()) {
@@ -38,7 +20,13 @@ const RedditGeneratorPage = () => {
     }
 
     setGeneratedPost('');
-    const systemPrompt = getSystemPrompt() + " Generate a Reddit post based on the user's topic. Make it engaging and appropriate for Reddit. Include relevant formatting. Do not include any introductory or concluding remarks, just the post content.";
+    const systemPrompt = getSystemPrompt('reddit') + ` 
+Generate a Reddit post based on the user's topic. 
+Make it engaging and appropriate for Reddit. 
+Include relevant formatting.
+Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
+Do not include any introductory or concluding remarks, just the post content.`;
+    
     const userPrompt = `Generate a Reddit post about: ${topic}`;
 
     const result = await callGemini(userPrompt, systemPrompt);
@@ -62,7 +50,9 @@ const RedditGeneratorPage = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Reddit Post Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">Generate engaging Reddit posts based on your persona and topic.</p>
+      <p className="text-sm text-gray-400 mb-4">
+        Generate engaging Reddit posts based on your {isMale ? 'Findom' : 'Femdom'} persona and topic.
+      </p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader>
@@ -70,7 +60,9 @@ const RedditGeneratorPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <Textarea
-            placeholder="Enter the topic for your Reddit post (e.g., 'findom lifestyle', 'financial domination experiences', 'sub training')"
+            placeholder={`Enter the topic for your Reddit post (e.g., ${isMale 
+              ? "'findom lifestyle', 'financial domination experiences', 'sub training'" 
+              : "'femdom power', 'worship experiences', 'paypig training'"})`}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             rows={3}

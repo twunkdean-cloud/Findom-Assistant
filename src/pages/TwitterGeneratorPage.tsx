@@ -3,34 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
-import { useFindom } from '@/context/FindomContext';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
 const TwitterGeneratorPage = () => {
   const { callGemini, isLoading, error } = useGemini();
+  const { getSystemPrompt, getHashtags, isMale, isFemale } = useGenderedContent();
   const [topic, setTopic] = useState('');
   const [generatedTweet, setGeneratedTweet] = useState('');
-
-  const getSystemPrompt = (): string => {
-    return `You are a confident, experienced MALE FOR MALE findom content creator who knows how to write compelling Twitter content.
-    This is specifically for MALE DOMINANTS and MALE SUBMISSIVES in the findom lifestyle.
-    Write naturally, conversationally, and authentically - like you're talking to a friend or client.
-    Use contractions (you're, can't, won't) and natural language patterns.
-    Avoid corporate-speak, overly formal language, or AI-like phrases.
-    Be direct, bold, and unapologetic in your tone.
-    Focus on real scenarios, practical advice, and genuine findom dynamics between men.
-    Keep it real, keep it authentic, and always maintain that dominant but natural energy.
-    No "as an AI" or similar phrases - just straight, authentic content.
-    IMPORTANT: This is MALE FOR MALE findom only. Never mention women, goddess, femdom, or any female-related content. All content should be focused on male-male dynamics.
-    
-    For Twitter content:
-    - Keep tweets under 280 characters
-    - Use relevant hashtags like #findom #malefindom #cashmaster #paypig #finsub
-    - Be provocative but within Twitter's guidelines
-    - Include clear calls to action when appropriate
-    - Focus on male-male findom dynamics`;
-  };
 
   const handleGenerateTweet = async () => {
     if (!topic.trim()) {
@@ -39,7 +20,12 @@ const TwitterGeneratorPage = () => {
     }
 
     setGeneratedTweet('');
-    const systemPrompt = getSystemPrompt() + " Generate a single tweet (max 280 characters) based on the user's topic. Include relevant emojis and hashtags. Do not include any introductory or concluding remarks, just the tweet content.";
+    const systemPrompt = getSystemPrompt('twitter') + ` 
+Generate a single tweet (max 280 characters) based on the user's topic. 
+Include relevant emojis and hashtags. 
+Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
+Do not include any introductory or concluding remarks, just the tweet content.`;
+    
     const userPrompt = `Generate a tweet about: ${topic}`;
 
     const result = await callGemini(userPrompt, systemPrompt);
@@ -63,7 +49,9 @@ const TwitterGeneratorPage = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Tweet Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">Generate engaging tweets based on your persona and a given topic.</p>
+      <p className="text-sm text-gray-400 mb-4">
+        Generate engaging tweets based on your {isMale ? 'Findom' : 'Femdom'} persona and a given topic.
+      </p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader>
@@ -71,7 +59,9 @@ const TwitterGeneratorPage = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <Textarea
-            placeholder="Enter the topic for your tweet (e.g., 'a sub sending tribute', 'my dominance', 'foot worship')"
+            placeholder={`Enter the topic for your tweet (e.g., ${isMale 
+              ? "'a sub sending tribute', 'my dominance', 'foot worship'" 
+              : "'a worshipper serving me', 'my divine power', 'paypig obedience'"})`}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             rows={3}

@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useGemini } from '@/hooks/use-gemini';
-import { useFindom } from '@/context/FindomContext';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
 const TaskGeneratorPage = () => {
-  const { callGemini, isLoading, error, getSystemPrompt } = useGemini();
+  const { callGemini, isLoading, error } = useGemini();
+  const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
   const [topic, setTopic] = useState('');
   const [intensity, setIntensity] = useState<'low' | 'medium' | 'high'>('medium');
   const [generatedTask, setGeneratedTask] = useState('');
@@ -24,8 +25,13 @@ const TaskGeneratorPage = () => {
     }
 
     setGeneratedTask('');
-    const systemPrompt = getSystemPrompt() + ` Generate a creative findom task for a sub based on the user's topic. The task should be of ${intensity} intensity. Do not include any introductory or concluding remarks, just the task content.`;
-    const userPrompt = `Generate a findom task about: ${topic}`;
+    const systemPrompt = getSystemPrompt('task') + ` 
+Generate a creative ${isMale ? 'findom' : 'femdom'} task for a sub based on the user's topic. 
+The task should be of ${intensity} intensity.
+Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
+Do not include any introductory or concluding remarks, just the task content.`;
+    
+    const userPrompt = `Generate a ${isMale ? 'findom' : 'femdom'} task about: ${topic}`;
 
     const result = await callGemini(userPrompt, systemPrompt);
     if (result) {
@@ -48,7 +54,9 @@ const TaskGeneratorPage = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Task Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">Generate creative findom tasks based on type and intensity.</p>
+      <p className="text-sm text-gray-400 mb-4">
+        Generate creative {isMale ? 'findom' : 'femdom'} tasks based on type and intensity.
+      </p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader>
@@ -59,7 +67,9 @@ const TaskGeneratorPage = () => {
             <Label htmlFor="task-topic">Task Topic</Label>
             <Textarea
               id="task-topic"
-              placeholder="Enter the topic for the task (e.g., 'a public display of devotion', 'a financial challenge', 'a humiliating confession')"
+              placeholder={`Enter the topic for the task (e.g., ${isMale 
+                ? "'a public display of devotion', 'a financial challenge', 'a humiliating confession'" 
+                : "'an act of worship', 'a tribute ritual', 'a servitude demonstration'"})`}
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               rows={3}
@@ -73,7 +83,7 @@ const TaskGeneratorPage = () => {
               <SelectTrigger id="task-intensity" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
                 <SelectValue placeholder="Select intensity" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border border-gray-700 text-gray-200">
+              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High</SelectItem>
