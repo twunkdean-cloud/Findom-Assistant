@@ -49,7 +49,7 @@ const MobileOptimizedCard: React.FC<MobileOptimizedCardProps> = ({
           )}
         </CardHeader>
       )}
-      <CardContent className={cn('pt-0', { 'pt-0': isMobile })}>
+      <CardContent className={cn('pt-0', { 'pt-2': isMobile })}>
         {children}
       </CardContent>
       {footer && (
@@ -62,3 +62,4 @@ const MobileOptimizedCard: React.FC<MobileOptimizedCardProps> = ({
 };
 
 export default MobileOptimizedCard;
+export { MobileOptimizedCard };
