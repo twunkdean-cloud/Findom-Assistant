@@ -1,11 +1,11 @@
 export { Sidebar } from './Sidebar';
-export { SidebarProvider, useSidebar } from '../sidebar';
+export { SidebarProvider, useSidebar } from './SidebarProvider';
 export { SidebarContent } from './SidebarContent';
 export { SidebarFooter } from './SidebarFooter';
 export { SidebarHeader } from './SidebarHeader';
 export { SidebarInput } from './SidebarInput';
 export { SidebarInset } from './SidebarInset';
 export { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from './SidebarMenu';
-export { SidebarRail } from '../sidebar';
+export { SidebarRail } from './SidebarRail';
 export { SidebarSeparator } from './SidebarSeparator';
-export { SidebarTrigger } from '../sidebar';
+export { SidebarTrigger } from './SidebarTrigger';

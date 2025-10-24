@@ -1,18 +1,21 @@
-import * as React from "react";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
-export const SidebarSeparator = React.forwardRef<
-  React.ElementRef<typeof Separator>,
-  React.ComponentProps<typeof Separator>
+const SidebarSeparator = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
   return (
-    <Separator
+    <div
       ref={ref}
-      data-sidebar="separator"
-      className={cn("mx-2 w-auto bg-sidebar-border", className)}
+      className={cn(
+        "shrink-0 bg-border",
+        className
+      )}
       {...props}
     />
-  );
-});
-SidebarSeparator.displayName = "SidebarSeparator";
+  )
+})
+SidebarSeparator.displayName = "SidebarSeparator"
+
+export { SidebarSeparator }
