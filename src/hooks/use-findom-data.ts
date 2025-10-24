@@ -10,7 +10,7 @@ import {
   calendarService,
   redflagsService,
   checklistsService,
-} from '@/services';
+} from '@/services/unified-service';
 
 export const useFindomData = () => {
   const { user } = useAuth();

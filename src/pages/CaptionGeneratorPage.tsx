@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast-unified';
 import { Loader2, Copy, Image } from 'lucide-react';
 
 const CaptionGeneratorPage = () => {

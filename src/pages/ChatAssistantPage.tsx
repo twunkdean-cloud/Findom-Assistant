@@ -11,7 +11,7 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { MobileOptimizedCard } from '@/components/MobileOptimizedCard';
 import MobileLoadingSpinner from '@/components/MobileLoadingSpinner';
 import { useGestures } from '@/hooks/use-gestures';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast-unified';
 import { Loader2, Send, Copy, Bot, User, History, Brain, MessageSquare } from 'lucide-react';
 import { LazyWrapper, ComponentLoadingFallback } from '@/utils/lazy-loading';
 import { 

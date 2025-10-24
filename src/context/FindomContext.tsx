@@ -10,8 +10,7 @@ import {
   calendarService,
   redflagsService,
   checklistsService,
-  userDataService,
-} from '@/services';
+} from '@/services/unified-service';
 
 const FindomContext = createContext<FindomContextType | undefined>(undefined);
 

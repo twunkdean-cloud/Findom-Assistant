@@ -5,11 +5,13 @@ import { Card, CardContent } from '@/components/ui/card';
 interface LazyComponentProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
+  errorFallback?: React.ReactNode;
 }
 
 export const LazyWrapper: React.FC<LazyComponentProps> = ({ 
   children, 
-  fallback 
+  fallback,
+  errorFallback
 }) => {
   const defaultFallback = (
     <div className="flex items-center justify-center min-h-[200px]">
@@ -17,12 +19,54 @@ export const LazyWrapper: React.FC<LazyComponentProps> = ({
     </div>
   );
 
+  const defaultErrorFallback = (
+    <div className="flex items-center justify-center min-h-[200px]">
+      <Card className="w-full max-w-md">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-red-600">Failed to Load</h3>
+            <p className="text-sm text-gray-600 mt-1">Please refresh the page and try again.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <Suspense fallback={fallback || defaultFallback}>
-      {children}
+      <ErrorBoundary fallback={errorFallback || defaultErrorFallback}>
+        {children}
+      </ErrorBoundary>
     </Suspense>
   );
 };
+
+// Enhanced error boundary for lazy loading
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Lazy loading error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
 
 export const PageLoadingFallback: React.FC<{ title?: string }> = ({ 
   title = "Loading..." 

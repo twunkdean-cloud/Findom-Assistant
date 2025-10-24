@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useGemini } from '@/hooks/use-gemini';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast-unified';
 import { Loader2, Copy } from 'lucide-react';
 
 const TaskGeneratorPage = () => {

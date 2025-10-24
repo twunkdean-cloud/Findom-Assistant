@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useGemini } from '@/hooks/use-gemini';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast-unified';
 import { Upload, Loader2, Eye, Copy } from 'lucide-react';
 
 const ImageVisionPage = () => {

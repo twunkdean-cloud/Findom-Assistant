@@ -1,61 +1,39 @@
-export interface BundleMetrics {
+interface BundleMetrics {
   totalSize: number;
   gzippedSize: number;
-  chunkCount: number;
-  largestChunks: Array<{
-    name: string;
-    size: number;
-    gzippedSize: number;
-  }>;
+  chunkSizes: Record<string, number>;
+  largestChunks: Array<{ name: string; size: number }>;
 }
 
-export const analyzeBundle = (): BundleMetrics => {
-  // This would typically be done with webpack-bundle-analyzer or similar
-  // For now, we'll return mock data
+export const analyzeBundleSize = (): BundleMetrics => {
+  // This would typically be implemented with webpack-bundle-analyzer or similar
+  // For now, return mock data that could be populated by build tools
   return {
-    totalSize: 2500000, // 2.5MB
-    gzippedSize: 750000, // 750KB
-    chunkCount: 15,
-    largestChunks: [
-      { name: 'vendor', size: 1500000, gzippedSize: 450000 },
-      { name: 'main', size: 500000, gzippedSize: 150000 },
-      { name: 'chat-assistant', size: 300000, gzippedSize: 90000 },
-      { name: 'dashboard', size: 200000, gzippedSize: 60000 },
-    ]
+    totalSize: 0,
+    gzippedSize: 0,
+    chunkSizes: {},
+    largestChunks: []
   };
 };
 
-export const getOptimizationSuggestions = (metrics: BundleMetrics): string[] => {
-  const suggestions: string[] = [];
+export const optimizeBundle = () => {
+  // Bundle optimization recommendations
+  const recommendations = [
+    'Implement dynamic imports for large components',
+    'Use tree shaking for unused exports',
+    'Optimize image assets',
+    'Consider code splitting by routes',
+    'Remove unused dependencies'
+  ];
   
-  if (metrics.totalSize > 3000000) {
-    suggestions.push('Consider implementing more aggressive code splitting');
-  }
-  
-  if (metrics.gzippedSize > 1000000) {
-    suggestions.push('Optimize images and assets further');
-  }
-  
-  if (metrics.largestChunks[0].size > 1000000) {
-    suggestions.push('Break down the largest chunk into smaller pieces');
-  }
-  
-  return suggestions;
+  console.log('Bundle optimization recommendations:', recommendations);
+  return recommendations;
 };
 
-export const logBundleMetrics = () => {
+export const monitorBundleSize = () => {
+  // Monitor bundle size in development
   if (process.env.NODE_ENV === 'development') {
-    const metrics = analyzeBundle();
-    console.group('📦 Bundle Analysis');
-    console.log('Total Size:', `${(metrics.totalSize / 1024 / 1024).toFixed(2)} MB`);
-    console.log('Gzipped Size:', `${(metrics.gzippedSize / 1024 / 1024).toFixed(2)} MB`);
-    console.log('Chunk Count:', metrics.chunkCount);
-    console.log('Largest Chunks:', metrics.largestChunks);
-    
-    const suggestions = getOptimizationSuggestions(metrics);
-    if (suggestions.length > 0) {
-      console.log('Optimization Suggestions:', suggestions);
-    }
-    console.groupEnd();
+    const metrics = analyzeBundleSize();
+    console.log('Bundle metrics:', metrics);
   }
 };

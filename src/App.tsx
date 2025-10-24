@@ -8,6 +8,7 @@ import { LoadingSpinner } from './components/ui/loading-spinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LazyWrapper, PageLoadingFallback } from './utils/lazy-loading';
 import { usePreloadComponents } from './hooks/use-preload-components';
+import { monitorBundleSize } from './utils/bundle-analysis';
 
 // Lazy loaded pages
 import {
@@ -66,6 +67,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppContent = () => {
   // Preload critical components
   usePreloadComponents();
+  
+  // Monitor bundle size in development
+  useEffect(() => {
+    monitorBundleSize();
+  }, []);
 
   return (
     <ErrorBoundary>

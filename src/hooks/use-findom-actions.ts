@@ -12,7 +12,7 @@ import {
   checklistsService,
   userDataService,
   migrationService,
-} from '@/services';
+} from '@/services/unified-service';
 
 export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<React.SetStateAction<AppData>>) => {
   const { user } = useAuth();
