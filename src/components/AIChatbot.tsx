@@ -7,7 +7,7 @@ import { useAIAnalytics } from '@/hooks/use-ai-analytics';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Bot, Send, Copy, User, BotIcon } from 'lucide-react';
-import { VoiceInput } from '@/components/ui/voice-input';
+import VoiceInput from '@/components/ui/voice-input';
 
 interface ChatMessage {
   id: string;
