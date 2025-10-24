@@ -10,9 +10,8 @@ import {
   calendarService,
   redflagsService,
   checklistsService,
-  userDataService,
-  migrationService,
 } from '@/services/unified-service';
+import { migrationService } from '@/services/migration-service';
 
 export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<React.SetStateAction<AppData>>) => {
   const { user } = useAuth();
