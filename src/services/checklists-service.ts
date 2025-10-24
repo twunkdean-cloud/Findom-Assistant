@@ -14,6 +14,24 @@ export class ChecklistsService extends BaseService<Checklist> {
     return 'checklists';
   }
 
+  protected transformFromDB(items: any[]): Checklist[] {
+    return items.map(item => ({
+      ...item,
+      weeklyTasks: (item as any).weeklyTasks || DEFAULT_WEEKLY_TASKS,
+      weeklyCompleted: (item as any).weeklyCompleted || [],
+    }));
+  }
+
+  protected transformToDB(item: Checklist): any {
+    return {
+      id: item.id,
+      user_id: (item as any).user_id,
+      date: item.date,
+      tasks: item.tasks,
+      completed: item.completed,
+    };
+  }
+
   async getToday(userId: string): Promise<Checklist> {
     const today = new Date().toISOString().split('T')[0];
     
@@ -78,7 +96,7 @@ export class ChecklistsService extends BaseService<Checklist> {
     }
   }
 
-  async update(userId: string, data: Checklist): Promise<void> {
+  async updateChecklist(userId: string, data: Checklist): Promise<void> {
     try {
       const updateData = {
         user_id: userId,

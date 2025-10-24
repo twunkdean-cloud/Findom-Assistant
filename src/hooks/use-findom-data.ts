@@ -77,7 +77,9 @@ export const useFindomData = () => {
           tributes,
           customPrices,
           calendarEvents: calendar,
+          calendar: calendar,
           redflags,
+          checklists: [checklist],
           checklist: {
             ...checklist,
             weeklyTasks: (checklist as any).weeklyTasks || [],

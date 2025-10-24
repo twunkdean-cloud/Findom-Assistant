@@ -29,11 +29,11 @@ const SettingsPage = () => {
   const [dailyReminders, setDailyReminders] = useState(appData.settings?.dailyReminders ?? true);
   
   // Privacy settings
-  const [profileVisibility, setProfileVisibility] = useState(appData.settings?.profileVisibility || 'private');
+  const [profileVisibility, setProfileVisibility] = useState<'private' | 'friends' | 'public'>(appData.settings?.profileVisibility || 'private');
   const [dataSharing, setDataSharing] = useState(appData.settings?.dataSharing ?? false);
   
   // Theme settings
-  const [theme, setTheme] = useState(appData.settings?.theme || 'dark');
+  const [theme, setTheme] = useState<'dark' | 'light' | 'auto'>(appData.settings?.theme || 'dark');
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
@@ -229,7 +229,7 @@ const SettingsPage = () => {
         <CardContent className="space-y-4">
           <div>
             <Label className="text-gray-300">Profile Visibility</Label>
-            <Select value={profileVisibility} onValueChange={setProfileVisibility}>
+            <Select value={profileVisibility} onValueChange={(value: 'private' | 'friends' | 'public') => setProfileVisibility(value)}>
               <SelectTrigger className="bg-gray-900 border-gray-600 text-gray-200">
                 <SelectValue />
               </SelectTrigger>
@@ -264,7 +264,7 @@ const SettingsPage = () => {
         <CardContent className="space-y-4">
           <div>
             <Label className="text-gray-300">Theme</Label>
-            <Select value={theme} onValueChange={setTheme}>
+            <Select value={theme} onValueChange={(value: 'dark' | 'light' | 'auto') => setTheme(value)}>
               <SelectTrigger className="bg-gray-900 border-gray-600 text-gray-200">
                 <SelectValue />
               </SelectTrigger>

@@ -74,9 +74,12 @@ export interface AppData {
   checklists: Checklist[];
   customPrices: CustomPrice[];
   calendarEvents: CalendarEvent[];
+  calendar: CalendarEvent[]; // Add calendar property for backward compatibility
   goal?: {
     weekly: number;
     monthly: number;
+    target?: number;
+    current?: number;
   };
   profile?: {
     displayName: string;

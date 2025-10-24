@@ -47,7 +47,7 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
           await userDataService.setUploadedImageData(userId, value);
           break;
         case 'checklist':
-          await checklistsService.update(userId, value);
+          await checklistsService.updateChecklist(userId, value);
           break;
         case 'profile':
           await userDataService.setProfile(userId, value);
@@ -102,7 +102,7 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
 
   const updateCalendar = async (calendar: CalendarEvent[]): Promise<void> => {
     if (!user) return;
-    setAppData(prev => ({ ...prev, calendarEvents: calendar }));
+    setAppData(prev => ({ ...prev, calendarEvents: calendar, calendar }));
     try {
       await calendarService.updateAll(user.id, calendar);
     } catch (error) {

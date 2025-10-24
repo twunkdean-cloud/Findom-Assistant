@@ -89,7 +89,9 @@ export const FindomProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           tributes,
           customPrices,
           calendarEvents: calendar,
+          calendar: calendar, // Add calendar for backward compatibility
           redflags,
+          checklists: [checklist], // Wrap in array
           checklist: {
             ...checklist,
             weeklyTasks: (checklist as any).weeklyTasks || [],
