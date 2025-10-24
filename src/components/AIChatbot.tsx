@@ -61,6 +61,7 @@ const AIChatbot = () => {
       // Get the appropriate system prompt based on gender and chat mode
       const promptType = chatMode === 'general' ? 'response' : 
                         chatMode === 'sub' ? 'response' : 
+                        chatMode === 'creative' ? 'response' : 
                         chatMode;
       let systemPrompt = getSystemPrompt(promptType);
       
