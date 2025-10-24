@@ -15,6 +15,7 @@ export const DEFAULT_APP_DATA: AppData = {
   checklists: [],
   customPrices: [],
   calendarEvents: [],
+  calendar: [],
   goal: { weekly: 0, monthly: 0 },
   profile: {
     displayName: '',
