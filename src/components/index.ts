@@ -1,13 +1,3 @@
-// UI Components
-export { Button } from './ui/button';
-export { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-export { Input } from './ui/input';
-export { Textarea } from './ui/textarea';
-export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-export { Badge } from './ui/badge';
-export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-export { Label } from './ui/label';
-
 // Custom Components
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as PullToRefresh } from './PullToRefresh';

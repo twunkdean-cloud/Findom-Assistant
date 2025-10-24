@@ -29,7 +29,7 @@ import PushNotificationManager from '@/components/PushNotificationManager';
 
 const DashboardPage = () => {
   const { appData } = useFindom();
-  const { updateAppData } = useFindomActions();
+  const { updateAppData } = useFindomActions(appData);
   const { isMobile } = useMobile();
   const [activeTab, setActiveTab] = useState('overview');
 

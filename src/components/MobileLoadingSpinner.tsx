@@ -40,3 +40,4 @@ const MobileLoadingSpinner: React.FC<MobileLoadingSpinnerProps> = ({
 };
 
 export default MobileLoadingSpinner;
+export { MobileLoadingSpinner };

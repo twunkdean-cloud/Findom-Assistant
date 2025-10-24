@@ -66,6 +66,7 @@ export interface Tribute {
   amount: number;
   date: string;
   from: string;
+  from_sub?: string;
   reason?: string;
   notes?: string;
   source: string;

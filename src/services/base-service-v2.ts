@@ -6,9 +6,11 @@ export abstract class BaseServiceV2 {
   protected tableName: string;
   protected toast = useAppToast();
   protected offline = useOffline();
+  protected userId: string;
 
-  constructor(tableName: string) {
+  constructor(tableName: string, userId: string) {
     this.tableName = tableName;
+    this.userId = userId;
   }
 
   protected async handleOperation<T>(
@@ -43,97 +45,55 @@ export abstract class BaseServiceV2 {
     }
   }
 
-  protected async getAll<T>(userId: string): Promise<T[]> {
+  async getAll(): Promise<T[]> {
     return this.handleOperation(
       () => supabase
         .from(this.tableName)
         .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return data as T[];
-        }),
-      undefined,
-      `Failed to fetch ${this.tableName}`
-    ) || [];
+        .eq('user_id', this.userId)
+    ) as Promise<T[]>;
   }
 
-  protected async create<T>(userId: string, data: Partial<T>): Promise<T | null> {
-    const createData = { ...data, user_id: userId };
-    
+  async getById(id: string): Promise<T | null> {
     return this.handleOperation(
       () => supabase
         .from(this.tableName)
-        .insert(createData)
-        .select()
+        .select('*')
+        .eq('user_id', this.userId)
+        .eq('id', id)
         .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return data as T;
-        }),
-      `${this.tableName} created successfully`,
-      `Failed to create ${this.tableName}`,
-      {
-        url: `/rest/v1/${this.tableName}`,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-          'apikey': supabase.supabaseKey,
-        },
-        body: JSON.stringify(createData),
-      }
-    );
+    ) as Promise<T | null>;
   }
 
-  protected async update<T>(id: string, data: Partial<T>): Promise<T | null> {
+  async create(data: Partial<T>): Promise<T> {
+    return this.handleOperation(
+      () => supabase
+        .from(this.tableName)
+        .insert({ ...data, user_id: this.userId })
+        .select('*')
+        .single()
+    ) as Promise<T>;
+  }
+
+  async update(id: string, data: Partial<T>): Promise<T> {
     return this.handleOperation(
       () => supabase
         .from(this.tableName)
         .update(data)
+        .eq('user_id', this.userId)
         .eq('id', id)
-        .select()
+        .select('*')
         .single()
-        .then(({ data, error }) => {
-          if (error) throw error;
-          return data as T;
-        }),
-      `${this.tableName} updated successfully`,
-      `Failed to update ${this.tableName}`,
-      {
-        url: `/rest/v1/${this.tableName}?id=eq.${id}`,
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-          'apikey': supabase.supabaseKey,
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    ) as Promise<T>;
   }
 
-  protected async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<boolean> {
     return this.handleOperation(
       () => supabase
         .from(this.tableName)
         .delete()
+        .eq('user_id', this.userId)
         .eq('id', id)
-        .then(({ error }) => {
-          if (error) throw error;
-          return true;
-        }),
-      `${this.tableName} deleted successfully`,
-      `Failed to delete ${this.tableName}`,
-      {
-        url: `/rest/v1/${this.tableName}?id=eq.${id}`,
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-          'apikey': supabase.supabaseKey,
-        },
-      }
-    ) || false;
+    ) as Promise<boolean>;
   }
 }

@@ -35,7 +35,7 @@ class OfflineQueue {
     const store = transaction.objectStore(this.storeName);
     const actions = await store.getAll();
     db.close();
-    return actions;
+    return actions as QueuedAction[];
   }
 
   async removeFromQueue(id: string): Promise<void> {
