@@ -59,7 +59,10 @@ const AIChatbot = () => {
       let contextPrompt = currentInput;
       
       // Get the appropriate system prompt based on gender and chat mode
-      let systemPrompt = getSystemPrompt(chatMode === 'general' ? 'response' : chatMode);
+      const promptType = chatMode === 'general' ? 'response' : 
+                        chatMode === 'sub' ? 'response' : 
+                        chatMode;
+      let systemPrompt = getSystemPrompt(promptType);
       
       // Add personality-specific instructions
       systemPrompt += `
