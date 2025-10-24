@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useGenderedContent } from './use-gendered-content';
+import { API_BASE_URL, API_TOKEN } from '@/constants';
 
 interface UseGeminiReturn {
   callGemini: (prompt: string, systemPrompt?: string) => Promise<string | null>;
@@ -29,11 +30,11 @@ export const useGemini = (): UseGeminiReturn => {
       
       console.log('Sending to Gemini API:', payload);
 
-      const response = await fetch('https://qttmhbtaguiioomcjqbt.supabase.co/functions/v1/gemini-chat', {
+      const response = await fetch(`${API_BASE_URL}/gemini-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0dG1oYnRhZ3VpaW9vbWNqcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MjQ5MDMsImV4cCI6MjA3NjMwMDkwM30.M4AiSRnA0xfmDgmtxYaKr4GT7bvzoFS3ukxpsN3b8K0`,
+          'Authorization': `Bearer ${API_TOKEN}`,
         },
         body: JSON.stringify(payload),
       });
@@ -76,11 +77,11 @@ export const useGemini = (): UseGeminiReturn => {
       const mimeType = matches[1];
       const base64Data = matches[2];
 
-      const response = await fetch('https://qttmhbtaguiioomcjqbt.supabase.co/functions/v1/gemini-vision', {
+      const response = await fetch(`${API_BASE_URL}/gemini-vision`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0dG1oYnRhZ3VpaW9vbWNqcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MjQ5MDMsImV4cCI6MjA3NjMwMDkwM30.M4AiSRnA0xfmDgmtxYaKr4GT7bvzoFS3ukxpsN3b8K0`,
+          'Authorization': `Bearer ${API_TOKEN}`,
         },
         body: JSON.stringify({
           image: base64Data,

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useFindom } from '@/context/FindomContext';
+import { GENDER_HASHTAGS, PERSONA_OPTIONS } from '@/constants';
 
 export const useGenderedContent = () => {
   const { appData } = useFindom();
@@ -22,7 +23,7 @@ export const useGenderedContent = () => {
       return {
         findom: `${basePrompt}
         
-        This is specifically for MALE DOMINANTS and MALE SUBMISSIVES in the findom lifestyle.
+        This is specifically for MALE DOMINANTS and MALE SUBMISSIVES in findom lifestyle.
         IMPORTANT: This is MALE FOR MALE findom only. Never mention women, goddess, femdom, or any female-related content. 
         All content should be focused on male-male dynamics.
         
@@ -37,7 +38,7 @@ export const useGenderedContent = () => {
         
         For Twitter content (Male Findom):
         - Keep tweets under 280 characters
-        - Use hashtags like #findom #malefindom #cashmaster #paypig #finsub
+        - Use hashtags like ${GENDER_HASHTAGS.male.join(' ')}
         - Be provocative but within Twitter's guidelines
         - Include clear calls to action when appropriate
         - Focus on male-male findom dynamics
@@ -48,15 +49,15 @@ export const useGenderedContent = () => {
         For Reddit content (Male Findom):
         - Follow subreddit rules and formatting
         - Use appropriate flairs when required
-        - Be engaging and authentic to the Reddit community
+        - Be engaging and authentic to Reddit community
         - Include relevant details about male-male findom dynamics
         - Focus on genuine experiences and advice for men in findom`,
         
         caption: `${basePrompt}
         
         For captions (Male Findom):
-        - Match the tone to the image/content type
-        - Include relevant hashtags for the platform
+        - Match tone to image/content type
+        - Include relevant hashtags for platform
         - Be provocative but engaging
         - Focus on male-male findom dynamics
         - Include clear calls to action when appropriate
@@ -86,7 +87,7 @@ export const useGenderedContent = () => {
       return {
         femdom: `${basePrompt}
         
-        This is specifically for FEMALE DOMINANTS and MALE SUBMISSIVES in the femdom lifestyle.
+        This is specifically for FEMALE DOMINANTS and MALE SUBMISSIVES in femdom lifestyle.
         IMPORTANT: This is FEMALE FOR MALE femdom only. Never mention male dominants, gay findom, or any male-male content. 
         All content should be focused on female-male dynamics.
         
@@ -101,7 +102,7 @@ export const useGenderedContent = () => {
         
         For Twitter content (Femdom):
         - Keep tweets under 280 characters
-        - Use hashtags like #femdom #findom #goddess #paypig #finsub #femalesupremacy
+        - Use hashtags like ${GENDER_HASHTAGS.female.join(' ')}
         - Be provocative but within Twitter's guidelines
         - Include clear calls to action when appropriate
         - Focus on female-male femdom dynamics
@@ -112,15 +113,15 @@ export const useGenderedContent = () => {
         For Reddit content (Femdom):
         - Follow subreddit rules and formatting
         - Use appropriate flairs when required
-        - Be engaging and authentic to the Reddit community
+        - Be engaging and authentic to Reddit community
         - Include relevant details about female-male femdom dynamics
         - Focus on genuine experiences and advice for femdom`,
         
         caption: `${basePrompt}
         
         For captions (Femdom):
-        - Match the tone to the image/content type
-        - Include relevant hashtags for the platform
+        - Match tone to image/content type
+        - Include relevant hashtags for platform
         - Be provocative but engaging
         - Focus on female-male femdom dynamics
         - Include clear calls to action when appropriate
@@ -155,29 +156,17 @@ export const useGenderedContent = () => {
   };
 
   const getPersonaTones = () => {
-    if (gender === 'male') {
-      return {
-        dominant: 'Commanding, assertive, direct',
-        seductive: 'Charismatic, confident, alluring',
-        strict: 'Authoritative, demanding, uncompromising',
-        caring: 'Protective, guiding, firm but fair'
-      };
-    } else {
-      return {
-        dominant: 'Goddess-like, commanding, supreme',
-        seductive: 'Enchanting, captivating, irresistible',
-        strict: 'Demanding, unforgiving, exacting',
-        caring: 'Nurturing, guiding, maternal dominance'
-      };
-    }
+    const options = PERSONA_OPTIONS[gender];
+    return {
+      dominant: options.find(o => o.value === 'dominant')?.label.split(' - ')[1] || 'Commanding',
+      seductive: options.find(o => o.value === 'seductive')?.label.split(' - ')[1] || 'Charismatic',
+      strict: options.find(o => o.value === 'strict')?.label.split(' - ')[1] || 'Authoritative',
+      caring: options.find(o => o.value === 'caring')?.label.split(' - ')[1] || 'Protective'
+    };
   };
 
   const getHashtags = () => {
-    if (gender === 'male') {
-      return ['#findom', '#malefindom', '#cashmaster', '#paypig', '#finsub', '#m4m'];
-    } else {
-      return ['#femdom', '#findom', '#goddess', '#paypig', '#finsub', '#femalesupremacy'];
-    }
+    return GENDER_HASHTAGS[gender];
   };
 
   const getTargetAudience = () => {

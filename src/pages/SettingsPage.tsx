@@ -11,6 +11,7 @@ import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Save, User, Bell, Shield, Palette, Download, Upload, Crown } from 'lucide-react';
 import GenderSelector from '@/components/ui/gender-selector';
+import { PERSONA_OPTIONS } from '@/constants';
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -88,7 +89,7 @@ const SettingsPage = () => {
     reader.onload = (e) => {
       try {
         const importedData = JSON.parse(e.target?.result as string);
-        // Here you would validate and merge the imported data
+        // Here you would validate and merge imported data
         toast.success('Data imported successfully!');
       } catch (error) {
         toast.error('Failed to import data. Please check the file format.');
@@ -103,21 +104,7 @@ const SettingsPage = () => {
   };
 
   const getPersonaOptions = () => {
-    if (gender === 'male') {
-      return [
-        { value: 'dominant', label: 'Dominant - Commanding, assertive, direct' },
-        { value: 'seductive', label: 'Seductive - Charismatic, confident, alluring' },
-        { value: 'strict', label: 'Strict - Authoritative, demanding, uncompromising' },
-        { value: 'caring', label: 'Caring - Protective, guiding, firm but fair' }
-      ];
-    } else {
-      return [
-        { value: 'dominant', label: 'Dominant - Goddess-like, supreme, commanding' },
-        { value: 'seductive', label: 'Seductive - Enchanting, captivating, irresistible' },
-        { value: 'strict', label: 'Strict - Demanding, unforgiving, exacting' },
-        { value: 'caring', label: 'Caring - Nurturing, guiding, maternal dominance' }
-      ];
-    }
+    return PERSONA_OPTIONS[gender];
   };
 
   return (
@@ -243,7 +230,7 @@ const SettingsPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-white">Data Sharing</p>
-              <p className="text-sm text-gray-400">Share anonymized data to improve the service</p>
+              <p className="text-sm text-gray-400">Share anonymized data to improve service</p>
             </div>
             <Switch
               checked={dataSharing}
