@@ -1,54 +1,41 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import { useMobile } from '@/hooks/use-mobile';
 
 interface MobileOptimizedCardProps {
   children: React.ReactNode;
   title?: string;
   className?: string;
-  padding?: 'sm' | 'md' | 'lg';
-  noShadow?: boolean;
+  mobileClassName?: string;
+  desktopClassName?: string;
 }
 
 const MobileOptimizedCard: React.FC<MobileOptimizedCardProps> = ({
   children,
   title,
-  className,
-  padding = 'md',
-  noShadow = false,
+  className = '',
+  mobileClassName = '',
+  desktopClassName = '',
 }) => {
   const { isMobile } = useMobile();
 
-  const paddingClasses = {
-    sm: isMobile ? 'p-3' : 'p-4',
-    md: isMobile ? 'p-4' : 'p-6',
-    lg: isMobile ? 'p-5' : 'p-8',
-  };
+  const cardClassName = `
+    ${className}
+    ${isMobile ? mobileClassName : desktopClassName}
+    ${isMobile ? 'p-3' : 'p-6'}
+    ${isMobile ? 'text-sm' : 'text-base'}
+  `.trim();
 
   return (
-    <Card
-      className={cn(
-        'bg-gray-800 border border-gray-700',
-        !noShadow && 'shadow-lg',
-        isMobile && 'rounded-xl',
-        className
-      )}
-    >
+    <Card className={`bg-gray-800 border-gray-700 ${cardClassName}`}>
       {title && (
-        <CardHeader className={cn(paddingClasses[padding], 'pb-3')}>
-          <CardTitle className={cn(
-            'text-lg font-semibold text-gray-100',
-            isMobile && 'text-base'
-          )}>
+        <CardHeader className={isMobile ? 'pb-2' : 'pb-4'}>
+          <CardTitle className={isMobile ? 'text-base' : 'text-lg'}>
             {title}
           </CardTitle>
         </CardHeader>
       )}
-      <CardContent className={cn(
-        paddingClasses[padding],
-        title && 'pt-0'
-      )}>
+      <CardContent className={isMobile ? 'pt-2' : 'pt-4'}>
         {children}
       </CardContent>
     </Card>
