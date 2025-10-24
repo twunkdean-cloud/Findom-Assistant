@@ -92,6 +92,7 @@ export interface AppData {
 
 export interface FindomContextType {
   appData: AppData;
+  setAppData: React.Dispatch<React.SetStateAction<AppData>>;
   updateAppData: (key: keyof AppData, value: any) => Promise<void>;
   saveAllAppData: (newData?: AppData) => void;
   clearAllData: () => Promise<void>;
@@ -108,4 +109,5 @@ export interface FindomContextType {
   updateRedflags: (redflags: RedFlag[]) => Promise<void>;
   updateChecklist: (key: keyof Checklist, value: any) => void;
   handleToggleWeeklyTask: (task: string) => void;
+  loading?: boolean;
 }
