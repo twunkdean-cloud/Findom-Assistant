@@ -117,7 +117,7 @@ const AIChatbot = () => {
                   <SelectValue placeholder={`Select ${isMale ? 'sub' : 'worshipper'} for context`} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="">General</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
                   {appData.subs.map((sub) => (
                     <SelectItem key={sub.id} value={sub.name}>
                       {sub.name} (${sub.total.toFixed(2)})
