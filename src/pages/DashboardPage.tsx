@@ -28,8 +28,8 @@ import AIInsightsDashboard from '@/components/AIInsightsDashboard';
 import PushNotificationManager from '@/components/PushNotificationManager';
 
 const DashboardPage = () => {
-  const { appData } = useFindom();
-  const { updateAppData } = useFindomActions(appData);
+  const { appData, setAppData } = useFindom();
+  const { updateAppData } = useFindomActions(appData, setAppData);
   const { isMobile } = useMobile();
   const [activeTab, setActiveTab] = useState('overview');
 
