@@ -31,7 +31,7 @@ import {
   ListChecks,
   ChevronRight,
 } from 'lucide-react';
-import { PullToRefresh } from '@/components/PullToRefresh';
+import PullToRefresh from '@/components/PullToRefresh';
 
 interface LayoutProps {
   children: ReactNode;
