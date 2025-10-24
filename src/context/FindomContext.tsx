@@ -3,7 +3,6 @@ import { useFindomActions } from '@/hooks/use-findom-actions';
 import { FindomContextType } from '@/types';
 import { DEFAULT_APP_DATA } from '@/constants/default-data';
 import { AppData } from '@/types';
-import { useAuth } from '@/hooks/use-auth';
 import { userDataService } from '@/services/user-data-service';
 import { subsService } from '@/services/subs-service';
 import { tributesService } from '@/services/tributes-service';
@@ -25,84 +24,12 @@ export const useFindom = () => {
 export const FindomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [appData, setAppData] = useState<AppData>(DEFAULT_APP_DATA);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
   const actions = useFindomActions(appData, setAppData);
 
   useEffect(() => {
-    if (user) {
-      loadUserData(user.id);
-    } else {
-      setAppData(DEFAULT_APP_DATA);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const loadUserData = async (userId: string) => {
-    try {
-      const [
-        apiKey,
-        persona,
-        goal,
-        responses,
-        screenTime,
-        timerStart,
-        uploadedImageData,
-        subs,
-        tributes,
-        customPrices,
-        calendar,
-        redflags,
-        checklist,
-        profile,
-        settings,
-        subscription,
-      ] = await Promise.all([
-        userDataService.getApiKey(userId),
-        userDataService.getPersona(userId),
-        userDataService.getGoal(userId),
-        userDataService.getResponses(userId),
-        userDataService.getScreenTime(userId),
-        userDataService.getTimerStart(userId),
-        userDataService.getUploadedImageData(userId),
-        subsService.getAll(userId),
-        tributesService.getAll(userId),
-        customPricesService.getAll(userId),
-        calendarService.getAll(userId),
-        redflagsService.getAll(userId),
-        checklistsService.getToday(userId),
-        userDataService.getProfile(userId),
-        userDataService.getSettings(userId),
-        userDataService.getSubscription(userId),
-      ]);
-
-      setAppData({
-        apiKey,
-        persona,
-        goal,
-        responses,
-        screenTime,
-        timerStart,
-        uploadedImageData,
-        subs,
-        tributes,
-        customPrices,
-        calendar,
-        redflags,
-        checklist: {
-          ...checklist,
-          weeklyTasks: checklist.weeklyTasks || [],
-          weeklyCompleted: checklist.weeklyCompleted || [],
-        },
-        profile: profile as any,
-        settings: settings as any,
-        subscription: subscription as string,
-      });
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // For now, just set loading to false since we don't have auth
+    setLoading(false);
+  }, []);
 
   const value = {
     appData,

@@ -1,5 +1,28 @@
 import { AppData } from '@/types';
 
+export const DEFAULT_WEEKLY_TASKS = [
+  'Review weekly earnings and set goals',
+  'Deep clean content creation space',
+  'Plan content calendar for next week',
+  'Update pricing and service menus',
+  'Review and update sub tier levels',
+  'Create special offers for loyal subs',
+  'Post longer-form content (blog/article)',
+  'Host live session or Q&A',
+  'Update social media bios and links',
+  'Review platform analytics and trends',
+  'Create themed content bundles',
+  'Reach out to inactive subs',
+  'Backup all content and data',
+  'Review and update red flag database',
+  'Plan self-care and relaxation time',
+  'Update equipment/supplies as needed',
+  'Network with other creators',
+  'Research new content ideas/trends',
+  'Review tax/financial planning',
+  'Set weekly tribute targets'
+];
+
 export const DEFAULT_APP_DATA: AppData = {
   apiKey: '',
   persona: { name: 'Switch Dean', specialties: 'male findom, foot worship, wallet drain', style: 'strict' },
@@ -80,27 +103,4 @@ export const DEFAULT_CHECKLIST_TASKS = [
   'Review red flag database',
   'Drink 8 glasses of water',
   'Eat a healthy meal',
-];
-
-export const DEFAULT_WEEKLY_TASKS = [
-  'Review weekly earnings and set goals',
-  'Deep clean content creation space',
-  'Plan content calendar for next week',
-  'Update pricing and service menus',
-  'Review and update sub tier levels',
-  'Create special offers for loyal subs',
-  'Post longer-form content (blog/article)',
-  'Host live session or Q&A',
-  'Update social media bios and links',
-  'Review platform analytics and trends',
-  'Create themed content bundles',
-  'Reach out to inactive subs',
-  'Backup all content and data',
-  'Review and update red flag database',
-  'Plan self-care and relaxation time',
-  'Update equipment/supplies as needed',
-  'Network with other creators',
-  'Research new content ideas/trends',
-  'Review tax/financial planning',
-  'Set weekly tribute targets'
 ];
