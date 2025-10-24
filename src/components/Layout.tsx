@@ -31,6 +31,7 @@ import {
   ListChecks,
   ChevronRight,
 } from 'lucide-react';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 interface LayoutProps {
   children: ReactNode;
@@ -317,7 +318,12 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 lg:pb-6">
-        {children}
+        <PullToRefresh
+          onRefresh={() => window.location.reload()}
+          isRefreshing={false}
+        >
+          {children}
+        </PullToRefresh>
       </main>
     </div>
   );

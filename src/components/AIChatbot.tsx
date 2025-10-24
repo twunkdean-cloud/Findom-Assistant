@@ -7,6 +7,7 @@ import { useAIAnalytics } from '@/hooks/use-ai-analytics';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Bot, Send, Copy, User, BotIcon } from 'lucide-react';
+import { VoiceInput } from '@/components/ui/voice-input';
 
 interface ChatMessage {
   id: string;
@@ -194,6 +195,11 @@ const AIChatbot = () => {
               rows={2}
               className="flex-1 p-2 bg-gray-900 border-gray-600 text-gray-200 resize-none"
               disabled={isLoading}
+            />
+            <VoiceInput
+              onTranscript={(text) => setInput(text)}
+              disabled={isLoading}
+              className="self-end"
             />
             <Button
               onClick={handleSendMessage}

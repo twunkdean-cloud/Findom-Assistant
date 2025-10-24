@@ -11,6 +11,7 @@ import { Loader2, Send, Copy, Bot, User, History, Brain, MessageSquare } from 'l
 import AIContentSuggestions from '@/components/AIContentSuggestions';
 import SentimentAnalysis from '@/components/SentimentAnalysis';
 import AIChatbot from '@/components/AIChatbot';
+import VoiceInput from '@/components/VoiceInput';
 
 interface Message {
   id: string;
@@ -386,6 +387,11 @@ ${selectedSub && selectedSub !== 'general' ? `You are currently discussing ${sel
                     rows={2}
                     className="flex-1 p-2 bg-gray-900 border-gray-600 text-gray-200 resize-none"
                     disabled={isLoading}
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setInput(text)}
+                    disabled={isLoading}
+                    className="self-end"
                   />
                   <Button
                     onClick={handleSendMessage}
