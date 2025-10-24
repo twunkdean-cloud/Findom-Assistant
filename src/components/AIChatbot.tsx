@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useGemini } from '@/hooks/use-gemini';
 import { useFindom } from '@/context/FindomContext';
 import { useMobile } from '@/hooks/use-mobile';
+import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from '@/utils/toast-unified';
 import { Loader2, Send, Copy, Bot, User, Brain, MessageSquare, Settings } from 'lucide-react';
 
@@ -20,6 +21,7 @@ interface Message {
 const AIChatbot = () => {
   const { callGemini, isLoading, error } = useGemini();
   const { appData } = useFindom();
+  const { getSystemPrompt, getTargetAudience, isMale, isFemale } = useGenderedContent();
   const { isMobile } = useMobile();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -55,9 +57,15 @@ const AIChatbot = () => {
 
     try {
       let contextPrompt = currentInput;
-      let systemPrompt = `You are an AI assistant for a findom content creator. 
+      
+      // Get the appropriate system prompt based on gender and chat mode
+      let systemPrompt = getSystemPrompt(chatMode === 'general' ? 'response' : chatMode);
+      
+      // Add personality-specific instructions
+      systemPrompt += `
+
 Your persona should be ${botPersonality} and professional while maintaining appropriate boundaries.
-Generate content that is empowering, consensual, and focused on the findom lifestyle.
+Generate content that is empowering, consensual, and focused on the ${isMale ? 'findom' : 'femdom'} lifestyle.
 Always maintain a respectful yet ${botPersonality} tone.
 Do not generate any content that is illegal, harmful, or violates platform policies.
 Focus on empowerment, financial literacy, and consensual power dynamics.
@@ -67,7 +75,9 @@ IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE.
 - Limit responses to 2-3 sentences maximum
 - Get straight to the point
 - Avoid lengthy explanations unless specifically asked
-- Focus on actionable advice`;
+- Focus on actionable advice
+
+Target audience: ${getTargetAudience()}`;
 
       // Add sub-specific context if selected
       if (selectedSub && selectedSub !== 'general') {
@@ -81,13 +91,13 @@ IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE.
       // Adjust prompt based on chat mode
       switch (chatMode) {
         case 'task':
-          systemPrompt += ` Focus on generating creative tasks and assignments for subs.`;
+          systemPrompt += ` Focus on generating creative tasks and assignments for ${isMale ? 'male subs' : 'subs serving female dominants'}.`;
           break;
         case 'creative':
-          systemPrompt += ` Focus on creative content ideas, captions, and engagement strategies.`;
+          systemPrompt += ` Focus on creative content ideas, captions, and engagement strategies for ${isMale ? 'male-male findom' : 'female-male femdom'}.`;
           break;
         case 'sub':
-          systemPrompt += ` Focus on sub management, relationship dynamics, and engagement strategies.`;
+          systemPrompt += ` Focus on sub management, relationship dynamics, and engagement strategies for ${isMale ? 'male-male findom' : 'female-male femdom'}.`;
           break;
       }
 
@@ -153,6 +163,9 @@ IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE.
         <CardTitle className="flex items-center">
           <Bot className="mr-2 h-5 w-5 text-indigo-400" />
           AI Chatbot
+          <Badge className={`ml-2 ${isMale ? 'bg-blue-600' : 'bg-pink-600'}`}>
+            {isMale ? 'Male Findom' : 'Female Femdom'}
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -196,6 +209,7 @@ IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE.
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
                 <SelectItem value="general">General</SelectItem>
+                <SelectItem value="general">General</SelectItem>
                 {appData.subs.map((sub) => (
                   <SelectItem key={sub.id} value={sub.name}>
                     {sub.name} (${sub.total.toFixed(2)})
@@ -232,6 +246,9 @@ IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE.
               </p>
               <p className="text-sm text-gray-600 mt-2">
                 Ask for advice, content ideas, or help with tasks
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                Currently configured for: {isMale ? 'Male Findom (Male for Male)' : 'Female Femdom (Female for Male)'}
               </p>
             </div>
           ) : (
@@ -287,7 +304,7 @@ IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE.
             placeholder={
               selectedSub && selectedSub !== 'general'
                 ? `Ask about ${selectedSub} or get personalized advice...`
-                : "Ask me anything about findom, content creation, or strategies..."
+                : `Ask me anything about ${isMale ? 'findom' : 'femdom'}, content creation, or strategies...`
             }
             rows={isMobile ? 2 : 3}
             className="w-full p-3 bg-gray-900 border-gray-600 text-gray-200 resize-none"
