@@ -23,8 +23,8 @@ import {
   AlertTriangle,
   Sparkles
 } from 'lucide-react';
-import TributeChart from '@/components/TributeChart';
-import AIInsightsDashboard from '@/components/AIInsightsDashboard';
+import { LazyWrapper, ComponentLoadingFallback } from '@/utils/lazy-loading';
+import { LazyTributeChart, LazyAIInsightsDashboard } from '@/components/lazy';
 import PushNotificationManager from '@/components/PushNotificationManager';
 
 const DashboardPage = () => {
@@ -250,7 +250,9 @@ const DashboardPage = () => {
 
         {/* AI Insights Tab */}
         <TabsContent value="insights">
-          <AIInsightsDashboard />
+          <LazyWrapper fallback={<ComponentLoadingFallback message="Loading AI Insights..." />}>
+            <LazyAIInsightsDashboard />
+          </LazyWrapper>
         </TabsContent>
 
         {/* Analytics Tab */}
@@ -260,7 +262,9 @@ const DashboardPage = () => {
               <CardTitle className="text-lg font-semibold text-gray-200">Tribute Trends</CardTitle>
             </CardHeader>
             <CardContent>
-              <TributeChart tributes={appData.tributes} />
+              <LazyWrapper fallback={<ComponentLoadingFallback message="Loading chart..." />}>
+                <LazyTributeChart tributes={appData.tributes} />
+              </LazyWrapper>
             </CardContent>
           </Card>
         </TabsContent>

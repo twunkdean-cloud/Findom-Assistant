@@ -13,9 +13,12 @@ import MobileLoadingSpinner from '@/components/MobileLoadingSpinner';
 import { useGestures } from '@/hooks/use-gestures';
 import { toast } from 'sonner';
 import { Loader2, Send, Copy, Bot, User, History, Brain, MessageSquare } from 'lucide-react';
-import AIContentSuggestions from '@/components/AIContentSuggestions';
-import SentimentAnalysis from '@/components/SentimentAnalysis';
-import AIChatbot from '@/components/AIChatbot';
+import { LazyWrapper, ComponentLoadingFallback } from '@/utils/lazy-loading';
+import { 
+  LazyAIContentSuggestions, 
+  LazySentimentAnalysis, 
+  LazyAIChatbot 
+} from '@/components/lazy';
 import VoiceInput from '@/components/ui/voice-input';
 
 interface Message {
@@ -456,15 +459,21 @@ ${selectedSub && selectedSub !== 'general' ? `You are currently discussing ${sel
           </TabsContent>
 
           <TabsContent value="content">
-            <AIContentSuggestions />
+            <LazyWrapper fallback={<ComponentLoadingFallback message="Loading Content AI..." />}>
+              <LazyAIContentSuggestions />
+            </LazyWrapper>
           </TabsContent>
 
           <TabsContent value="sentiment">
-            <SentimentAnalysis />
+            <LazyWrapper fallback={<ComponentLoadingFallback message="Loading Sentiment Analysis..." />}>
+              <LazySentimentAnalysis />
+            </LazyWrapper>
           </TabsContent>
 
           <TabsContent value="chatbot">
-            <AIChatbot />
+            <LazyWrapper fallback={<ComponentLoadingFallback message="Loading AI Chatbot..." />}>
+              <LazyAIChatbot />
+            </LazyWrapper>
           </TabsContent>
         </Tabs>
       </div>

@@ -6,22 +6,28 @@ import { FindomProvider } from './context/FindomContext';
 import Layout from './components/Layout';
 import { LoadingSpinner } from './components/ui/loading-spinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { LazyWrapper, PageLoadingFallback } from './utils/lazy-loading';
+import { usePreloadComponents } from './hooks/use-preload-components';
 
-// Pages
+// Lazy loaded pages
+import {
+  LazyDashboardPage,
+  LazySubTrackerPage,
+  LazyTributeTrackerPage,
+  LazyTaskGeneratorPage,
+  LazyResponseTemplatesPage,
+  LazyTwitterGeneratorPage,
+  LazyRedditGeneratorPage,
+  LazyCaptionGeneratorPage,
+  LazyImageVisionPage,
+  LazyChatAssistantPage,
+  LazyChecklistPage,
+  LazyPricingPage,
+  LazySettingsPage,
+} from './pages/lazy';
+
+// Regular pages (kept non-lazy for critical paths)
 import Index from './pages/Index';
-import DashboardPage from './pages/DashboardPage';
-import SubTrackerPage from './pages/SubTrackerPage';
-import TributeTrackerPage from './pages/TributeTrackerPage';
-import TaskGeneratorPage from './pages/TaskGeneratorPage';
-import ResponseTemplatesPage from './pages/ResponseTemplatesPage';
-import TwitterGeneratorPage from './pages/TwitterGeneratorPage';
-import RedditGeneratorPage from './pages/RedditGeneratorPage';
-import CaptionGeneratorPage from './pages/CaptionGeneratorPage';
-import ImageVisionPage from './pages/ImageVisionPage';
-import ChatAssistantPage from './pages/ChatAssistantPage';
-import ChecklistPage from './pages/ChecklistPage';
-import PricingPage from './pages/PricingPage';
-import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import NotFound from './pages/NotFound';
@@ -45,6 +51,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppContent = () => {
+  // Preload critical components
+  usePreloadComponents();
+
   return (
     <ErrorBoundary>
       <Router>
@@ -54,91 +63,117 @@ const AppContent = () => {
           <Route path="/" element={
             <ProtectedRoute>
               <Layout>
-                <DashboardPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Dashboard..." />}>
+                  <LazyDashboardPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/subs" element={
             <ProtectedRoute>
               <Layout>
-                <SubTrackerPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Sub Tracker..." />}>
+                  <LazySubTrackerPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/tributes" element={
             <ProtectedRoute>
               <Layout>
-                <TributeTrackerPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Tribute Tracker..." />}>
+                  <LazyTributeTrackerPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/tasks" element={
             <ProtectedRoute>
               <Layout>
-                <TaskGeneratorPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Task Generator..." />}>
+                  <LazyTaskGeneratorPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/responses" element={
             <ProtectedRoute>
               <Layout>
-                <ResponseTemplatesPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Response Templates..." />}>
+                  <LazyResponseTemplatesPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/twitter" element={
             <ProtectedRoute>
               <Layout>
-                <TwitterGeneratorPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Twitter Generator..." />}>
+                  <LazyTwitterGeneratorPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/reddit" element={
             <ProtectedRoute>
               <Layout>
-                <RedditGeneratorPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Reddit Generator..." />}>
+                  <LazyRedditGeneratorPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/caption" element={
             <ProtectedRoute>
               <Layout>
-                <CaptionGeneratorPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Caption Generator..." />}>
+                  <LazyCaptionGeneratorPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/image-vision" element={
             <ProtectedRoute>
               <Layout>
-                <ImageVisionPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Image Vision..." />}>
+                  <LazyImageVisionPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/chat-assistant" element={
             <ProtectedRoute>
               <Layout>
-                <ChatAssistantPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Chat Assistant..." />}>
+                  <LazyChatAssistantPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/pricing" element={
             <ProtectedRoute>
               <Layout>
-                <PricingPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Pricing..." />}>
+                  <LazyPricingPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/checklist" element={
             <ProtectedRoute>
               <Layout>
-                <ChecklistPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Checklist..." />}>
+                  <LazyChecklistPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
           <Route path="/settings" element={
             <ProtectedRoute>
               <Layout>
-                <SettingsPage />
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Settings..." />}>
+                  <LazySettingsPage />
+                </LazyWrapper>
               </Layout>
             </ProtectedRoute>
           } />
