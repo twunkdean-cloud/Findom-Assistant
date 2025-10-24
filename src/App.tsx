@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { FindomProvider } from './context/FindomContext';
 import Layout from './components/Layout';
 import { LoadingSpinner } from './components/ui/loading-spinner';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Pages
 import Index from './pages/Index';
@@ -45,105 +46,107 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppContent = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Layout>
-              <DashboardPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/subs" element={
-          <ProtectedRoute>
-            <Layout>
-              <SubTrackerPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/tributes" element={
-          <ProtectedRoute>
-            <Layout>
-              <TributeTrackerPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/tasks" element={
-          <ProtectedRoute>
-            <Layout>
-              <TaskGeneratorPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/responses" element={
-          <ProtectedRoute>
-            <Layout>
-              <ResponseTemplatesPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/twitter" element={
-          <ProtectedRoute>
-            <Layout>
-              <TwitterGeneratorPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/reddit" element={
-          <ProtectedRoute>
-            <Layout>
-              <RedditGeneratorPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/caption" element={
-          <ProtectedRoute>
-            <Layout>
-              <CaptionGeneratorPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/image-vision" element={
-          <ProtectedRoute>
-            <Layout>
-              <ImageVisionPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/chat-assistant" element={
-          <ProtectedRoute>
-            <Layout>
-              <ChatAssistantPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/pricing" element={
-          <ProtectedRoute>
-            <Layout>
-              <PricingPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/checklist" element={
-          <ProtectedRoute>
-            <Layout>
-              <ChecklistPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <Layout>
-              <SettingsPage />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout>
+                <DashboardPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/subs" element={
+            <ProtectedRoute>
+              <Layout>
+                <SubTrackerPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tributes" element={
+            <ProtectedRoute>
+              <Layout>
+                <TributeTrackerPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/tasks" element={
+            <ProtectedRoute>
+              <Layout>
+                <TaskGeneratorPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/responses" element={
+            <ProtectedRoute>
+              <Layout>
+                <ResponseTemplatesPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/twitter" element={
+            <ProtectedRoute>
+              <Layout>
+                <TwitterGeneratorPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/reddit" element={
+            <ProtectedRoute>
+              <Layout>
+                <RedditGeneratorPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/caption" element={
+            <ProtectedRoute>
+              <Layout>
+                <CaptionGeneratorPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/image-vision" element={
+            <ProtectedRoute>
+              <Layout>
+                <ImageVisionPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/chat-assistant" element={
+            <ProtectedRoute>
+              <Layout>
+                <ChatAssistantPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/pricing" element={
+            <ProtectedRoute>
+              <Layout>
+                <PricingPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/checklist" element={
+            <ProtectedRoute>
+              <Layout>
+                <ChecklistPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Layout>
+                <SettingsPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </Router>
+    </ErrorBoundary>
   );
 };
 
