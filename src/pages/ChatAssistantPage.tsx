@@ -11,7 +11,7 @@ import { Loader2, Send, Copy, Bot, User, History, Brain, MessageSquare } from 'l
 import AIContentSuggestions from '@/components/AIContentSuggestions';
 import SentimentAnalysis from '@/components/SentimentAnalysis';
 import AIChatbot from '@/components/AIChatbot';
-import VoiceInput from '@/components/VoiceInput';
+import VoiceInput from '@/components/ui/voice-input';
 
 interface Message {
   id: string;
