@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAIAnalytics } from '@/hooks/use-ai-analytics';
 import { useFindom } from '@/context/FindomContext';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast-unified';
 import { Bot, Send, Copy, User, BotIcon } from 'lucide-react';
 import VoiceInput from '@/components/ui/voice-input';
 

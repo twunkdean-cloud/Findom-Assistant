@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useFindom } from '@/context/FindomContext';
 import { useAIAnalytics } from '@/hooks/use-ai-analytics';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast-unified';
 import { Brain, Copy, Sparkles, Target, MessageSquare, CheckSquare } from 'lucide-react';
 
 const AIContentSuggestions = () => {
