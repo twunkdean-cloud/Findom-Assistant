@@ -14,7 +14,7 @@ export class UnifiedService<T> {
         .eq('user_id', userId);
 
       if (error) throw error;
-      return data || [];
+      return data as T[] || [];
     } catch (error) {
       console.error(`Error fetching ${this.tableName}:`, error);
       return [];
@@ -55,7 +55,7 @@ export class UnifiedService<T> {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as T;
     } catch (error) {
       console.error(`Error creating ${this.tableName}:`, error);
       throw error;
@@ -73,7 +73,7 @@ export class UnifiedService<T> {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as T;
     } catch (error) {
       console.error(`Error updating ${this.tableName}:`, error);
       throw error;
@@ -96,12 +96,12 @@ export class UnifiedService<T> {
   }
 }
 
-// Create service instances
-export const subsService = new UnifiedService('subs');
-export const tributesService = new UnifiedService('tributes');
-export const customPricesService = new UnifiedService('custom_prices');
-export const calendarService = new UnifiedService('calendar_events');
-export const redflagsService = new UnifiedService('redflags');
+// Create typed service instances
+export const subsService = new UnifiedService<import('@/types').Sub>('subs');
+export const tributesService = new UnifiedService<import('@/types').Tribute>('tributes');
+export const customPricesService = new UnifiedService<import('@/types').CustomPrice>('custom_prices');
+export const calendarService = new UnifiedService<import('@/types').CalendarEvent>('calendar_events');
+export const redflagsService = new UnifiedService<import('@/types').RedFlag>('redflags');
 
 // Export checklistsService separately since it has additional methods
 export { checklistsService };
