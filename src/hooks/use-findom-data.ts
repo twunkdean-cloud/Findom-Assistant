@@ -3,7 +3,6 @@ import { useAuth } from '@/context/AuthContext';
 import { AppData } from '@/types';
 import { DEFAULT_APP_DATA } from '@/constants/default-data';
 import {
-  userDataService,
   subsService,
   tributesService,
   customPricesService,
@@ -11,6 +10,7 @@ import {
   redflagsService,
   checklistsService,
 } from '@/services/unified-service';
+import { userDataService } from '@/services/user-data-service';
 
 export const useFindomData = () => {
   const { user } = useAuth();

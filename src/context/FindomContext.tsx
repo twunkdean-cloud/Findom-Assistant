@@ -11,6 +11,7 @@ import {
   redflagsService,
   checklistsService,
 } from '@/services/unified-service';
+import { userDataService } from '@/services/user-data-service';
 
 const FindomContext = createContext<FindomContextType | undefined>(undefined);
 
