@@ -87,6 +87,8 @@ export interface AppData {
     persona: 'dominant' | 'seductive' | 'strict' | 'caring';
     gender: 'male' | 'female';
     energy: 'masculine' | 'feminine';
+    onboardingCompleted?: boolean;
+    onboardingCompletedAt?: string | null;
   };
   settings?: {
     emailNotifications: boolean;
