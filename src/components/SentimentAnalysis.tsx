@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { useFindom } from '@/context/FindomContext';
 import { useAIAnalytics } from '@/hooks/use-ai-analytics';
 import { toast } from 'sonner';
-import { Brain, TrendingUp, AlertTriangle, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
+import { Brain, TrendingUp, AlertTriangle, MessageSquare, CheckCircle, XCircle, Sparkles } from 'lucide-react';
 
 const SentimentAnalysis = () => {
   const { appData } = useFindom();
