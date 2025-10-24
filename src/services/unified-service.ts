@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { checklistsService } from './checklists-service';
 
 export class UnifiedService<T> {
   protected supabase = supabase;
@@ -101,4 +102,6 @@ export const tributesService = new UnifiedService('tributes');
 export const customPricesService = new UnifiedService('custom_prices');
 export const calendarService = new UnifiedService('calendar_events');
 export const redflagsService = new UnifiedService('redflags');
-export const checklistsService = new UnifiedService('checklists');
+
+// Export checklistsService separately since it has additional methods
+export { checklistsService };
