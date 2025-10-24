@@ -53,53 +53,48 @@ serve(async (req) => {
       );
     }
 
-    // First, try to list available models to debug
-    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    if (!modelsResponse.ok) {
-      const errorData = await modelsResponse.json();
-      return new Response(
-        JSON.stringify({ error: `Models API error: ${errorData.error?.message || 'Unknown error'}` }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    const modelsData = await modelsResponse.json();
-    const availableModels = modelsData.models?.filter(m => m.supportedGenerationMethods?.includes('generateContent')) || [];
-    
     // Try different model names in order of preference
-    const modelNames = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest', 'gemini-pro-latest'];
+    const modelNames = ['gemini-2.0-flash-exp', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-pro'];
     let response;
     let lastError;
     
     for (const modelName of modelNames) {
       try {
         const modelEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        
+        const requestBody = {
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+          },
+        };
+
+        // Add system instruction if provided
+        if (systemInstruction) {
+          requestBody.systemInstruction = {
+            parts: [{
+              text: systemInstruction
+            }]
+          };
+        }
+
         response = await fetch(modelEndpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: prompt
-              }]
-            }],
-            systemInstruction: systemInstruction ? {
-              parts: [{
-                text: systemInstruction
-              }]
-            } : undefined,
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 2048,
-            },
-          }),
+          body: JSON.stringify(requestBody),
         });
         
         if (response.ok) {
+          console.log(`Successfully used model: ${modelName}`);
           break; // Success, exit loop
         } else {
           lastError = await response.json();
@@ -114,7 +109,7 @@ serve(async (req) => {
     if (!response || !response.ok) {
       return new Response(
         JSON.stringify({ 
-          error: `All models failed. Last error: ${lastError?.error?.message || lastError?.error || 'Unknown error'}. Available models: ${availableModels.map(m => m.name).join(', ')}`
+          error: `All models failed. Last error: ${lastError?.error?.message || lastError?.error || 'Unknown error'}`
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

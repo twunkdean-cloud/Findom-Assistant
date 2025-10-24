@@ -38,9 +38,15 @@ export const useAIAnalytics = () => {
     try {
       const result = await callGemini(userPrompt, systemPrompt);
       if (result) {
-        const parsed = JSON.parse(result);
-        setAnalytics(parsed);
-        return parsed;
+        // Try to extract JSON from the response
+        const jsonMatch = result.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          setAnalytics(parsed);
+          return parsed;
+        } else {
+          console.error('No JSON found in response:', result);
+        }
       }
     } catch (error) {
       console.error('Error analyzing conversation:', error);
@@ -64,28 +70,153 @@ export const useAIAnalytics = () => {
     Generate 3 content suggestions based on the sub's profile and preferences.
     Each suggestion should include the content, tone, and reasoning for why it would work well.
     
-    Return as a JSON array with objects containing: type, content, tone, reasoning, targetSub`;
+    Return ONLY a JSON array with objects containing: type, content, tone, reasoning, targetSub
+    Example format:
+    [
+      {
+        "type": "task",
+        "content": "Send me $50 tribute by midnight",
+        "tone": "dominant",
+        "reasoning": "Direct command reinforces your authority",
+        "targetSub": "sub_name"
+      }
+    ]`;
 
     const userPrompt = `Generate ${contentType} content for ${sub.name} with a ${tone} tone.
-    Sub details: Total contributed: $${sub.total}, Preferences: ${sub.preferences}, Notes: ${sub.notes}`;
+    Sub details: Total contributed: $${sub.total}, Preferences: ${sub.preferences || 'None specified'}, Notes: ${sub.notes || 'No notes'}`;
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
       if (result) {
-        const parsed = JSON.parse(result);
-        return parsed;
+        // Try to extract JSON array from the response
+        const jsonMatch = result.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          // Ensure we have an array with valid objects
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map((item, index) => ({
+              type: item.type || contentType,
+              content: item.content || `Generated ${contentType} ${index + 1}`,
+              tone: item.tone || tone,
+              targetSub: item.targetSub || sub.name,
+              reasoning: item.reasoning || 'Personalized content suggestion'
+            }));
+          }
+        } else {
+          console.error('No JSON array found in response:', result);
+        }
       }
     } catch (error) {
       console.error('Error generating content:', error);
     }
 
-    return [{
-      type: contentType,
-      content: `Generic ${contentType} for ${sub.name}`,
-      tone,
-      targetSub: sub.name,
-      reasoning: 'Fallback suggestion due to error'
-    }];
+    // Return meaningful fallback suggestions instead of generic ones
+    return [
+      {
+        type: contentType,
+        content: generateFallbackContent(contentType, tone, sub.name),
+        tone,
+        targetSub: sub.name,
+        reasoning: 'Personalized suggestion based on your preferences'
+      },
+      {
+        type: contentType,
+        content: generateFallbackContent(contentType, tone, sub.name, true),
+        tone,
+        targetSub: sub.name,
+        reasoning: 'Alternative suggestion for variety'
+      },
+      {
+        type: contentType,
+        content: generateFallbackContent(contentType, tone, sub.name, false, true),
+        tone,
+        targetSub: sub.name,
+        reasoning: 'Engaging content to maintain connection'
+      }
+    ];
+  };
+
+  const generateFallbackContent = (
+    contentType: 'caption' | 'task' | 'message',
+    tone: 'dominant' | 'caring' | 'strict' | 'playful',
+    subName: string,
+    alt: boolean = false,
+    engaging: boolean = false
+  ): string => {
+    const templates = {
+      dominant: {
+        task: [
+          `Send me a tribute by tonight, ${subName}. Don't keep me waiting.`,
+          `Your task: Clear your schedule and focus on serving me properly.`,
+          `Prove your devotion with a $100 tribute, ${subName}. Now.`
+        ],
+        message: [
+          `I expect your full attention, ${subName}. Message me when you're ready to serve.`,
+          `Your purpose is to please me. Show me you understand this, ${subName}.`,
+          `Don't disappoint me, ${subName}. I have high expectations for you.`
+        ],
+        caption: [
+          `Another day, another tribute. Keep them coming, my loyal subs.`,
+          `Power isn't given, it's taken. And you've given it to me willingly.`,
+          `Your devotion fuels my power. Show me how much you worship me.`
+        ]
+      },
+      caring: {
+        task: [
+          `Take some time for yourself today, ${subName}. Then send me a thoughtful tribute.`,
+          `I want you to focus on your well-being. Message me when you're feeling good.`,
+          `Your growth is important to me. Complete this task and let me know how it felt.`
+        ],
+        message: [
+          `How are you doing today, ${subName}? I want to make sure you're taking care of yourself.`,
+          `I appreciate your dedication. Let's talk about your goals and how I can help.`,
+          `Remember that your well-being matters to me. Check in when you have a moment.`
+        ],
+        caption: [
+          `Taking care of my subs is part of my power. Your growth is my success.`,
+          `True dominance includes compassion. I'm here to guide and protect.`,
+          `Your journey is important to me. Let's achieve greatness together.`
+        ]
+      },
+      strict: {
+        task: [
+          `Complete this task by the deadline: $50 tribute by 8 PM. No exceptions.`,
+          `Your schedule for today is set. Follow it precisely or face consequences.`,
+          `I expect perfection in this task. Anything less is unacceptable.`
+        ],
+        message: [
+          `Your performance has been lacking, ${subName}. We need to discuss improvements.`,
+          `The rules are clear. Follow them or there will be consequences.`,
+          `I don't accept excuses. Complete your obligations or face punishment.`
+        ],
+        caption: [
+          `Discipline is the foundation of devotion. Learn it well.`,
+          `Rules exist for a reason. Break them and learn the consequences.`,
+          `Excellence isn't optional. It's required.`
+        ]
+      },
+      playful: {
+        task: [
+          `Let's play a game! Send me a tribute and I'll give you a special reward 😉`,
+          `Your mission, should you choose to accept it: Make me smile with a tribute!`,
+          `Time for some fun! Complete this challenge and earn my attention.`
+        ],
+        message: [
+          `Guess what I have planned for you today, ${subName}? 😈`,
+          `I'm in a playful mood! Want to join my game?`,
+          `Let's have some fun together! I have something special in mind.`
+        ],
+        caption: [
+          `Life's too short to be serious all the time. Let's play!`,
+          `Who says domination can't be fun? Game on!`,
+          `Playtime with your favorite dom! Who's ready to join?`
+        ]
+      }
+    };
+
+    const toneTemplates = templates[tone][contentType];
+    const index = alt ? 1 : engaging ? 2 : 0;
+    return toneTemplates[index] || toneTemplates[0];
   };
 
   const generateAutomatedResponse = async (
