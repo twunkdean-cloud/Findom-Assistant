@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useFindom } from '@/context/FindomContext';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast-unified';
 import { Crown, Heart, Sparkles, Users, ArrowRight } from 'lucide-react';
 
 const OnboardingPage = () => {
@@ -35,10 +35,12 @@ const OnboardingPage = () => {
           gender: selectedGender!,
           energy: selectedGender === 'male' ? 'masculine' : 'feminine',
           persona: selectedPersona,
+          onboardingCompleted: true,
+          onboardingCompletedAt: new Date().toISOString()
         });
         
         toast.success('Welcome! Your profile has been set up.');
-        navigate('/');
+        navigate('/', { replace: true });
       } catch (error) {
         toast.error('Failed to save profile');
       }

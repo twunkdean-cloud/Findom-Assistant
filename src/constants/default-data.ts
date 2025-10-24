@@ -16,6 +16,8 @@ export const DEFAULT_APP_DATA: AppData = {
     persona: 'dominant',
     gender: 'male',
     energy: 'masculine',
+    onboardingCompleted: false,
+    onboardingCompletedAt: null,
   },
   settings: {
     emailNotifications: true,

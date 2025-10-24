@@ -49,8 +49,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user has completed onboarding
-  if (!appData.profile?.gender) {
+  // Only redirect to onboarding if user has explicitly not completed it
+  // Check if onboarding was completed by checking if profile exists and has required fields
+  const hasCompletedOnboarding = appData.profile && 
+    appData.profile.gender && 
+    appData.profile.persona &&
+    appData.profile.displayName;
+
+  if (!hasCompletedOnboarding) {
     return <Navigate to="/onboarding" replace />;
   }
   
