@@ -3,11 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGemini } from '@/hooks/use-gemini';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
-import { Loader2, Send, Copy, Bot, User, History } from 'lucide-react';
-import ChatTest from '@/components/ChatTest';
+import { Loader2, Send, Copy, Bot, User, History, Brain, MessageSquare } from 'lucide-react';
+import AIContentSuggestions from '@/components/AIContentSuggestions';
+import SentimentAnalysis from '@/components/SentimentAnalysis';
+import AIChatbot from '@/components/AIChatbot';
 
 interface Message {
   id: string;
@@ -224,167 +227,195 @@ ${selectedSub && selectedSub !== 'general' ? `You are currently discussing ${sel
   };
 
   return (
-    <div className="space-y-6 h-[calc(100vh-200px)]">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-100">AI Chat Assistant</h2>
-          <p className="text-sm text-gray-400 mt-1">Get help with content, advice, and personalized sub interactions</p>
+          <h2 className="text-2xl font-bold text-gray-100">AI Assistant Suite</h2>
+          <p className="text-sm text-gray-400 mt-1">Advanced AI tools for content creation and sub management</p>
         </div>
-        <Button
-          onClick={handleClearChat}
-          variant="outline"
-          className="border-gray-600 text-gray-300 hover:bg-gray-700"
-        >
-          Clear Chat
-        </Button>
       </div>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold flex items-center">
-            <Bot className="mr-2 h-5 w-5 text-indigo-400" />
-            Sub Selection
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex space-x-4 items-center">
-            <div className="flex-1">
-              <label className="text-sm text-gray-300 mb-2 block">Select Sub (Optional)</label>
-              <Select value={selectedSub} onValueChange={setSelectedSub}>
-                <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-200">
-                  <SelectValue placeholder="Choose a sub for personalized responses" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="general">General Advice</SelectItem>
-                  {appData.subs.map((sub) => (
-                    <SelectItem key={sub.id} value={sub.name}>
-                      {sub.name} (${sub.total.toFixed(2)})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {selectedSub && (
-              <div className="flex-1">
-                <div className="text-sm text-gray-300 mb-2">Sub Info</div>
-                <div className="bg-gray-900 p-3 rounded border border-gray-700">
-                  {(() => {
-                    const sub = appData.subs.find(s => s.name === selectedSub);
-                    return sub ? (
-                      <div className="text-sm space-y-1">
-                        <div className="text-green-400 font-medium">{sub.name}</div>
-                        <div className="text-gray-400">Total: ${sub.total.toFixed(2)}</div>
-                        <div className="text-gray-400">Last: {sub.lastTribute || 'N/A'}</div>
-                        {sub.conversationHistory && (
-                          <div className="flex items-center text-indigo-400">
-                            <History className="h-3 w-3 mr-1" />
-                            Has conversation history
-                          </div>
-                        )}
-                      </div>
-                    ) : null;
-                  })()}
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="chat" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 bg-gray-800 border border-gray-700">
+          <TabsTrigger value="chat" className="data-[state=active]:bg-indigo-600">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Personal Chat
+          </TabsTrigger>
+          <TabsTrigger value="content" className="data-[state=active]:bg-indigo-600">
+            <Brain className="mr-2 h-4 w-4" />
+            Content AI
+          </TabsTrigger>
+          <TabsTrigger value="sentiment" className="data-[state=active]:bg-indigo-600">
+            <History className="mr-2 h-4 w-4" />
+            Sentiment Analysis
+          </TabsTrigger>
+          <TabsTrigger value="chatbot" className="data-[state=active]:bg-indigo-600">
+            <Bot className="mr-2 h-4 w-4" />
+            AI Chatbot
+          </TabsTrigger>
+        </TabsList>
 
-      <Card className="bg-gray-800 border border-gray-700 flex flex-col h-[calc(100%-280px)]">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold flex items-center">
-            <Bot className="mr-2 h-5 w-5 text-indigo-400" />
-            Conversation {selectedSub && `- ${selectedSub}`}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-0">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.length === 0 ? (
-              <div className="text-center py-8">
-                <Bot className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-500">Start a conversation with your AI assistant</p>
-                <p className="text-sm text-gray-600 mt-2">
-                  {selectedSub 
-                    ? `Ask for personalized messages, content ideas, or strategies for ${selectedSub}`
-                    : 'Ask for content ideas, advice, or help with tasks'
-                  }
-                </p>
+        <TabsContent value="chat" className="space-y-6">
+          <Card className="bg-gray-800 border border-gray-700 p-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold flex items-center">
+                <Bot className="mr-2 h-5 w-5 text-indigo-400" />
+                Sub Selection
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex space-x-4 items-center">
+                <div className="flex-1">
+                  <label className="text-sm text-gray-300 mb-2 block">Select Sub (Optional)</label>
+                  <Select value={selectedSub} onValueChange={setSelectedSub}>
+                    <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-200">
+                      <SelectValue placeholder="Choose a sub for personalized responses" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="general">General Advice</SelectItem>
+                      {appData.subs.map((sub) => (
+                        <SelectItem key={sub.id} value={sub.name}>
+                          {sub.name} (${sub.total.toFixed(2)})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {selectedSub && (
+                  <div className="flex-1">
+                    <div className="text-sm text-gray-300 mb-2">Sub Info</div>
+                    <div className="bg-gray-900 p-3 rounded border border-gray-700">
+                      {(() => {
+                        const sub = appData.subs.find(s => s.name === selectedSub);
+                        return sub ? (
+                          <div className="text-sm space-y-1">
+                            <div className="text-green-400 font-medium">{sub.name}</div>
+                            <div className="text-gray-400">Total: ${sub.total.toFixed(2)}</div>
+                            <div className="text-gray-400">Last: {sub.lastTribute || 'N/A'}</div>
+                            {sub.conversationHistory && (
+                              <div className="flex items-center text-indigo-400">
+                                <History className="h-3 w-3 mr-1" />
+                                Has conversation history
+                              </div>
+                            )}
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
-                      message.role === 'user'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-700 text-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-start space-x-2">
-                      {message.role === 'assistant' && (
-                        <Bot className="h-4 w-4 mt-0.5 text-indigo-400 flex-shrink-0" />
-                      )}
-                      {message.role === 'user' && (
-                        <User className="h-4 w-4 mt-0.5 text-indigo-200 flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <p className="text-xs opacity-70">
-                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleCopyMessage(message.content)}
-                            className="h-6 w-6 p-0 opacity-70 hover:opacity-100"
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-800 border border-gray-700 flex flex-col h-[calc(100vh-400px)]">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold flex items-center">
+                <Bot className="mr-2 h-5 w-5 text-indigo-400" />
+                Conversation {selectedSub && `- ${selectedSub}`}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col p-0">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Bot className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-500">Start a conversation with your AI assistant</p>
+                    <p className="text-sm text-gray-600 mt-2">
+                      {selectedSub 
+                        ? `Ask for personalized messages, content ideas, or strategies for ${selectedSub}`
+                        : 'Ask for content ideas, advice, or help with tasks'
+                      }
+                    </p>
+                  </div>
+                ) : (
+                  messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 ${
+                          message.role === 'user'
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-gray-700 text-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-start space-x-2">
+                          {message.role === 'assistant' && (
+                            <Bot className="h-4 w-4 mt-0.5 text-indigo-400 flex-shrink-0" />
+                          )}
+                          {message.role === 'user' && (
+                            <User className="h-4 w-4 mt-0.5 text-indigo-200 flex-shrink-0" />
+                          )}
+                          <div className="flex-1">
+                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            <div className="flex items-center justify-between mt-2">
+                              <p className="text-xs opacity-70">
+                                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleCopyMessage(message.content)}
+                                className="h-6 w-6 p-0 opacity-70 hover:opacity-100"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="border-t border-gray-700 p-4">
-            <div className="flex space-x-2">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={
-                  selectedSub
-                    ? `Ask for a personalized message or content for ${selectedSub}...`
-                    : "Ask me anything about findom, content creation, or strategies..."
-                }
-                rows={2}
-                className="flex-1 p-2 bg-gray-900 border-gray-600 text-gray-200 resize-none"
-                disabled={isLoading}
-              />
-              <Button
-                onClick={handleSendMessage}
-                disabled={isLoading || !input.trim()}
-                className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 self-end"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
+                  ))
                 )}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="border-t border-gray-700 p-4">
+                <div className="flex space-x-2">
+                  <Textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={
+                      selectedSub
+                        ? `Ask for a personalized message or content for ${selectedSub}...`
+                        : "Ask me anything about findom, content creation, or strategies..."
+                    }
+                    rows={2}
+                    className="flex-1 p-2 bg-gray-900 border-gray-600 text-gray-200 resize-none"
+                    disabled={isLoading}
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !input.trim()}
+                    className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 self-end"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="content">
+          <AIContentSuggestions />
+        </TabsContent>
+
+        <TabsContent value="sentiment">
+          <SentimentAnalysis />
+        </TabsContent>
+
+        <TabsContent value="chatbot">
+          <AIChatbot />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

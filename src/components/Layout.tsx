@@ -46,7 +46,7 @@ const navItems = [
   },
   { 
     id: 'subs', 
-    label: 'Sub Tracker', 
+    label: 'Subs', 
     path: '/subs', 
     icon: Users,
     description: 'Manage your subs'
@@ -95,14 +95,14 @@ const navItems = [
   },
   { 
     id: 'image-vision', 
-    label: 'Image Vision', 
+    label: 'Vision', 
     path: '/image-vision', 
     icon: Camera,
     description: 'AI image analysis'
   },
   { 
     id: 'chat-assistant', 
-    label: 'Chat AI', 
+    label: 'AI Chat', 
     path: '/chat-assistant', 
     icon: Brain,
     description: 'AI assistant'
@@ -282,8 +282,41 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </nav>
 
+      {/* Mobile Bottom Navigation */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-xl border-t border-gray-800/50">
+        <div className="grid grid-cols-5 gap-1">
+          {navItems.slice(0, 5).map((item) => {
+            const isActive = location.pathname === item.path;
+            const Icon = item.icon;
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => navigate(item.path)}
+                className={cn(
+                  "flex flex-col items-center justify-center py-2 px-1 transition-all",
+                  isActive 
+                    ? "text-indigo-400" 
+                    : "text-gray-500 hover:text-gray-300"
+                )}
+              >
+                <Icon className="h-5 w-5 mb-1" />
+                <span className="text-xs">{item.label}</span>
+              </button>
+            );
+          })}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex flex-col items-center justify-center py-2 px-1 text-gray-500 hover:text-gray-300"
+          >
+            <Menu className="h-5 w-5 mb-1" />
+            <span className="text-xs">More</span>
+          </button>
+        </div>
+      </nav>
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 lg:pb-6">
         {children}
       </main>
     </div>
