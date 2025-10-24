@@ -19,7 +19,7 @@ const TaskGeneratorPage = () => {
 
   const handleGenerateTask = async () => {
     if (!topic.trim()) {
-      toast.error('Please enter a topic for the task.');
+      toast.error('Please enter a topic for task.');
       return;
     }
 

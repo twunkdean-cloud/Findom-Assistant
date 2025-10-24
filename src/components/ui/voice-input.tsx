@@ -76,18 +76,6 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled = false,
         isListening ? 'bg-red-500 hover:bg-red-600' : 'border-gray-600 text-gray-300 hover:bg-gray-700'
       }`}
     >
-      {isListening ? (
-        <>
-          <MicOff className="h-4 w-4" />
-          {isMobile ? '' : <span className="ml-2">Stop</span>}
-        </>
-      ) : (
-        <>
-          <Mic className="h-4 w-4" />
-          {isMobile ? '' : <span className="ml-2">Voice</span>}
-        </>
-      )}
-      {isListening && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
     </Button>
   );
 };
