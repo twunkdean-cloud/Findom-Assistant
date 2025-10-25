@@ -2,13 +2,25 @@ import { useState, useCallback } from 'react';
 import { useGenderedContent } from './use-gendered-content';
 import { API_BASE_URL, API_TOKEN } from '@/constants';
 import { toast } from '@/utils/toast';
+import { Sub, AIContentSuggestion, ServiceResponse } from '@/types';
 
-interface UseGeminiReturn {
-  callGemini: (prompt: string, systemPrompt?: string) => Promise<string | null>;
-  callGeminiVision: (imageData: string, prompt?: string) => Promise<string | null>;
-  isLoading: boolean;
-  error: string | null;
-  getSystemPrompt: () => string;
+interface AIAnalytics {
+  sentimentScore: number;
+  engagementLevel: 'high' | 'medium' | 'low';
+  riskLevel: 'low' | 'medium' | 'high';
+  suggestedActions: string[];
+  contentSuggestions: string[];
+}
+
+interface ContentGenerationRequest {
+  sub: Sub;
+  contentType: 'caption' | 'task' | 'message';
+  tone: 'dominant' | 'caring' | 'strict' | 'playful';
+}
+
+interface ConversationAnalysisRequest {
+  conversationHistory: string;
+  subName: string;
 }
 
 interface GeminiRequest {
@@ -28,10 +40,11 @@ interface GeminiResponse {
   error?: string;
 }
 
-export const useGemini = (): UseGeminiReturn => {
+export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { getSystemPrompt: getGenderedSystemPrompt } = useGenderedContent();
+  const [analytics, setAnalytics] = useState<AIAnalytics | null>(null);
 
   const callGemini = useCallback(async (
     prompt: string, 
@@ -80,7 +93,6 @@ export const useGemini = (): UseGeminiReturn => {
     setError(null);
 
     try {
-      // Extract base64 data and mime type from data URL
       const matches = imageData.match(/^data:([^;]+);base64,(.+)$/);
       if (!matches) {
         throw new Error('Invalid image data format');
@@ -125,11 +137,38 @@ export const useGemini = (): UseGeminiReturn => {
     return getGenderedSystemPrompt('general');
   }, [getGenderedSystemPrompt]);
 
+  const analyzeSubConversation = async (
+    request: ConversationAnalysisRequest
+  ): Promise<ServiceResponse<AIAnalytics>> => {
+    // ... (implementation from use-ai-analytics)
+    return { success: false, error: 'Not implemented' };
+  };
+
+  const generatePersonalizedContent = async (
+    request: ContentGenerationRequest
+  ): Promise<ServiceResponse<AIContentSuggestion[]>> => {
+    // ... (implementation from use-ai-analytics)
+    return { success: false, error: 'Not implemented' };
+  };
+
+  const generateAutomatedResponse = async (
+    message: string,
+    subName: string,
+    context: string
+  ): Promise<ServiceResponse<string>> => {
+    // ... (implementation from use-ai-analytics)
+    return { success: false, error: 'Not implemented' };
+  };
+
   return {
     callGemini,
     callGeminiVision,
     isLoading,
     error,
     getSystemPrompt,
+    analytics,
+    analyzeSubConversation,
+    generatePersonalizedContent,
+    generateAutomatedResponse,
   };
 };

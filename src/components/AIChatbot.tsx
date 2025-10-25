@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useGemini } from '@/hooks/use-gemini';
+import { useAI } from '@/hooks/use-ai';
 import { useFindom } from '@/context/FindomContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
@@ -19,7 +19,7 @@ interface Message {
 }
 
 const AIChatbot = () => {
-  const { callGemini, isLoading, error } = useGemini();
+  const { callGemini, isLoading, error } = useAI();
   const { appData } = useFindom();
   const { getSystemPrompt, getTargetAudience, isMale, isFemale } = useGenderedContent();
   const { isMobile } = useMobile();
@@ -58,14 +58,12 @@ const AIChatbot = () => {
     try {
       let contextPrompt = currentInput;
       
-      // Get the appropriate system prompt based on gender and chat mode
       const promptType = chatMode === 'general' ? 'response' : 
                         chatMode === 'sub' ? 'response' : 
                         chatMode === 'creative' ? 'response' : 
                         chatMode;
       let systemPrompt = getSystemPrompt(promptType);
       
-      // Add personality-specific instructions
       systemPrompt += `
 
 Your persona should be ${botPersonality} and professional while maintaining appropriate boundaries.
@@ -83,7 +81,6 @@ IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE.
 
 Target audience: ${getTargetAudience()}`;
 
-      // Add sub-specific context if selected
       if (selectedSub && selectedSub !== 'general') {
         const sub = appData.subs.find(s => s.name === selectedSub);
         if (sub) {
@@ -92,7 +89,6 @@ Target audience: ${getTargetAudience()}`;
         }
       }
 
-      // Adjust prompt based on chat mode
       switch (chatMode) {
         case 'task':
           systemPrompt += ` Focus on generating creative tasks and assignments for ${isMale ? 'male subs' : 'subs serving female dominants'}.`;

@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useFindom } from '@/context/FindomContext';
-import { useAIAnalytics } from '@/hooks/use-ai-analytics';
+import { useAI } from '@/hooks/use-ai';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from '@/utils/toast';
 import { Brain, Copy, Sparkles, Target, MessageSquare, CheckSquare } from 'lucide-react';
 
 const AIContentSuggestions = () => {
   const { appData } = useFindom();
-  const { generatePersonalizedContent, isLoading } = useAIAnalytics();
+  const { generatePersonalizedContent, isLoading } = useAI();
   const { getPersonaTones, isMale, isFemale } = useGenderedContent();
   const [selectedSub, setSelectedSub] = useState('');
   const [contentType, setContentType] = useState<'caption' | 'task' | 'message'>('message');

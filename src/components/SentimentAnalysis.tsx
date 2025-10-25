@@ -5,13 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useFindom } from '@/context/FindomContext';
-import { useAIAnalytics } from '@/hooks/use-ai-analytics';
-import { toast } from 'sonner';
+import { useAI } from '@/hooks/use-ai';
+import { toast } from '@/utils/toast';
 import { Brain, TrendingUp, AlertTriangle, MessageSquare, CheckCircle, XCircle, Sparkles } from 'lucide-react';
 
 const SentimentAnalysis = () => {
   const { appData } = useFindom();
-  const { analyzeSubConversation, analytics, isLoading } = useAIAnalytics();
+  const { analyzeSubConversation, analytics, isLoading } = useAI();
   const [selectedSub, setSelectedSub] = useState('');
 
   const handleAnalyze = async () => {

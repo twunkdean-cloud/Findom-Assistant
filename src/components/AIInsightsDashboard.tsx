@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useFindom } from '@/context/FindomContext';
-import { useAIAnalytics } from '@/hooks/use-ai-analytics';
+import { useAI } from '@/hooks/use-ai';
 import { toast } from 'sonner';
 import { 
   Brain, 
@@ -31,7 +31,7 @@ interface AIInsight {
 
 const AIInsightsDashboard = () => {
   const { appData } = useFindom();
-  const { isLoading } = useAIAnalytics();
+  const { isLoading } = useAI();
   const { isMobile } = useMobile();
   const [insights, setInsights] = useState<AIInsight[]>([]);
 
