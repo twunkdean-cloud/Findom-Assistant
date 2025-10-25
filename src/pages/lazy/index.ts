@@ -9,6 +9,7 @@ export const LazyNotFound = lazy(() => import('../NotFound'));
 
 // Dashboard and tracking
 export const LazyDashboardPage = lazy(() => import('../DashboardPage'));
+export const LazyAnalyticsPage = lazy(() => import('../AnalyticsPage'));
 export const LazySubTrackerPage = lazy(() => import('../SubTrackerPage'));
 export const LazyTributeTrackerPage = lazy(() => import('../TributeTrackerPage'));
 export const LazyChecklistPage = lazy(() => import('../ChecklistPage'));

@@ -26,7 +26,8 @@ import {
   LazyCalendarPage,
   LazyPricingPage,
   LazySettingsPage,
-  LazyNotFound
+  LazyNotFound,
+  LazyAnalyticsPage
 } from '@/pages/lazy';
 
 const AppRoutes: React.FC = () => {
@@ -64,6 +65,7 @@ const AppRoutes: React.FC = () => {
       <Suspense fallback={<ComponentLoadingFallback />}>
         <Routes>
           <Route path="/" element={<LazyIndex />} />
+          <Route path="/analytics" element={<LazyAnalyticsPage />} />
           <Route path="/subs" element={<LazySubTrackerPage />} />
           <Route path="/tributes" element={<LazyTributeTrackerPage />} />
           <Route path="/chat-assistant" element={<LazyChatAssistantPage />} />

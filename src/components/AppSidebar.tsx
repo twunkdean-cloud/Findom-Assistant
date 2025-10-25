@@ -25,11 +25,13 @@ import {
   MessageCircle,
   CreditCard,
   Bot,
-  Calendar
+  Calendar,
+  PieChart
 } from 'lucide-react';
 
 const navigationItems = [
   { title: 'Dashboard', icon: Home, path: '/' },
+  { title: 'Analytics', icon: PieChart, path: '/analytics' },
   { title: 'Sub Tracker', icon: Users, path: '/subs' },
   { title: 'Tributes', icon: DollarSign, path: '/tributes' },
   { title: 'AI Assistant', icon: Bot, path: '/chat-assistant' },
