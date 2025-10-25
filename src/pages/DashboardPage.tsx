@@ -87,13 +87,13 @@ const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <StatCard
             title="Total Tributes"
-           ={`$${totalTributes.toFixed(2)}`}
+            value={`$${totalTributes.toFixed(2)}`}
             icon={<DollarSign className="h-6 w-6" />}
             trend="+12% from last month"
           />
           <StatCard
             title="Active Subs"
-           ={activeSubs}
+            value={activeSubs}
             icon={<Users className="h-6 w-6" />}
             trend="+3 this week"
           />
@@ -147,26 +147,26 @@ const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Tributes"
-         ={`$${totalTributes.toFixed(2)}`}
+          value={`$${totalTributes.toFixed(2)}`}
           icon={<DollarSign className="h-6 w-6" />}
           trend="+12% from last month"
         />
         <StatCard
           title="Active Subs"
-          {activeSubs}
+          value={activeSubs}
           icon={<Users className="h-6 w-6" />}
           trend="+3 this week"
           color="text-green-600"
         />
         <StatCard
           title="Total Subs"
-         ={appData.subs.length}
+          value={appData.subs.length}
           icon={<Crown className="h-6 w-6" />}
           color="text-purple-600"
         />
         <StatCard
           title="Avg Tribute"
-         ={`$${appData.tributes.length > 0 ? (totalTributes / appData.tributes.length).toFixed(2) : '0'}`}
+          value={`$${appData.tributes.length > 0 ? (totalTributes / appData.tributes.length).toFixed(2) : '0'}`}
           icon={<TrendingUp className="h-6 w-6" />}
           color="text-orange-600"
         />
