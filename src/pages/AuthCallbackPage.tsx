@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import { useFindom } from '@/context/FindomContext';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Check, Crown, Zap, Star, CreditCard } from 'lucide-react';
 
 const PricingPage = () => {

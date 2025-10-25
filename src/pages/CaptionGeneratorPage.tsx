@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Loader2, Copy, Image } from 'lucide-react';
 
 const CaptionGeneratorPage = () => {
@@ -59,7 +59,7 @@ Do not include any introductory or concluding remarks, just the caption content.
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Caption Generator</h2>
       <p className="text-sm text-gray-400 mb-4">
-        Generate engaging captions for your photos based on image description and your {isMale ? 'Findom' : 'Femdom'} persona.
+        Generate compelling captions for various platforms based on image description and your {isMale ? 'Findom' : 'Femdom'} persona.
       </p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
@@ -121,13 +121,18 @@ Do not include any introductory or concluding remarks, just the caption content.
               <p className="text-gray-500">Your generated caption will appear here...</p>
             </div>
           )}
-          <Button
-            onClick={handleCopyCaption}
-            disabled={!generatedCaption.trim()}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
-          >
-            <Copy className="mr-2 h-4 w-4" /> Copy Caption
-          </Button>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">
+              {generatedCaption.length}/500 characters
+            </span>
+            <Button
+              onClick={handleCopyCaption}
+              disabled={!generatedCaption.trim()}
+              className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center"
+            >
+              <Copy className="mr-2 h-4 w-4" /> Copy Caption
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

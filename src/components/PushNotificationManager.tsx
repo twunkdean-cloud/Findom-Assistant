@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Bell, BellOff, Settings, CheckCircle } from 'lucide-react';
 import { useMobile } from '@/hooks/use-mobile';
 

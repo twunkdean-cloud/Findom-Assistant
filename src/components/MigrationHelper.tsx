@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useFindom } from '@/context/FindomContext';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { UploadCloud, Database, Cloud, CheckCircle } from 'lucide-react';
 
 const MigrationHelper = () => {

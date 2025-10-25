@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/context/AuthContext';
 import { useFindom } from '@/context/FindomContext';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Save, User, Bell, Shield, Palette, Download, Upload, Crown } from 'lucide-react';
 import GenderSelector from '@/components/ui/gender-selector';
 import { PERSONA_OPTIONS } from '@/constants';

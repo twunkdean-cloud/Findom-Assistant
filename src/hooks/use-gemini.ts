@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useGenderedContent } from './use-gendered-content';
 import { API_BASE_URL, API_TOKEN } from '@/constants';
+import { toast } from '@/utils/toast';
 
 interface UseGeminiReturn {
   callGemini: (prompt: string, systemPrompt?: string) => Promise<string | null>;

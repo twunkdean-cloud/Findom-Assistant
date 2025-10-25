@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useFindom } from '@/context/FindomContext';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Crown, Heart, Sparkles, Users, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 

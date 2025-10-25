@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFindom } from '@/context/FindomContext';
 import { Sub } from '@/types/index';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
 
 const SubTrackerPage = () => {

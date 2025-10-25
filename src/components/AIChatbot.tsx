@@ -8,7 +8,7 @@ import { useGemini } from '@/hooks/use-gemini';
 import { useFindom } from '@/context/FindomContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Loader2, Send, Copy, Bot, User, Brain, MessageSquare, Settings } from 'lucide-react';
 
 interface Message {

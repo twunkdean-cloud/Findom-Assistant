@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useGemini } from '@/hooks/use-gemini';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Loader2, Send, Bot } from 'lucide-react';
 
 export const ChatTest = () => {

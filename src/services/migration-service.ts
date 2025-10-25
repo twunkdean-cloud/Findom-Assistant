@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Sub, Tribute, CustomPrice, CalendarEvent, RedFlag, Checklist } from '@/types/index';
 import {
   subsService,

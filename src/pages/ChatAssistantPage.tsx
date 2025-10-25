@@ -6,7 +6,7 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { MobileOptimizedCard } from '@/components/MobileOptimizedCard';
 import { MobileLoadingSpinner } from '@/components/MobileLoadingSpinner';
 import { useGestures } from '@/hooks/use-gestures';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Bot, Brain, History, MessageSquare } from 'lucide-react';
 import { LazyWrapper } from '@/utils/lazy-loading';
 

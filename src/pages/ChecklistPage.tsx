@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useFindom } from '@/context/FindomContext';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Plus, Edit, Trash2, Calendar, CheckSquare } from 'lucide-react';
 import { CalendarEvent } from '@/types';
 

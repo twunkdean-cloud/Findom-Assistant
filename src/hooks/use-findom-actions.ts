@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { useAuth } from '@/context/AuthContext';
 import { 
   AppData, 
