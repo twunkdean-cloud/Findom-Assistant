@@ -23,6 +23,7 @@ import {
   LazyRedditGeneratorPage,
   LazyImageVisionPage,
   LazyChecklistPage,
+  LazyCalendarPage,
   LazyPricingPage,
   LazySettingsPage,
   LazyNotFound
@@ -73,6 +74,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/reddit" element={<LazyRedditGeneratorPage />} />
           <Route path="/image-vision" element={<LazyImageVisionPage />} />
           <Route path="/checklist" element={<LazyChecklistPage />} />
+          <Route path="/calendar" element={<LazyCalendarPage />} />
           <Route path="/pricing" element={<LazyPricingPage />} />
           <Route path="/settings" element={<LazySettingsPage />} />
           <Route path="*" element={<LazyNotFound />} />

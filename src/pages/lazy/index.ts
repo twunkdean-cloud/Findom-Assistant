@@ -11,7 +11,8 @@ export const LazyNotFound = lazy(() => import('../NotFound'));
 export const LazyDashboardPage = lazy(() => import('../DashboardPage'));
 export const LazySubTrackerPage = lazy(() => import('../SubTrackerPage'));
 export const LazyTributeTrackerPage = lazy(() => import('../TributeTrackerPage'));
-export const LazyChecklistPage = lazy(() => import('../ChecklistPage'));
+export const LazyChecklistPage = lazy(() => import('./LazyChecklistPage'));
+export const LazyCalendarPage = lazy(() => import('./LazyCalendarPage'));
 
 // AI and generators
 export const LazyChatAssistantPage = lazy(() => import('../ChatAssistantPage'));

@@ -140,15 +140,78 @@ export const useAI = () => {
   const analyzeSubConversation = async (
     request: ConversationAnalysisRequest
   ): Promise<ServiceResponse<AIAnalytics>> => {
-    // ... (implementation from use-ai-analytics)
-    return { success: false, error: 'Not implemented' };
+    const systemPrompt = `You are an expert in findom relationship dynamics and sentiment analysis.
+    Analyze conversation history and provide:
+    1. Sentiment score (-100 to 100, where negative indicates dissatisfaction)
+    2. Engagement level (high/medium/low based on response frequency and enthusiasm)
+    3. Risk level (low/medium/high based on warning signs like payment delays, complaints, etc.)
+    4. Suggested actions to improve relationship
+    5. Content suggestions for next interactions
+    
+    Return your response as a JSON object with these exact keys: sentimentScore, engagementLevel, riskLevel, suggestedActions (array), contentSuggestions (array).`;
+
+    const userPrompt = `Analyze this conversation with ${request.subName}: ${request.conversationHistory}`;
+
+    try {
+      const result = await callGemini(userPrompt, systemPrompt);
+      if (result) {
+        const jsonMatch = result.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          const analyticsData: AIAnalytics = {
+            sentimentScore: parsed.sentimentScore || 0,
+            engagementLevel: parsed.engagementLevel || 'medium',
+            riskLevel: parsed.riskLevel || 'low',
+            suggestedActions: parsed.suggestedActions || ['Continue regular engagement'],
+            contentSuggestions: parsed.contentSuggestions || ['Send a check-in message']
+          };
+          setAnalytics(analyticsData);
+          return { data: analyticsData, success: true };
+        }
+      }
+      throw new Error("Failed to parse AI response.");
+    } catch (error) {
+      console.error('Error analyzing conversation:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Analysis failed' };
+    }
   };
 
   const generatePersonalizedContent = async (
     request: ContentGenerationRequest
   ): Promise<ServiceResponse<AIContentSuggestion[]>> => {
-    // ... (implementation from use-ai-analytics)
-    return { success: false, error: 'Not implemented' };
+    const systemPrompt = `You are a creative findom content creator specializing in personalized content.
+    Generate 3 content suggestions based on sub's profile and preferences.
+    Each suggestion should include content, tone, and reasoning for why it would work well.
+    
+    Return ONLY a JSON array with objects containing: type, content, tone, reasoning, targetSub.`;
+
+    const userPrompt = `Generate ${request.contentType} content for ${request.sub.name} with a ${request.tone} tone.
+    Sub details: Total contributed: $${request.sub.total}, Preferences: ${request.sub.preferences || 'None specified'}, Notes: ${request.sub.notes || 'No notes'}`;
+
+    try {
+      const result = await callGemini(userPrompt, systemPrompt);
+      if (result) {
+        const jsonMatch = result.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const suggestions: AIContentSuggestion[] = parsed.map((item, index) => ({
+              type: item.type || request.contentType,
+              content: item.content || `Generated ${request.contentType} ${index + 1}`,
+              tone: item.tone || request.tone,
+              targetSub: item.targetSub || request.sub.name,
+              reasoning: item.reasoning || 'Personalized content suggestion',
+              priority: item.priority || 'medium'
+            }));
+            return { data: suggestions, success: true };
+          }
+        }
+      }
+      throw new Error("Failed to parse AI response for content generation.");
+    } catch (error) {
+      console.error('Error generating content:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Content generation failed' };
+    }
   };
 
   const generateAutomatedResponse = async (
@@ -156,8 +219,22 @@ export const useAI = () => {
     subName: string,
     context: string
   ): Promise<ServiceResponse<string>> => {
-    // ... (implementation from use-ai-analytics)
-    return { success: false, error: 'Not implemented' };
+    const systemPrompt = `You are an AI assistant for a findom dominant.
+    Generate appropriate, professional responses to routine inquiries.
+    Maintain dominant persona while being helpful and clear.
+    Keep responses concise and actionable.
+    Do not make promises about specific amounts or timelines.`;
+
+    const userPrompt = `Generate a response to this message from ${subName}: "${message}"
+    Context: ${context}`;
+
+    try {
+      const result = await callGemini(userPrompt, systemPrompt);
+      return { data: result || 'Thank you for your message. I will review and respond appropriately.', success: true };
+    } catch (error) {
+      console.error('Error generating response:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Response generation failed' };
+    }
   };
 
   return {
