@@ -740,5 +740,3 @@ const SidebarMenuSubButton = React.forwardRef<
   );
 });
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
-
-export * from "./sidebar";

@@ -8,10 +8,7 @@ import {
   SidebarHeader, 
   SidebarMenu, 
   SidebarMenuButton, 
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarInset
+  SidebarMenuItem
 } from '@/components/ui/sidebar';
 import { 
   Home, 
