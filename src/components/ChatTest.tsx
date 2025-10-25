@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useGemini } from '@/hooks/use-gemini';
+import { useAI } from '@/hooks/use-ai';
 import { toast } from '@/utils/toast';
 import { Loader2, Send, Bot } from 'lucide-react';
 
 export const ChatTest = () => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
-  const { callGemini, isLoading } = useGemini();
+  const { callGemini, isLoading } = useAI();
 
   const handleSend = async () => {
     if (!prompt.trim()) {

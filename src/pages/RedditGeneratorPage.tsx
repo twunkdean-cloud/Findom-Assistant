@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useGemini } from '@/hooks/use-gemini';
+import { useAI } from '@/hooks/use-ai';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from '@/utils/toast';
 import { Loader2, Copy } from 'lucide-react';
 
 const RedditGeneratorPage = () => {
-  const { callGemini, isLoading, error } = useGemini();
+  const { callGemini, isLoading, error } = useAI();
   const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
   const [topic, setTopic] = useState('');
   const [generatedPost, setGeneratedPost] = useState('');

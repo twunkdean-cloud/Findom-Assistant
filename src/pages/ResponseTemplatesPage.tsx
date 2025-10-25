@@ -6,15 +6,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useGemini } from '@/hooks/use-gemini';
+import { useAI } from '@/hooks/use-ai';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { useFindom } from '@/context/FindomContext';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { Loader2, Save, Copy } from 'lucide-react';
 
 const ResponseTemplatesPage = () => {
   const { appData, updateAppData } = useFindom();
-  const { callGemini, isLoading, error } = useGemini();
+  const { callGemini, isLoading, error } = useAI();
   const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
 
   const [responseType, setResponseType] = useState<string>('initial');
@@ -133,7 +133,7 @@ Do not include any introductory or concluding remarks, just the response content
               value={context}
               onChange={(e) => setContext(e.target.value)}
               rows={3}
-              className="w-full p-2 bg-gray-900 border-gray-700 rounded text-gray-200"
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
               disabled={isLoading}
             />
           </div>

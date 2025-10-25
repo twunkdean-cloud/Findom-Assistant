@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useGemini } from '@/hooks/use-gemini';
+import { useAI } from '@/hooks/use-ai';
 import { toast } from '@/utils/toast';
 import { Upload, Loader2, Eye, Copy } from 'lucide-react';
 
 const ImageVisionPage = () => {
-  const { callGeminiVision, isLoading, error } = useGemini();
+  const { callGeminiVision, isLoading, error } = useAI();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [prompt, setPrompt] = useState('');

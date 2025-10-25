@@ -6,13 +6,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { useGemini } from '@/hooks/use-gemini';
+import { useAI } from '@/hooks/use-ai';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from '@/utils/toast';
 import { Loader2, Copy } from 'lucide-react';
 
 const TaskGeneratorPage = () => {
-  const { callGemini, isLoading, error } = useGemini();
+  const { callGemini, isLoading, error } = useAI();
   const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
   const [topic, setTopic] = useState('');
   const [intensity, setIntensity] = useState<'low' | 'medium' | 'high'>('medium');
