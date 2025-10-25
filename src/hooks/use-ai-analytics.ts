@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGemini } from './use-gemini';
-import { Sub, Tribute } from '@/types';
+import { Sub, Tribute, AIContentSuggestion, ServiceResponse } from '@/types';
 
 interface AIAnalytics {
   sentimentScore: number;
@@ -10,19 +10,24 @@ interface AIAnalytics {
   contentSuggestions: string[];
 }
 
-interface ContentSuggestion {
-  type: 'caption' | 'task' | 'message';
-  content: string;
+interface ContentGenerationRequest {
+  sub: Sub;
+  contentType: 'caption' | 'task' | 'message';
   tone: 'dominant' | 'caring' | 'strict' | 'playful';
-  targetSub?: string;
-  reasoning: string;
+}
+
+interface ConversationAnalysisRequest {
+  conversationHistory: string;
+  subName: string;
 }
 
 export const useAIAnalytics = () => {
   const { callGemini, isLoading } = useGemini();
   const [analytics, setAnalytics] = useState<AIAnalytics | null>(null);
 
-  const analyzeSubConversation = async (conversationHistory: string, subName: string): Promise<AIAnalytics> => {
+  const analyzeSubConversation = async (
+    request: ConversationAnalysisRequest
+  ): Promise<ServiceResponse<AIAnalytics>> => {
     const systemPrompt = `You are an expert in findom relationship dynamics and sentiment analysis.
     Analyze conversation history and provide:
     1. Sentiment score (-100 to 100, where negative indicates dissatisfaction)
@@ -33,7 +38,7 @@ export const useAIAnalytics = () => {
     
     Return your response as a JSON object with these exact keys: sentimentScore, engagementLevel, riskLevel, suggestedActions (array), contentSuggestions (array).`;
 
-    const userPrompt = `Analyze this conversation with ${subName}: ${conversationHistory}`;
+    const userPrompt = `Analyze this conversation with ${request.subName}: ${request.conversationHistory}`;
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
@@ -42,28 +47,49 @@ export const useAIAnalytics = () => {
         const jsonMatch = result.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
-          setAnalytics(parsed);
-          return parsed;
+          const analyticsData: AIAnalytics = {
+            sentimentScore: parsed.sentimentScore || 0,
+            engagementLevel: parsed.engagementLevel || 'medium',
+            riskLevel: parsed.riskLevel || 'low',
+            suggestedActions: parsed.suggestedActions || ['Continue regular engagement'],
+            contentSuggestions: parsed.contentSuggestions || ['Send a check-in message']
+          };
+          setAnalytics(analyticsData);
+          return {
+            data: analyticsData,
+            success: true,
+            error: null
+          };
         }
       }
+      
+      // Fallback response
+      const fallbackAnalytics: AIAnalytics = {
+        sentimentScore: 0,
+        engagementLevel: 'medium',
+        riskLevel: 'low',
+        suggestedActions: ['Continue regular engagement'],
+        contentSuggestions: ['Send a check-in message']
+      };
+      
+      return {
+        data: fallbackAnalytics,
+        success: true,
+        error: null
+      };
     } catch (error) {
       console.error('Error analyzing conversation:', error);
+      return {
+        data: undefined,
+        success: false,
+        error: error instanceof Error ? error.message : 'Analysis failed'
+      };
     }
-
-    return {
-      sentimentScore: 0,
-      engagementLevel: 'medium',
-      riskLevel: 'low',
-      suggestedActions: ['Continue regular engagement'],
-      contentSuggestions: ['Send a check-in message']
-    };
   };
 
   const generatePersonalizedContent = async (
-    sub: Sub,
-    contentType: 'caption' | 'task' | 'message',
-    tone: 'dominant' | 'caring' | 'strict' | 'playful'
-  ): Promise<ContentSuggestion[]> => {
+    request: ContentGenerationRequest
+  ): Promise<ServiceResponse<AIContentSuggestion[]>> => {
     const systemPrompt = `You are a creative findom content creator specializing in personalized content.
     Generate 3 content suggestions based on sub's profile and preferences.
     Each suggestion should include content, tone, and reasoning for why it would work well.
@@ -80,8 +106,8 @@ export const useAIAnalytics = () => {
       }
     ]`;
 
-    const userPrompt = `Generate ${contentType} content for ${sub.name} with a ${tone} tone.
-    Sub details: Total contributed: $${sub.total}, Preferences: ${sub.preferences || 'None specified'}, Notes: ${sub.notes || 'No notes'}`;
+    const userPrompt = `Generate ${request.contentType} content for ${request.sub.name} with a ${request.tone} tone.
+    Sub details: Total contributed: $${request.sub.total}, Preferences: ${request.sub.preferences || 'None specified'}, Notes: ${request.sub.notes || 'No notes'}`;
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
@@ -92,13 +118,19 @@ export const useAIAnalytics = () => {
           const parsed = JSON.parse(jsonMatch[0]);
           // Ensure we have an array with valid objects
           if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map((item, index) => ({
-              type: item.type || contentType,
-              content: item.content || `Generated ${contentType} ${index + 1}`,
-              tone: item.tone || tone,
-              targetSub: item.targetSub || sub.name,
-              reasoning: item.reasoning || 'Personalized content suggestion'
+            const suggestions: AIContentSuggestion[] = parsed.map((item, index) => ({
+              type: item.type || request.contentType,
+              content: item.content || `Generated ${request.contentType} ${index + 1}`,
+              tone: item.tone || request.tone,
+              targetSub: item.targetSub || request.sub.name,
+              reasoning: item.reasoning || 'Personalized content suggestion',
+              priority: item.priority || 'medium'
             }));
+            return {
+              data: suggestions,
+              success: true,
+              error: null
+            };
           }
         }
       }
@@ -107,29 +139,38 @@ export const useAIAnalytics = () => {
     }
 
     // Return meaningful fallback suggestions instead of generic ones
-    return [
+    const fallbackSuggestions: AIContentSuggestion[] = [
       {
-        type: contentType,
-        content: generateFallbackContent(contentType, tone, sub.name),
-        tone,
-        targetSub: sub.name,
-        reasoning: 'Personalized suggestion based on your preferences'
+        type: request.contentType,
+        content: generateFallbackContent(request.contentType, request.tone, request.sub.name),
+        tone: request.tone,
+        targetSub: request.sub.name,
+        reasoning: 'Personalized suggestion based on your preferences',
+        priority: 'medium'
       },
       {
-        type: contentType,
-        content: generateFallbackContent(contentType, tone, sub.name, true),
-        tone,
-        targetSub: sub.name,
-        reasoning: 'Alternative suggestion for variety'
+        type: request.contentType,
+        content: generateFallbackContent(request.contentType, request.tone, request.sub.name, true),
+        tone: request.tone,
+        targetSub: request.sub.name,
+        reasoning: 'Alternative suggestion for variety',
+        priority: 'medium'
       },
       {
-        type: contentType,
-        content: generateFallbackContent(contentType, tone, sub.name, false, true),
-        tone,
-        targetSub: sub.name,
-        reasoning: 'Engaging content to maintain connection'
+        type: request.contentType,
+        content: generateFallbackContent(request.contentType, request.tone, request.sub.name, false, true),
+        tone: request.tone,
+        targetSub: request.sub.name,
+        reasoning: 'Engaging content to maintain connection',
+        priority: 'medium'
       }
     ];
+
+    return {
+      data: fallbackSuggestions,
+      success: true,
+      error: null
+    };
   };
 
   const generateFallbackContent = (
@@ -187,7 +228,7 @@ export const useAIAnalytics = () => {
         ],
         caption: [
           `Discipline is the foundation of devotion. Learn it well.`,
-          `Rules exist for a reason. Break them and learn the consequences.`,
+          `Rules exist for a reason. Break them and learn consequences.`,
           `Excellence isn't optional. It's required.`
         ]
       },
@@ -219,7 +260,7 @@ export const useAIAnalytics = () => {
     message: string,
     subName: string,
     context: string
-  ): Promise<string> => {
+  ): Promise<ServiceResponse<string>> => {
     const systemPrompt = `You are an AI assistant for a findom dominant.
     Generate appropriate, professional responses to routine inquiries.
     Maintain dominant persona while being helpful and clear.
@@ -231,10 +272,18 @@ export const useAIAnalytics = () => {
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
-      return result || 'Thank you for your message. I will review and respond appropriately.';
+      return {
+        data: result || 'Thank you for your message. I will review and respond appropriately.',
+        success: true,
+        error: null
+      };
     } catch (error) {
       console.error('Error generating response:', error);
-      return 'Thank you for your message. I will review and respond appropriately.';
+      return {
+        data: 'Thank you for your message. I will review and respond appropriately.',
+        success: false,
+        error: error instanceof Error ? error.message : 'Response generation failed'
+      };
     }
   };
 

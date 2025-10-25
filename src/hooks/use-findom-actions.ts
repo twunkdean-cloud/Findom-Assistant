@@ -1,7 +1,17 @@
 import { useContext } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { AppData, Checklist, Sub, Tribute, CustomPrice, CalendarEvent, RedFlag } from '@/types';
+import { 
+  AppData, 
+  Checklist, 
+  Sub, 
+  Tribute, 
+  CustomPrice, 
+  CalendarEvent, 
+  RedFlag,
+  ServiceResponse,
+  DeepPartial
+} from '@/types';
 import { DEFAULT_APP_DATA } from '@/constants/default-data';
 import {
   subsService,
@@ -12,12 +22,15 @@ import {
   checklistsService,
 } from '@/services/unified-service';
 import { migrationService } from '@/services/migration-service';
-import { userDataService } from '@/services/user-data-service';
+import { userDataService } from './user-data-service';
 
-export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<React.SetStateAction<AppData>>) => {
+export const useFindomActions = (
+  appData: AppData, 
+  setAppData: React.Dispatch<React.SetStateAction<AppData>>
+) => {
   const { user } = useAuth();
 
-  const updateAppData = async (key: string, value: any): Promise<void> => {
+  const updateAppData = async (key: keyof AppData, value: any): Promise<void> => {
     if (!user) return;
 
     setAppData(prev => ({ ...prev, [key]: value }));
@@ -174,7 +187,7 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'findom_assistant_backup.json';
+    a.download = 'findom-assistant-backup.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -227,11 +240,11 @@ export const useFindomActions = (appData: AppData, setAppData: React.Dispatch<Re
     if (isCompleted) {
       // Remove from completed
       const updatedWeeklyCompleted = (appData.checklist?.weeklyCompleted || []).filter(t => t !== task);
-      updateChecklist('weeklyCompleted' as keyof Checklist, updatedWeeklyCompleted);
+      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
     } else {
       // Add to completed
       const updatedWeeklyCompleted = [...(appData.checklist?.weeklyCompleted || []), task];
-      updateChecklist('weeklyCompleted' as keyof Checklist, updatedWeeklyCompleted);
+      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
     }
   };
 

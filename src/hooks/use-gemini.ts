@@ -10,6 +10,23 @@ interface UseGeminiReturn {
   getSystemPrompt: () => string;
 }
 
+interface GeminiRequest {
+  prompt: string;
+  systemInstruction?: string;
+}
+
+interface GeminiVisionRequest {
+  image: string;
+  mimeType: string;
+  prompt?: string;
+}
+
+interface GeminiResponse {
+  response?: string;
+  content?: string;
+  error?: string;
+}
+
 export const useGemini = (): UseGeminiReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +40,7 @@ export const useGemini = (): UseGeminiReturn => {
     setError(null);
 
     try {
-      const payload = {
+      const payload: GeminiRequest = {
         prompt: prompt,
         systemInstruction: systemPrompt || getGenderedSystemPrompt('general'),
       };
@@ -42,7 +59,7 @@ export const useGemini = (): UseGeminiReturn => {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: GeminiResponse = await response.json();
       return data.response || data.content || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -71,17 +88,19 @@ export const useGemini = (): UseGeminiReturn => {
       const mimeType = matches[1];
       const base64Data = matches[2];
 
+      const payload: GeminiVisionRequest = {
+        image: base64Data,
+        mimeType: mimeType,
+        prompt: prompt || 'Analyze this image and provide a detailed description.',
+      };
+
       const response = await fetch(`${API_BASE_URL}/gemini-vision`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${API_TOKEN}`,
         },
-        body: JSON.stringify({
-          image: base64Data,
-          mimeType: mimeType,
-          prompt: prompt || 'Analyze this image and provide a detailed description.',
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -89,7 +108,7 @@ export const useGemini = (): UseGeminiReturn => {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: GeminiResponse = await response.json();
       return data.response || data.content || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';

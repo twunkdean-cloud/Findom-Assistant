@@ -5,7 +5,7 @@ export interface Sub {
   lastTribute?: string;
   preferences?: string;
   notes?: string;
-  conversationHistory?: string | any;
+  conversationHistory?: string | Record<string, any>;
   created_at?: string;
   updated_at?: string;
 }
@@ -17,7 +17,7 @@ export interface Tribute {
   from_sub: string;
   reason?: string;
   notes?: string;
-  source: string;
+  source: 'cashapp' | 'venmo' | 'paypal' | 'other';
   created_at?: string;
   updated_at?: string;
 }
@@ -26,6 +26,7 @@ export interface RedFlag {
   id: string;
   username: string;
   reason: string;
+  severity?: 'low' | 'medium' | 'high';
   created_at?: string;
   updated_at?: string;
 }
@@ -33,8 +34,8 @@ export interface RedFlag {
 export interface Checklist {
   id: string;
   date: string;
-  tasks: any;
-  completed: any;
+  tasks: string[] | Record<string, any>;
+  completed: string[] | Record<string, boolean>;
   weeklyTasks?: string[];
   weeklyCompleted?: string[];
   created_at?: string;
@@ -45,6 +46,8 @@ export interface CustomPrice {
   id: string;
   service: string;
   price: number;
+  category?: string;
+  description?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -54,6 +57,7 @@ export interface CalendarEvent {
   datetime: string;
   platform: string;
   content: string;
+  type?: 'post' | 'story' | 'live' | 'reminder';
   created_at?: string;
   updated_at?: string;
 }
@@ -62,11 +66,12 @@ export interface UserData {
   id: string;
   user_id: string;
   data_type: string;
-  data: any;
+  data: Record<string, any>;
   created_at?: string;
   updated_at?: string;
 }
 
+// Enhanced type safety for AppData
 export interface AppData {
   subs: Sub[];
   tributes: Tribute[];
@@ -98,9 +103,7 @@ export interface AppData {
     dataSharing: boolean;
     theme: 'dark' | 'light' | 'auto';
   };
-  responses?: {
-    [key: string]: string;
-  };
+  responses?: Record<string, string>;
   // Additional properties for user data
   apiKey?: string;
   persona?: string;
@@ -111,11 +114,14 @@ export interface AppData {
   subscription?: string;
 }
 
+// Enhanced AI content types
 export interface AIContentSuggestion {
   type: 'caption' | 'task' | 'message';
   tone: 'dominant' | 'caring' | 'strict' | 'playful';
   content: string;
   reasoning: string;
+  targetSub?: string;
+  priority?: 'high' | 'medium' | 'low';
 }
 
 export interface ChatMessage {
@@ -123,6 +129,11 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  metadata?: {
+    model?: string;
+    tokens?: number;
+    cost?: number;
+  };
 }
 
 export interface PerformanceMetrics {
@@ -130,8 +141,12 @@ export interface PerformanceMetrics {
   renderTime: number;
   memoryUsage: number;
   bundleSize: number;
+  firstContentfulPaint?: number;
+  largestContentfulPaint?: number;
+  timeToInteractive?: number;
 }
 
+// Enhanced context types
 export interface FindomContextType {
   appData: AppData;
   setAppData: React.Dispatch<React.SetStateAction<AppData>>;
@@ -152,4 +167,144 @@ export interface FindomContextType {
   updateRedflags: (redflags: RedFlag[]) => Promise<void>;
   updateChecklist: (key: keyof Checklist, value: any) => void;
   handleToggleWeeklyTask: (task: string) => void;
+}
+
+// Service response types
+export interface ServiceResponse<T = any> {
+  data?: T;
+  error?: string | null;
+  success: boolean;
+  loading?: boolean;
+}
+
+// API types
+export interface APIResponse<T = any> {
+  data?: T;
+  error?: {
+    message: string;
+    code?: string;
+    details?: any;
+  };
+  success: boolean;
+}
+
+// Form types
+export interface FormField {
+  name: string;
+  label: string;
+  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea';
+  required?: boolean;
+  placeholder?: string;
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+    custom?: (value: any) => string | undefined;
+  };
+}
+
+export interface FormState<T = any> {
+  values: T;
+  errors: Partial<Record<keyof T, string>>;
+  touched: Partial<Record<keyof T, boolean>>;
+  isSubmitting: boolean;
+  isValid: boolean;
+}
+
+// Utility types
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type EventHandler<T = Event> = (event: T) => void;
+
+export type AsyncEventHandler<T = Event> = (event: T) => Promise<void>;
+
+// Component props types
+export interface BaseComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  style?: React.CSSProperties;
+  testId?: string;
+}
+
+export interface LoadingProps extends BaseComponentProps {
+  loading?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'spinner' | 'skeleton' | 'dots';
+}
+
+export interface ErrorProps extends BaseComponentProps {
+  error?: string | Error | null;
+  onRetry?: () => void;
+  retryCount?: number;
+}
+
+// Theme types
+export type Theme = 'dark' | 'light' | 'auto';
+export type ColorScheme = 'light' | 'dark';
+
+export interface ThemeConfig {
+  theme: Theme;
+  colorScheme?: ColorScheme;
+  customColors?: Record<string, string>;
+}
+
+// Navigation types
+export type RoutePath = 
+  | '/'
+  | '/login'
+  | '/auth/callback'
+  | '/dashboard'
+  | '/onboarding'
+  | '/subs'
+  | '/tributes'
+  | '/chat'
+  | '/captions'
+  | '/tasks'
+  | '/templates'
+  | '/twitter'
+  | '/reddit'
+  | '/vision'
+  | '/checklists'
+  | '/pricing'
+  | '/settings';
+
+export interface NavigationItem {
+  path: RoutePath;
+  label: string;
+  icon?: React.ComponentType<any>;
+  badge?: string | number;
+  disabled?: boolean;
+  children?: NavigationItem[];
+}
+
+// Analytics types
+export interface AnalyticsEvent {
+  name: string;
+  properties?: Record<string, any>;
+  timestamp?: number;
+  userId?: string;
+}
+
+export interface PageViewEvent extends AnalyticsEvent {
+  name: 'page_view';
+  properties: {
+    path: RoutePath;
+    title: string;
+    referrer?: string;
+  };
+}
+
+export interface UserActionEvent extends AnalyticsEvent {
+  name: 'user_action';
+  properties: {
+    action: string;
+    target?: string;
+    value?: any;
+  };
 }

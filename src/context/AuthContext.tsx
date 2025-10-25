@@ -1,14 +1,20 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any; data?: any }>;
-  signUp: (email: string, password: string) => Promise<{ error: any; data?: any }>;
-  signOut: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<ServiceResponse<{ user: User; session: Session }>>;
+  signUp: (email: string, password: string) => Promise<ServiceResponse<{ user: User; session: Session }>>;
+  signOut: () => Promise<ServiceResponse<void>>;
+}
+
+interface ServiceResponse<T = any> {
+  data?: T;
+  error?: AuthError | string | null;
+  success: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<ServiceResponse<{ user: User; session: Session }>> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -58,17 +64,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       
       if (error) {
-        return { error, data: null };
+        return { data: undefined, error, success: false };
       }
       
-      return { error: null, data };
+      return { data: { user: data.user!, session: data.session! }, error: null, success: true };
     } catch (error) {
       console.error('Unexpected sign in error:', error);
-      return { error, data: null };
+      return { 
+        data: undefined, 
+        error: error instanceof Error ? error.message : 'Sign in failed', 
+        success: false 
+      };
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string): Promise<ServiceResponse<{ user: User; session: Session }>> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -79,21 +89,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       
       if (error) {
-        return { error, data: null };
+        return { data: undefined, error, success: false };
       }
       
-      return { error: null, data };
+      return { data: { user: data.user!, session: data.session! }, error: null, success: true };
     } catch (error) {
       console.error('Unexpected sign up error:', error);
-      return { error, data: null };
+      return { 
+        data: undefined, 
+        error: error instanceof Error ? error.message : 'Sign up failed', 
+        success: false 
+      };
     }
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<ServiceResponse<void>> => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        return { data: undefined, error, success: false };
+      }
+      
+      return { data: undefined, error: null, success: true };
     } catch (error) {
       console.error('Sign out error:', error);
+      return { 
+        data: undefined, 
+        error: error instanceof Error ? error.message : 'Sign out failed', 
+        success: false 
+      };
     }
   };
 
@@ -104,7 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
