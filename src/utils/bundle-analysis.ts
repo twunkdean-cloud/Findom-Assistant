@@ -26,7 +26,6 @@ export const optimizeBundle = () => {
     'Remove unused dependencies'
   ];
   
-  console.log('Bundle optimization recommendations:', recommendations);
   return recommendations;
 };
 
@@ -34,6 +33,9 @@ export const monitorBundleSize = () => {
   // Monitor bundle size in development
   if (process.env.NODE_ENV === 'development') {
     const metrics = analyzeBundleSize();
-    console.log('Bundle metrics:', metrics);
+    // Only log in development for debugging purposes
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Bundle metrics:', metrics);
+    }
   }
 };

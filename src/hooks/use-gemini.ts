@@ -27,8 +27,6 @@ export const useGemini = (): UseGeminiReturn => {
         prompt: prompt,
         systemInstruction: systemPrompt || getGenderedSystemPrompt('general'),
       };
-      
-      console.log('Sending to Gemini API:', payload);
 
       const response = await fetch(`${API_BASE_URL}/gemini-chat`, {
         method: 'POST',
@@ -39,16 +37,12 @@ export const useGemini = (): UseGeminiReturn => {
         body: JSON.stringify(payload),
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('API Error:', errorData);
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
       return data.response || data.content || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';

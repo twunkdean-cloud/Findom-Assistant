@@ -1,6 +1,13 @@
 import { toast } from 'sonner';
 import { Sub, Tribute, CustomPrice, CalendarEvent, RedFlag, Checklist } from '@/types/index';
-import { subsService, tributesService, customPricesService, calendarService, redflagsService, checklistsService } from '@/services/unified-service';
+import {
+  subsService,
+  tributesService,
+  customPricesService,
+  calendarService,
+  redflagsService,
+  checklistsService,
+} from '@/services/unified-service';
 import { userDataService } from './user-data-service';
 
 export class MigrationService {

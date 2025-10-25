@@ -24,11 +24,11 @@ export const useAIAnalytics = () => {
 
   const analyzeSubConversation = async (conversationHistory: string, subName: string): Promise<AIAnalytics> => {
     const systemPrompt = `You are an expert in findom relationship dynamics and sentiment analysis.
-    Analyze the conversation history and provide:
+    Analyze conversation history and provide:
     1. Sentiment score (-100 to 100, where negative indicates dissatisfaction)
     2. Engagement level (high/medium/low based on response frequency and enthusiasm)
     3. Risk level (low/medium/high based on warning signs like payment delays, complaints, etc.)
-    4. Suggested actions to improve the relationship
+    4. Suggested actions to improve relationship
     5. Content suggestions for next interactions
     
     Return your response as a JSON object with these exact keys: sentimentScore, engagementLevel, riskLevel, suggestedActions (array), contentSuggestions (array).`;
@@ -38,14 +38,12 @@ export const useAIAnalytics = () => {
     try {
       const result = await callGemini(userPrompt, systemPrompt);
       if (result) {
-        // Try to extract JSON from the response
+        // Try to extract JSON from response
         const jsonMatch = result.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           setAnalytics(parsed);
           return parsed;
-        } else {
-          console.error('No JSON found in response:', result);
         }
       }
     } catch (error) {
@@ -67,8 +65,8 @@ export const useAIAnalytics = () => {
     tone: 'dominant' | 'caring' | 'strict' | 'playful'
   ): Promise<ContentSuggestion[]> => {
     const systemPrompt = `You are a creative findom content creator specializing in personalized content.
-    Generate 3 content suggestions based on the sub's profile and preferences.
-    Each suggestion should include the content, tone, and reasoning for why it would work well.
+    Generate 3 content suggestions based on sub's profile and preferences.
+    Each suggestion should include content, tone, and reasoning for why it would work well.
     
     Return ONLY a JSON array with objects containing: type, content, tone, reasoning, targetSub
     Example format:
@@ -88,7 +86,7 @@ export const useAIAnalytics = () => {
     try {
       const result = await callGemini(userPrompt, systemPrompt);
       if (result) {
-        // Try to extract JSON array from the response
+        // Try to extract JSON array from response
         const jsonMatch = result.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
@@ -102,8 +100,6 @@ export const useAIAnalytics = () => {
               reasoning: item.reasoning || 'Personalized content suggestion'
             }));
           }
-        } else {
-          console.error('No JSON array found in response:', result);
         }
       }
     } catch (error) {
@@ -180,7 +176,7 @@ export const useAIAnalytics = () => {
       },
       strict: {
         task: [
-          `Complete this task by the deadline: $50 tribute by 8 PM. No exceptions.`,
+          `Complete this task by deadline: $50 tribute by 8 PM. No exceptions.`,
           `Your schedule for today is set. Follow it precisely or face consequences.`,
           `I expect perfection in this task. Anything less is unacceptable.`
         ],
@@ -226,7 +222,7 @@ export const useAIAnalytics = () => {
   ): Promise<string> => {
     const systemPrompt = `You are an AI assistant for a findom dominant.
     Generate appropriate, professional responses to routine inquiries.
-    Maintain the dominant persona while being helpful and clear.
+    Maintain dominant persona while being helpful and clear.
     Keep responses concise and actionable.
     Do not make promises about specific amounts or timelines.`;
 
