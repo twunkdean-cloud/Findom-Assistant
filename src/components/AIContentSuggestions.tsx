@@ -65,9 +65,9 @@ const AIContentSuggestions = () => {
 
   const getToneOptions = () => {
     const tones = getPersonaTones();
-    return Object.entries(tones).map(([value, { label }]) => ({
-      value,
-      label: `${value.charAt(0).toUpperCase() + value.slice(1)} - ${label.split(',')[0]}`
+    return tones.map((option) => ({
+      value: option.value,
+      label: `${option.label} - ${option.description.split(',')[0]}`
     }));
   };
 

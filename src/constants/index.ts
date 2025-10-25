@@ -42,16 +42,16 @@ export const DEFAULT_CHECKLIST_TASKS = [
 
 export const PERSONA_OPTIONS = {
   male: [
-    { value: 'dominant', label: 'Dominant - Commanding, assertive, direct' },
-    { value: 'seductive', label: 'Seductive - Charismatic, confident, alluring' },
-    { value: 'strict', label: 'Strict - Authoritative, demanding, uncompromising' },
-    { value: 'caring', label: 'Caring - Protective, guiding, firm but fair' }
+    { value: 'dominant', label: 'Dominant', description: 'Commanding, assertive, direct' },
+    { value: 'seductive', label: 'Seductive', description: 'Charismatic, confident, alluring' },
+    { value: 'strict', label: 'Strict', description: 'Authoritative, demanding, uncompromising' },
+    { value: 'caring', label: 'Caring', description: 'Protective, guiding, firm but fair' }
   ],
   female: [
-    { value: 'dominant', label: 'Dominant - Goddess-like, supreme, commanding' },
-    { value: 'seductive', label: 'Seductive - Enchanting, captivating, irresistible' },
-    { value: 'strict', label: 'Strict - Demanding, unforgiving, exacting' },
-    { value: 'caring', label: 'Caring - Nurturing, guiding, maternal dominance' }
+    { value: 'dominant', label: 'Dominant', description: 'Goddess-like, supreme, commanding' },
+    { value: 'seductive', label: 'Seductive', description: 'Enchanting, captivating, irresistible' },
+    { value: 'strict', label: 'Strict', description: 'Demanding, unforgiving, exacting' },
+    { value: 'caring', label: 'Caring', description: 'Nurturing, guiding, maternal dominance' }
   ]
 } as const;
 

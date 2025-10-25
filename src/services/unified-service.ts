@@ -4,31 +4,31 @@ import { ServiceResponse, Sub, Tribute, CustomPrice, CalendarEvent, RedFlag } fr
 
 // Create typed service classes extending BaseService
 class SubsService extends BaseService<Sub> {
-  protected getTableName(): string {
+  public getTableName(): string {
     return 'subs';
   }
 }
 
 class TributesService extends BaseService<Tribute> {
-  protected getTableName(): string {
+  public getTableName(): string {
     return 'tributes';
   }
 }
 
 class CustomPricesService extends BaseService<CustomPrice> {
-  protected getTableName(): string {
+  public getTableName(): string {
     return 'custom_prices';
   }
 }
 
 class CalendarService extends BaseService<CalendarEvent> {
-  protected getTableName(): string {
+  public getTableName(): string {
     return 'calendar_events';
   }
 }
 
 class RedflagsService extends BaseService<RedFlag> {
-  protected getTableName(): string {
+  public getTableName(): string {
     return 'redflags';
   }
 }

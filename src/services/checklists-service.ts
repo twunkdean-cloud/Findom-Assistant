@@ -10,7 +10,7 @@ export const DEFAULT_WEEKLY_TASKS = [
 ];
 
 export class ChecklistsService extends BaseService<Checklist> {
-  protected getTableName(): string {
+  public getTableName(): string {
     return 'checklists';
   }
 
