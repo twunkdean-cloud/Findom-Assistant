@@ -1,338 +1,105 @@
-import React, { ReactNode, useState, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import ErrorBoundary from './ErrorBoundary';
 import { useAuth } from '@/context/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  LogOut,
-  User,
-  Menu,
-  Home,
-  Users,
-  DollarSign,
+import { useMobile } from '@/hooks/use-mobile';
+import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { 
+  Home, 
+  Users, 
+  DollarSign, 
+  Calendar, 
+  Settings, 
+  Brain, 
   MessageSquare,
-  Calendar,
-  Settings,
-  Brain,
-  Twitter,
+  Image,
   FileText,
-  Camera,
   CheckSquare,
-  CreditCard,
-  ListChecks,
-  ChevronRight,
+  Target,
+  TrendingUp
 } from 'lucide-react';
-import PullToRefresh from '@/components/PullToRefresh';
-import PerformanceMonitor from '@/components/PerformanceMonitor';
-import OfflineIndicator from '@/components/OfflineIndicator';
 
-interface LayoutProps {
-  children: ReactNode;
-}
+const Layout: React.FC = () => {
+  const { user, loading } = useAuth();
+  const { isMobile } = useMobile();
 
-const navItems = [
-  { 
-    id: 'dashboard', 
-    label: 'Dashboard', 
-    path: '/', 
-    icon: Home,
-    description: 'Overview & Analytics'
-  },
-  { 
-    id: 'subs', 
-    label: 'Subs', 
-    path: '/subs', 
-    icon: Users,
-    description: 'Manage your subs'
-  },
-  { 
-    id: 'tributes', 
-    label: 'Tributes', 
-    path: '/tributes', 
-    icon: DollarSign,
-    description: 'Track payments'
-  },
-  { 
-    id: 'tasks', 
-    label: 'Tasks', 
-    path: '/tasks', 
-    icon: ListChecks,
-    description: 'Generate tasks'
-  },
-  { 
-    id: 'responses', 
-    label: 'Responses', 
-    path: '/responses', 
-    icon: MessageSquare,
-    description: 'Message templates'
-  },
-  { 
-    id: 'twitter', 
-    label: 'Twitter', 
-    path: '/twitter', 
-    icon: Twitter,
-    description: 'Twitter content'
-  },
-  { 
-    id: 'reddit', 
-    label: 'Reddit', 
-    path: '/reddit', 
-    icon: FileText,
-    description: 'Reddit content'
-  },
-  { 
-    id: 'caption', 
-    label: 'Captions', 
-    path: '/caption', 
-    icon: FileText,
-    description: 'Photo captions'
-  },
-  { 
-    id: 'image-vision', 
-    label: 'Vision', 
-    path: '/image-vision', 
-    icon: Camera,
-    description: 'AI image analysis'
-  },
-  { 
-    id: 'chat-assistant', 
-    label: 'AI Chat', 
-    path: '/chat-assistant', 
-    icon: Brain,
-    description: 'AI assistant'
-  },
-  { 
-    id: 'calendar', 
-    label: 'Calendar', 
-    path: '/checklist', 
-    icon: Calendar,
-    description: 'Content calendar'
-  },
-  { 
-    id: 'pricing', 
-    label: 'Pricing', 
-    path: '/pricing', 
-    icon: CreditCard,
-    description: 'Subscription'
-  },
-  { 
-    id: 'settings', 
-    label: 'Settings', 
-    path: '/settings', 
-    icon: Settings,
-    description: 'App settings'
-  },
-];
-
-const Layout = ({ children }: LayoutProps) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
-  const NavItem = ({ item, isMobile = false }: { item: typeof navItems[0]; isMobile?: boolean }) => {
-    const isActive = location.pathname === item.path;
-    const Icon = item.icon;
-
-    if (isMobile) {
-      return (
-        <button
-          onClick={() => {
-            navigate(item.path);
-            setSidebarOpen(false);
-          }}
-          className={cn(
-            "w-full flex items-center justify-between p-3 rounded-lg transition-all",
-            "hover:bg-gray-800",
-            isActive 
-              ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg" 
-              : "text-gray-300 hover:text-white"
-          )}
-        >
-          <div className="flex items-center space-x-3">
-            <Icon className="h-5 w-5" />
-            <div className="text-left">
-              <div className="font-medium">{item.label}</div>
-              <div className="text-xs opacity-75">{item.description}</div>
-            </div>
-          </div>
-          {isActive && <ChevronRight className="h-4 w-4" />}
-        </button>
-      );
-    }
-
+  if (loading) {
     return (
-      <button
-        onClick={() => navigate(item.path)}
-        className={cn(
-          "group relative p-3 rounded-xl transition-all duration-200",
-          "hover:bg-gray-800/50",
-          isActive 
-            ? "bg-gradient-to-r from-indigo-600/20 to-purple-600/20 text-white border border-indigo-500/30" 
-            : "text-gray-400 hover:text-gray-200"
-        )}
-      >
-        <div className="flex flex-col items-center space-y-2">
-          <div className={cn(
-            "p-2 rounded-lg transition-all",
-            isActive 
-              ? "bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg" 
-              : "bg-gray-800 group-hover:bg-gray-700"
-          )}>
-            <Icon className="h-5 w-5" />
-          </div>
-          <span className="text-xs font-medium text-center">{item.label}</span>
-        </div>
-        {isActive && (
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full" />
-        )}
-      </button>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400"></div>
+      </div>
     );
-  };
+  }
+
+  if (!user) {
+    return <Outlet />;
+  }
+
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Sub Tracker', href: '/subs', icon: Users },
+    { name: 'Tribute Tracker', href: '/tributes', icon: DollarSign },
+    { name: 'Calendar', href: '/calendar', icon: Calendar },
+    { name: 'Checklist', href: '/checklist', icon: CheckSquare },
+    { name: 'AI Assistant', href: '/chat', icon: MessageSquare },
+    { name: 'Content Generator', href: '/content', icon: FileText },
+    { name: 'Image Vision', href: '/vision', icon: Image },
+    { name: 'Analytics', href: '/analytics', icon: TrendingUp },
+    { name: 'Settings', href: '/settings', icon: Settings },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-black">
-      {/* Performance Monitor */}
-      <PerformanceMonitor />
-      
-      {/* Offline Indicator */}
-      <OfflineIndicator />
-
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-xl border-b border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Mobile menu trigger */}
-            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden text-gray-400 hover:text-white">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80 bg-gray-900 border-gray-800 p-0">
-                <div className="p-6">
-                  <h2 className="text-xl font-bold text-white mb-6">Navigation</h2>
-                  <div className="space-y-2">
-                    {navItems.map((item) => (
-                      <NavItem key={item.id} item={item} isMobile />
-                    ))}
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="hidden lg:block">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                  Switch Dean's Assistant
-                </h1>
-                <p className="text-xs text-gray-500">Complete Findom Automation Suite</p>
-              </div>
-              <div className="lg:hidden">
-                <h1 className="text-lg font-bold text-white">SD Assistant</h1>
+    <ErrorBoundary>
+      <SidebarProvider>
+        <Sidebar>
+          <SidebarHeader>
+            <div className="p-4">
+              <h2 className="text-lg font-semibold text-gray-100">Findom Assistant</h2>
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              {navigation.map((item) => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.href} className="flex items-center gap-3">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.name}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            <div className="p-4">
+              <div className="text-sm text-gray-400">
+                {user.email}
               </div>
             </div>
-
-            {/* User menu */}
-            {user && (
-              <div className="flex items-center space-x-4">
-                <Badge variant="outline" className="hidden sm:flex items-center space-x-1 bg-gray-800 border-gray-700 text-gray-300">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs">Online</span>
-                </Badge>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-gray-400 hover:text-white">
-                      <User className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                    <DropdownMenuItem className="text-gray-300 focus:text-white focus:bg-gray-700">
-                      <User className="h-4 w-4 mr-2" />
-                      {user.email}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gray-700" />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-red-400 focus:text-red-300 focus:bg-gray-700">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Desktop Navigation */}
-      <nav className="hidden lg:block sticky top-16 z-40 bg-gray-900/50 backdrop-blur-sm border-b border-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2 py-4 overflow-x-auto">
-            {navItems.map((item) => (
-              <NavItem key={item.id} item={item} />
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-xl border-t border-gray-800/50">
-        <div className="grid grid-cols-5 gap-1">
-          {navItems.slice(0, 5).map((item) => {
-            const isActive = location.pathname === item.path;
-            const Icon = item.icon;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "flex flex-col items-center justify-center py-2 px-1 transition-all",
-                  isActive 
-                    ? "text-indigo-400" 
-                    : "text-gray-500 hover:text-gray-300"
-                )}
-              >
-                <Icon className="h-5 w-5 mb-1" />
-                <span className="text-xs">{item.label}</span>
-              </button>
-            );
-          })}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex flex-col items-center justify-center py-2 px-1 text-gray-500 hover:text-gray-300"
-          >
-            <Menu className="h-5 w-5 mb-1" />
-            <span className="text-xs">More</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 lg:pb-6">
-        <PullToRefresh
-          onRefresh={() => window.location.reload()}
-        >
-          {children}
-        </PullToRefresh>
-      </main>
-    </div>
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b border-gray-700 bg-gray-800 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <div className="flex flex-1 items-center justify-between">
+              <h1 className="text-lg font-semibold text-gray-100">Findom Assistant</h1>
+              {isMobile && (
+                <Button variant="ghost" size="sm">
+                  Menu
+                </Button>
+              )}
+            </div>
+          </header>
+          <main className="flex-1 bg-gray-900">
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </ErrorBoundary>
   );
 };
 

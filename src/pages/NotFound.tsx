@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
+import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Home, ArrowLeft } from 'lucide-react';
 
-const NotFound = () => {
+const NotFound: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const NotFound = () => {
           <h2 className="text-2xl font-semibold text-gray-300">Page Not Found</h2>
         </div>
         <p className="text-gray-400 max-w-md mx-auto">
-          Oops! The page you're looking for doesn't exist. It might have been moved, deleted, or you entered the wrong URL.
+          Oops! The page you're looking for doesn't exist. It might have been moved, deleted, or you entered wrong URL.
         </p>
         <Button 
           onClick={() => navigate("/")}

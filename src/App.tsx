@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FindomProvider, useFindom } from './context/FindomContext';
-import Layout from './components/Layout';
 import { LoadingSpinner } from './components/ui/loading-spinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LazyWrapper, PageLoadingFallback } from './utils/lazy-loading';
@@ -61,8 +60,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/onboarding" replace />;
   }
   
-  return <>{children}</>;
-};
+  return <>{children}</ProtectedRoute>;
 
 const AppContent = () => {
   // Preload critical components
@@ -92,7 +90,7 @@ const AppContent = () => {
           <Route path="/subs" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Sub Tracker..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Sub Tracker..." />>
                   <LazySubTrackerPage />
                 </LazyWrapper>
               </Layout>
@@ -101,7 +99,7 @@ const AppContent = () => {
           <Route path="/tributes" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Tribute Tracker..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Tribute Tracker..." />>
                   <LazyTributeTrackerPage />
                 </LazyWrapper>
               </Layout>
@@ -110,92 +108,85 @@ const AppContent = () => {
           <Route path="/tasks" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Task Generator..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Task Generator..." />>
                   <LazyTaskGeneratorPage />
                 </LazyWrapper>
               </Layout>
-            </ProtectedRoute>
+          </ProtectedRoute>
           } />
           <Route path="/responses" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Response Templates..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Response Templates..." />>
                   <LazyResponseTemplatesPage />
                 </LazyWrapper>
               </Layout>
-            </ProtectedRoute>
+          } />
           } />
           <Route path="/twitter" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Twitter Generator..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Twitter Generator..." />>
                   <LazyTwitterGeneratorPage />
                 </LazyWrapper>
               </Layout>
-            </ProtectedRoute>
+          } />
           } />
           <Route path="/reddit" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Reddit Generator..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Reddit Generator..." />>
                   <LazyRedditGeneratorPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
+                </Layout>
+          } />
           } />
           <Route path="/caption" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Caption Generator..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Caption Generator..." />:
                   <LazyCaptionGeneratorPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
+                </Layout>
+          } />
           } />
           <Route path="/image-vision" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Image Vision..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Image Vision..." />:
                   <LazyImageVisionPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
+                </Layout>
+          } />
           } />
           <Route path="/chat-assistant" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Chat Assistant..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Chat Assistant..." />:
                   <LazyChatAssistantPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
+                </Layout>
           } />
-          <Route path="/pricing" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Pricing..." />}>
-                  <LazyPricingPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
           } />
           <Route path="/checklist" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Checklist..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Checklist..." />:
                   <LazyChecklistPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
+                </Layout>
+          } />
+          } />
+          <Route path="/pricing" element={
+            <ProtectedRoute>
+              <Layout>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Pricing..." />:
+                  <LazyPricingPage />
+                </Layout>
+          } />
           } />
           <Route path="/settings" element={
             <ProtectedRoute>
               <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Settings..." />}>
+                <LazyWrapper fallback={<PageLoadingFallback title="Loading Settings..." />:
                   <LazySettingsPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
+                </Layout>
+          } />
           } />
           <Route path="*" element={<NotFound />} />
         </Routes>

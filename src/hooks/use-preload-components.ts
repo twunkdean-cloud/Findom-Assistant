@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import { preloadComponent } from '@/utils/lazy-loading';
 
-export const usePreloadComponents = () => {
+export const preloadComponent = (component: () => Promise<void>) => {
   useEffect(() => {
     // Preload critical components after initial render
     const timer = setTimeout(() => {

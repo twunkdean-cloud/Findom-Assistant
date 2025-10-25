@@ -1,36 +1,37 @@
 import { useState, useCallback } from 'react';
 
 interface LoadingState {
-  [key: string]: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 export const useLoadingState = () => {
-  const [loadingStates, setLoadingStates] = useState<LoadingState>({});
+  const [state, setState] = useState<LoadingState>({
+    isLoading: false,
+    error: null,
+  });
 
-  const setLoading = useCallback((key: string, isLoading: boolean) => {
-    setLoadingStates(prev => ({
-      ...prev,
-      [key]: isLoading,
-    }));
+  const setLoading = useCallback((isLoading: boolean) => {
+    setState(prev => ({ ...prev, isLoading }));
   }, []);
 
-  const isLoading = useCallback((key: string) => {
-    return loadingStates[key] || false;
-  }, [loadingStates]);
+  const setError = useCallback((error: string | null) => {
+    setState(prev => ({ ...prev, error, isLoading: false }));
+  }, []);
 
-  const isAnyLoading = useCallback(() => {
-    return Object.values(loadingStates).some(Boolean);
-  }, [loadingStates]);
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }));
+  }, []);
 
-  const clearAllLoading = useCallback(() => {
-    setLoadingStates({});
+  const reset = useCallback(() => {
+    setState({ isLoading: false, error: null });
   }, []);
 
   return {
+    ...state,
     setLoading,
-    isLoading,
-    isAnyLoading,
-    clearAllLoading,
-    loadingStates,
+    setError,
+    clearError,
+    reset,
   };
 };

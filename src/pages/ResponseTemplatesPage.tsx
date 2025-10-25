@@ -12,7 +12,15 @@ import { useFindom } from '@/context/FindomContext';
 import { toast } from 'sonner';
 import { Loader2, Save, Copy } from 'lucide-react';
 
-const ResponseTemplatesPage = () => {
+interface Template {
+  id: string;
+  name: string;
+  content: string;
+  category: string;
+  tone: string;
+}
+
+const ResponseTemplatesPage: React.FC = () => {
   const { appData, updateAppData } = useFindom();
   const { callGemini, isLoading, error } = useGemini();
   const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
@@ -21,7 +29,7 @@ const ResponseTemplatesPage = () => {
   const [context, setContext] = useState<string>('');
   const [generatedResponse, setGeneratedResponse] = useState<string>('');
 
-  // Load saved response for the current type when type changes
+  // Load saved response for current type when type changes
   useEffect(() => {
     setGeneratedResponse(appData.responses?.[responseType] || '');
   }, [responseType, appData.responses]);
@@ -35,7 +43,7 @@ const ResponseTemplatesPage = () => {
     setGeneratedResponse('');
     let userPrompt = '';
     let systemInstruction = getSystemPrompt('response') + ` 
-Generate a ${responseType} response based on the user's topic. 
+Generate a ${responseType} response based on user's topic. 
 Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
 Do not include any introductory or concluding remarks, just the response content.`;
 
@@ -61,16 +69,18 @@ Do not include any introductory or concluding remarks, just the response content
         systemInstruction += " Generate a concise, dominant message delivering a punishment to a sub.";
         break;
       default:
-        userPrompt = `Generate a response for the following scenario: ${context}`;
-        systemInstruction += " Generate a concise, dominant response for the given scenario.";
+        userPrompt = `Generate a response for following scenario: ${context}`;
+        systemInstruction += " Generate a concise, dominant response for given scenario.";
         break;
     }
 
-    const result = await callGemini(userPrompt, systemInstruction);
-    if (result) {
-      setGeneratedResponse(result);
-      toast.success('Response generated successfully!');
-    } else if (error) {
+    try {
+      const result = await callGemini(userPrompt, systemInstruction);
+      if (result) {
+        setGeneratedResponse(result);
+        toast.success('Response generated successfully!');
+      }
+    } catch (error) {
       toast.error(`Failed to generate response: ${error}`);
     }
   };
@@ -103,7 +113,7 @@ Do not include any introductory or concluding remarks, just the response content
         Generate and save AI-powered responses for common interactions with your {isMale ? 'subs' : 'worshippers'}.
       </p>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-gray-800 border-gray-700 p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generate Response</CardTitle>
         </CardHeader>
@@ -114,7 +124,7 @@ Do not include any introductory or concluding remarks, just the response content
               <SelectTrigger id="response-type" className="w-full p-2 bg-gray-900 border-gray-700 rounded text-gray-200">
                 <SelectValue placeholder="Select a response type" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
+              <SelectContent className="bg-gray-800 border-gray-700">
                 <SelectItem value="initial">Initial Greeting</SelectItem>
                 <SelectItem value="tribute">Tribute Received</SelectItem>
                 <SelectItem value="excuse">Excuse Rejected</SelectItem>
@@ -127,7 +137,7 @@ Do not include any introductory or concluding remarks, just the response content
             <Label htmlFor="context">Context / Details</Label>
             <Textarea
               id="context"
-              placeholder={`Provide any specific details or context for the response (e.g., ${isMale 
+              placeholder={`Provide any specific details or context for response (e.g., ${isMale 
                 ? "'sub's name is John', 'tribute amount was $50', 'excuse was being busy with work'" 
                 : "'worshipper's name is pet', 'tribute amount was $100', 'excuse was being unworthy'"})`}
               value={context}
@@ -148,7 +158,7 @@ Do not include any introductory or concluding remarks, just the response content
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-gray-800 border-gray-700 p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generated Response</CardTitle>
         </CardHeader>
@@ -158,7 +168,7 @@ Do not include any introductory or concluding remarks, just the response content
               value={generatedResponse}
               readOnly
               rows={6}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+              className="w-full p-2 bg-gray-900 border-gray-700 rounded text-gray-300"
             />
           ) : (
             <p className="text-gray-500 text-center">Your generated response will appear here...</p>

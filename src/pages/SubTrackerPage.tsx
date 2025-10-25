@@ -10,11 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFindom } from '@/context/FindomContext';
-import { Sub } from '@/types/index';
+import { Sub } from '@/types';
 import { toast } from 'sonner';
 import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
 
-const SubTrackerPage = () => {
+const SubTrackerPage: React.FC = () => {
   const { appData, updateSubs } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -50,13 +50,11 @@ const SubTrackerPage = () => {
       reader.onload = (e) => {
         try {
           const content = e.target?.result as string;
-          // Optionally parse and re-stringify to validate JSON
           JSON.parse(content);
           setSubConversationHistory(content);
           setConversationFileName(file.name);
           toast.success('Conversation history uploaded!');
         } catch (error) {
-          console.error('Error parsing conversation history file:', error);
           toast.error('Failed to parse conversation history. Please ensure it is valid JSON.');
           setSubConversationHistory(undefined);
           setConversationFileName(undefined);
@@ -130,12 +128,12 @@ const SubTrackerPage = () => {
   const openEditDialog = (sub: Sub) => {
     setCurrentSub(sub);
     setSubName(sub.name);
-    setSubTotal(sub.total.toString()); // Convert to string for input field
+    setSubTotal(sub.total.toString());
     setSubLastTribute(sub.lastTribute);
     setSubPreferences(sub.preferences);
     setSubNotes(sub.notes);
     setSubConversationHistory(sub.conversationHistory);
-    setConversationFileName(sub.conversationHistory ? 'conversation.json' : undefined); // Placeholder name
+    setConversationFileName(sub.conversationHistory ? 'conversation.json' : undefined);
     setIsEditDialogOpen(true);
   };
 
@@ -144,16 +142,17 @@ const SubTrackerPage = () => {
       <h2 className="text-2xl font-bold text-gray-100">Sub Tracker</h2>
       <p className="text-sm text-gray-400 mb-4">Keep track of your loyal subs, their tributes, and preferences.</p>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-gray-800 border-gray-700 p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-semibold">Your Subs</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-200">Your Subs</CardTitle>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                <PlusCircle className="mr-2 h-4 w-4" /> Add New Sub
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add New Sub
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-gray-800 border border-gray-700 text-gray-200">
+            <DialogContent className="bg-gray-800 border-gray-700 text-gray-200">
               <DialogHeader>
                 <DialogTitle className="text-lg font-semibold">Add New Sub</DialogTitle>
               </DialogHeader>
@@ -165,7 +164,7 @@ const SubTrackerPage = () => {
                     placeholder="Sub's Name"
                     value={subName}
                     onChange={(e) => setSubName(e.target.value)}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                    className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
                     required
                   />
                 </div>
@@ -177,7 +176,7 @@ const SubTrackerPage = () => {
                     placeholder="0"
                     value={subTotal}
                     onChange={(e) => setSubTotal(e.target.value)}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                    className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
                   />
                 </div>
                 <div>
@@ -187,7 +186,7 @@ const SubTrackerPage = () => {
                     type="date"
                     value={subLastTribute}
                     onChange={(e) => setSubLastTribute(e.target.value)}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                    className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
                   />
                 </div>
                 <div>
@@ -198,7 +197,7 @@ const SubTrackerPage = () => {
                     value={subPreferences}
                     onChange={(e) => setSubPreferences(e.target.value)}
                     rows={3}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                    className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
                   />
                 </div>
                 <div>
@@ -209,7 +208,7 @@ const SubTrackerPage = () => {
                     value={subNotes}
                     onChange={(e) => setSubNotes(e.target.value)}
                     rows={3}
-                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                    className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
                   />
                 </div>
                 <div className="space-y-2">
@@ -223,7 +222,8 @@ const SubTrackerPage = () => {
                   />
                   {conversationFileName && (
                     <p className="text-xs text-gray-400 flex items-center">
-                      <UploadCloud className="h-3 w-3 mr-1" /> {conversationFileName} uploaded.
+                      <UploadCloud className="h-3 w-3 mr-1" />
+                      {conversationFileName} uploaded.
                     </p>
                   )}
                 </div>
@@ -286,7 +286,7 @@ const SubTrackerPage = () => {
 
       {/* Edit Sub Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-800 border border-gray-700 text-gray-200">
+        <DialogContent className="bg-gray-800 border-gray-700 text-gray-200">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">Edit Sub</DialogTitle>
           </DialogHeader>
@@ -298,7 +298,7 @@ const SubTrackerPage = () => {
                 placeholder="Sub's Name"
                 value={subName}
                 onChange={(e) => setSubName(e.target.value)}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
                 required
               />
             </div>
@@ -310,7 +310,7 @@ const SubTrackerPage = () => {
                 placeholder="0"
                 value={subTotal}
                 onChange={(e) => setSubTotal(e.target.value)}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
               />
             </div>
             <div>
@@ -320,7 +320,7 @@ const SubTrackerPage = () => {
                 type="date"
                 value={subLastTribute}
                 onChange={(e) => setSubLastTribute(e.target.value)}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
               />
             </div>
             <div>
@@ -331,7 +331,7 @@ const SubTrackerPage = () => {
                 value={subPreferences}
                 onChange={(e) => setSubPreferences(e.target.value)}
                 rows={3}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
               />
             </div>
             <div>
@@ -342,7 +342,7 @@ const SubTrackerPage = () => {
                 value={subNotes}
                 onChange={(e) => setSubNotes(e.target.value)}
                 rows={3}
-                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                className="w-full p-2 bg-gray-900 border-gray-600 text-gray-200"
               />
             </div>
             <div className="space-y-2">
@@ -356,12 +356,14 @@ const SubTrackerPage = () => {
               />
               {conversationFileName && (
                 <p className="text-xs text-gray-400 flex items-center">
-                  <UploadCloud className="h-3 w-3 mr-1" /> {conversationFileName} uploaded.
+                  <UploadCloud className="h-3 w-3 mr-1" />
+                  {conversationFileName} uploaded.
                 </p>
               )}
               {!conversationFileName && currentSub?.conversationHistory && (
                 <p className="text-xs text-gray-400 flex items-center">
-                  <UploadCloud className="h-3 w-3 mr-1" /> Existing conversation history present.
+                  <UploadCloud className="h-3 w-3 mr-1" />
+                  Existing conversation history present.
                 </p>
               )}
             </div>

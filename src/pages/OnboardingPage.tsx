@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Crown, Heart, Sparkles, Users, ArrowRight } from 'lucide-react';
 
-const OnboardingPage = () => {
+const OnboardingPage: React.FC = () => {
   const { appData, updateAppData } = useFindom();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);

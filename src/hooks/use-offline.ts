@@ -27,32 +27,7 @@ export const useOffline = () => {
       toast.showError('You\'re offline. Changes will sync when you\'re back online.');
     };
 
-    const updateQueueDisplay = async () => {
-      try {
-        const queuedActions = await offlineQueue.getQueue();
-        setQueue(queuedActions);
-      } catch (error) {
-        console.error('Failed to update queue display:', error);
-      }
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // Initial queue update
-    updateQueueDisplay();
-
-    // Update queue display periodically
-    const interval = setInterval(updateQueueDisplay, 5000);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      clearInterval(interval);
-    };
-  }, [toast]);
-
-  const addToQueue = async (action: {
+    const addToQueue = async (action: {
     url: string;
     method: string;
     headers: Record<string, string>;
@@ -68,31 +43,32 @@ export const useOffline = () => {
     }
   };
 
-  const updateQueueDisplay = async () => {
-    try {
-      const queuedActions = await offlineQueue.getQueue();
-      setQueue(queuedActions);
-    } catch (error) {
-      console.error('Failed to update queue display:', error);
-    }
-  };
+    const updateQueueDisplay = async () => {
+      try {
+        const queuedActions = await offlineQueue.getQueue();
+        setQueue(queuedActions);
+      } catch (error) {
+        console.error('Failed to update queue display:', error);
+      }
+    };
 
-  const clearQueue = async () => {
-    try {
-      await offlineQueue.clearQueue();
-      setQueue([]);
-      toast.showSuccess('Queue cleared');
-    } catch (error) {
-      console.error('Failed to clear queue:', error);
-      toast.showError('Failed to clear queue');
-    }
-  };
+    const clearQueue = async () => {
+      try {
+        await offlineQueue.clearQueue();
+        setQueue([]);
+        toast.showSuccess('Queue cleared');
+      } catch (error) {
+        console.error('Failed to clear queue:', error);
+        toast.showError('Failed to clear queue');
+      }
+    };
 
-  return {
-    isOffline,
-    queue,
-    addToQueue,
-    clearQueue,
-    queueLength: queue.length,
-  };
+    return {
+      isOffline,
+      queue,
+      addToQueue,
+      clearQueue,
+      queueLength: queue.length,
+    };
+  }, [toast]);
 };

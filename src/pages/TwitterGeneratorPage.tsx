@@ -7,107 +7,98 @@ import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
-const TwitterGeneratorPage = () => {
-  const { callGemini, isLoading, error } = useGemini();
-  const { getSystemPrompt, getHashtags, isMale, isFemale } = useGenderedContent();
-  const [topic, setTopic] = useState('');
-  const [generatedTweet, setGeneratedTweet] = useState('');
+const TwitterGeneratorPage: React.FC = () => {
+  const { callGemini, isLoading } = useGemini();
+  const { getSystemPrompt } = useGenderedContent();
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
 
-  const handleGenerateTweet = async () => {
-    if (!topic.trim()) {
-      toast.error('Please enter a topic for the tweet.');
+  const generateTweet = async () => {
+    if (!input.trim()) {
+      toast.error('Please enter a topic or idea');
       return;
     }
 
-    setGeneratedTweet('');
-    const systemPrompt = getSystemPrompt('twitter') + ` 
-Generate a single tweet (max 280 characters) based on the user's topic. 
-Include relevant emojis and hashtags. 
-Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
-Do not include any introductory or concluding remarks, just the tweet content.`;
-    
-    const userPrompt = `Generate a tweet about: ${topic}`;
-
-    const result = await callGemini(userPrompt, systemPrompt);
-    if (result) {
-      setGeneratedTweet(result);
-      toast.success('Tweet generated successfully!');
-    } else if (error) {
-      toast.error(`Failed to generate tweet: ${error}`);
+    try {
+      const systemPrompt = getSystemPrompt('twitter');
+      const userPrompt = `Generate a tweet about: ${input}`;
+      
+      const result = await callGemini(userPrompt, systemPrompt);
+      if (result) {
+        setOutput(result);
+        toast.success('Tweet generated successfully');
+      }
+    } catch (error) {
+      toast.error('Failed to generate tweet');
     }
   };
 
-  const handleCopyTweet = () => {
-    if (generatedTweet.trim()) {
-      navigator.clipboard.writeText(generatedTweet.trim());
-      toast.success('Tweet copied to clipboard!');
-    } else {
-      toast.error('No tweet to copy.');
-    }
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(output);
+    toast.success('Copied to clipboard');
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-100">Tweet Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">
-        Generate engaging tweets based on your {isMale ? 'Findom' : 'Femdom'} persona and a given topic.
-      </p>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-100">Tweet Generator</h1>
+      </div>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Topic for Tweet</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Textarea
-            placeholder={`Enter the topic for your tweet (e.g., ${isMale 
-              ? "'a sub sending tribute', 'my dominance', 'foot worship'" 
-              : "'a worshipper serving me', 'my divine power', 'paypig obedience'"})`}
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            rows={3}
-            className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
-            disabled={isLoading}
-          />
-          <Button
-            onClick={handleGenerateTweet}
-            disabled={isLoading || !topic.trim()}
-            className="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 w-full flex items-center justify-center"
-          >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate Tweet
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white">Generate Tweet</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm text-gray-300 mb-2 block">Topic or Idea</label>
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Enter your topic or idea..."
+                rows={3}
+                className="bg-gray-900 border-gray-700 text-gray-200"
+              />
+            </div>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Generated Tweet</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {generatedTweet ? (
-            <Textarea
-              value={generatedTweet}
-              readOnly
-              rows={4}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
-            />
-          ) : (
-            <p className="text-gray-500 text-center">Your generated tweet will appear here...</p>
-          )}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">
-              {generatedTweet.length}/280 characters
-            </span>
             <Button
-              onClick={handleCopyTweet}
-              disabled={!generatedTweet.trim()}
-              className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center"
+              onClick={generateTweet}
+              disabled={isLoading}
+              className="w-full bg-indigo-600 hover:bg-indigo-700"
             >
-              <Copy className="mr-2 h-4 w-4" /> Copy Tweet
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Generate Tweet
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white">Generated Tweet</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {output ? (
+              <Textarea
+                value={output}
+                readOnly
+                rows={4}
+                className="bg-gray-900 border-gray-700 text-gray-200"
+              />
+            ) : (
+              <p className="text-gray-500 text-center py-8">Your generated tweet will appear here...</p>
+            )}
+            
+            <Button
+              onClick={copyToClipboard}
+              disabled={!output}
+              className="w-full bg-blue-600 hover:bg-blue-700 mt-4"
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              Copy to Clipboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

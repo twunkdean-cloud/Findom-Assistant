@@ -1,123 +1,103 @@
-interface QueuedAction {
+interface QueueItem {
   id: string;
-  url: string;
-  method: string;
-  headers: Record<string, string>;
-  body?: string;
+  type: string;
+  data: any;
   timestamp: number;
-  retryCount?: number;
+  retryCount: number;
 }
 
 class OfflineQueue {
-  private dbName = 'OfflineQueueDB';
-  private version = 1;
-  private storeName = 'queue';
+  private queue: QueueItem[] = [];
+  private isProcessing = false;
+  private maxRetries = 3;
 
-  async addToQueue(action: Omit<QueuedAction, 'id' | 'timestamp'>): Promise<void> {
-    const db = await this.openDB();
-    const transaction = db.transaction([this.storeName], 'readwrite');
-    const store = transaction.objectStore(this.storeName);
-    
-    const queuedAction: QueuedAction = {
-      ...action,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+  constructor() {
+    this.loadQueue();
+  }
+
+  private loadQueue(): void {
+    try {
+      const stored = localStorage.getItem('offlineQueue');
+      if (stored) {
+        this.queue = JSON.parse(stored);
+      }
+    } catch (error) {
+      console.warn('Failed to load offline queue:', error);
+    }
+  }
+
+  private saveQueue(): void {
+    try {
+      localStorage.setItem('offlineQueue', JSON.stringify(this.queue));
+    } catch (error) {
+      console.warn('Failed to save offline queue:', error);
+    }
+  }
+
+  public add(item: Omit<QueueItem, 'id' | 'timestamp' | 'retryCount'>): void {
+    const queueItem: QueueItem = {
+      ...item,
+      id: Date.now().toString(),
       timestamp: Date.now(),
-      retryCount: 0
+      retryCount: 0,
     };
-    
-    await store.add(queuedAction);
-    db.close();
+
+    this.queue.push(queueItem);
+    this.saveQueue();
   }
 
-  async getQueue(): Promise<QueuedAction[]> {
-    const db = await this.openDB();
-    const transaction = db.transaction([this.storeName], 'readonly');
-    const store = transaction.objectStore(this.storeName);
-    const request = store.getAll();
-    
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => {
-        const actions = request.result as QueuedAction[];
-        db.close();
-        resolve(actions);
-      };
-      request.onerror = () => {
-        db.close();
-        reject(request.error);
-      };
-    });
-  }
+  public async process(): Promise<void> {
+    if (this.isProcessing || this.queue.length === 0) {
+      return;
+    }
 
-  async removeFromQueue(id: string): Promise<void> {
-    const db = await this.openDB();
-    const transaction = db.transaction([this.storeName], 'readwrite');
-    const store = transaction.objectStore(this.storeName);
-    await store.delete(id);
-    db.close();
-  }
+    this.isProcessing = true;
 
-  async clearQueue(): Promise<void> {
-    const db = await this.openDB();
-    const transaction = db.transaction([this.storeName], 'readwrite');
-    const store = transaction.objectStore(this.storeName);
-    await store.clear();
-    db.close();
-  }
-
-  async processQueue(): Promise<void> {
-    const actions = await this.getQueue();
-    
-    for (const action of actions) {
+    while (this.queue.length > 0) {
+      const item = this.queue[0];
+      
       try {
-        await this.processAction(action);
-        await this.removeFromQueue(action.id);
+        await this.processItem(item);
+        this.queue.shift();
       } catch (error) {
-        console.error('Failed to process queued action:', error);
+        item.retryCount++;
         
-        // Increment retry count
-        action.retryCount = (action.retryCount || 0) + 1;
-        
-        // Remove if too many retries
-        if (action.retryCount >= 3) {
-          await this.removeFromQueue(action.id);
+        if (item.retryCount >= this.maxRetries) {
+          console.warn(`Max retries exceeded for item ${item.id}:`, error);
+          this.queue.shift();
         } else {
-          // Update retry count
-          const db = await this.openDB();
-          const transaction = db.transaction([this.storeName], 'readwrite');
-          const store = transaction.objectStore(this.storeName);
-          await store.put(action);
-          db.close();
+          // Exponential backoff
+          const delay = Math.pow(2, item.retryCount) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
+
+    this.isProcessing = false;
+    this.saveQueue();
   }
 
-  private async processAction(action: QueuedAction): Promise<void> {
-    const response = await fetch(action.url, {
-      method: action.method,
-      headers: action.headers,
-      body: action.body
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+  private async processItem(item: QueueItem): Promise<void> {
+    // This would be implemented based on the specific item type
+    switch (item.type) {
+      case 'api_call':
+        // Process API call
+        break;
+      case 'data_sync':
+        // Process data sync
+        break;
+      default:
+        throw new Error(`Unknown item type: ${item.type}`);
     }
   }
 
-  private async openDB(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.version);
-      
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-      
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(this.storeName)) {
-          db.createObjectStore(this.storeName, { keyPath: 'id' });
-        }
-      };
-    });
+  public clear(): void {
+    this.queue = [];
+    this.saveQueue();
+  }
+
+  public getQueue(): QueueItem[] {
+    return [...this.queue];
   }
 }
 
