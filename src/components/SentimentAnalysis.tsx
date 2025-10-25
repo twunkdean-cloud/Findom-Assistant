@@ -65,6 +65,8 @@ const SentimentAnalysis = () => {
     }
   };
 
+  const subsWithHistory = appData.subs.filter(sub => sub.conversationHistory);
+
   return (
     <Card className="bg-gray-800 border border-gray-700">
       <CardHeader>
@@ -82,14 +84,14 @@ const SentimentAnalysis = () => {
                 <SelectValue placeholder="Choose a sub with conversation history" />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
-                {appData.subs.length > 0 ? (
-                  appData.subs.map((sub) => (
-                    <SelectItem key={sub.id} value={sub.name} disabled={!sub.conversationHistory}>
-                      {sub.name} {!sub.conversationHistory && '(No History)'}
+                {subsWithHistory.length > 0 ? (
+                  subsWithHistory.map((sub) => (
+                    <SelectItem key={sub.id} value={sub.name}>
+                      {sub.name}
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="p-2 text-center text-sm text-gray-500">No subs found.</div>
+                  <div className="p-2 text-center text-sm text-gray-500">No subs with conversation history.</div>
                 )}
               </SelectContent>
             </Select>

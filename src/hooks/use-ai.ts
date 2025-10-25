@@ -140,6 +140,8 @@ export const useAI = () => {
   const analyzeSubConversation = async (
     request: ConversationAnalysisRequest
   ): Promise<ServiceResponse<AIAnalytics>> => {
+    setIsLoading(true);
+    setError(null);
     const systemPrompt = `You are an expert in findom relationship dynamics and sentiment analysis.
     Analyze conversation history and provide:
     1. Sentiment score (-100 to 100, where negative indicates dissatisfaction)
@@ -171,14 +173,20 @@ export const useAI = () => {
       }
       throw new Error("Failed to parse AI response.");
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Analysis failed';
       console.error('Error analyzing conversation:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Analysis failed' };
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const generatePersonalizedContent = async (
     request: ContentGenerationRequest
   ): Promise<ServiceResponse<AIContentSuggestion[]>> => {
+    setIsLoading(true);
+    setError(null);
     const systemPrompt = `You are a creative findom content creator specializing in personalized content.
     Generate 3 content suggestions based on sub's profile and preferences.
     Each suggestion should include content, tone, and reasoning for why it would work well.
@@ -209,8 +217,12 @@ export const useAI = () => {
       }
       throw new Error("Failed to parse AI response for content generation.");
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Content generation failed';
       console.error('Error generating content:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Content generation failed' };
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -219,6 +231,8 @@ export const useAI = () => {
     subName: string,
     context: string
   ): Promise<ServiceResponse<string>> => {
+    setIsLoading(true);
+    setError(null);
     const systemPrompt = `You are an AI assistant for a findom dominant.
     Generate appropriate, professional responses to routine inquiries.
     Maintain dominant persona while being helpful and clear.
@@ -232,8 +246,12 @@ export const useAI = () => {
       const result = await callGemini(userPrompt, systemPrompt);
       return { data: result || 'Thank you for your message. I will review and respond appropriately.', success: true };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Response generation failed';
       console.error('Error generating response:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Response generation failed' };
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
     }
   };
 
