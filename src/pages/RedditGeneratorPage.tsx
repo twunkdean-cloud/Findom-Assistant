@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useGemini } from '@/hooks/use-gemini';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
-import { toast } from '@/utils/toast-unified';
+import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
 const RedditGeneratorPage = () => {

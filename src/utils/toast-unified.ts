@@ -1,7 +1,6 @@
 import { toast as sonnerToast } from 'sonner';
-import { toast as shadcnToast } from '@/hooks/use-toast';
 
-// Use sonner as primary (already integrated in main.tsx)
+// Use sonner as primary toast system
 export const toast = {
   success: (message: string, options?: any) => sonnerToast.success(message, options),
   error: (message: string, options?: any) => sonnerToast.error(message, options),
@@ -10,6 +9,3 @@ export const toast = {
   loading: (message: string, options?: any) => sonnerToast.loading(message, options),
   dismiss: (id?: string | number) => sonnerToast.dismiss(id),
 };
-
-// Export shadcn toast for components that need it
-export { shadcnToast };

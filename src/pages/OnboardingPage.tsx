@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useFindom } from '@/context/FindomContext';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/utils/toast-unified';
+import { toast } from 'sonner';
 import { Crown, Heart, Sparkles, Users, ArrowRight } from 'lucide-react';
 
 const OnboardingPage = () => {
