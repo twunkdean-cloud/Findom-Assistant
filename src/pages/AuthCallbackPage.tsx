@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const AuthCallbackPage: React.FC = () => {
+const AuthCallbackPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,8 +31,9 @@ const AuthCallbackPage: React.FC = () => {
           toast.success('Email confirmed successfully!');
           // Clean up URL
           const url = new URL(window.location.pathname);
-          window.history.replaceState({}, url.pathname);
+          window.history.replaceState({}, '', url.pathname);
           navigate('/', { replace: true });
+          return;
         }
         
         // Fallback to getting current session

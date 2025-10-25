@@ -35,13 +35,15 @@ export const usePerformance = () => {
       
       if (currentTime >= lastTime + 1000) {
         const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-        setMetrics(prev => ({ ...prev, fps });
+        setMetrics(prev => ({ ...prev, fps }));
         frameCount = 0;
         lastTime = currentTime;
       }
       
       requestAnimationFrame(measureFPS);
-    }, []);
+    };
+
+    requestAnimationFrame(measureFPS);
 
     // Monitor memory usage (if available)
     if ('memory' in performance) {
@@ -50,9 +52,9 @@ export const usePerformance = () => {
         setMetrics(prev => ({
           ...prev,
           memoryUsage: memory.usedJSHeapSize / 1024 / 1024, // Convert to MB
-        });
+        }));
       };
-      
+
       setInterval(checkMemory, 5000); // Check every 5 seconds
     }
   }, []);

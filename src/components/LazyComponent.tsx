@@ -1,25 +1,40 @@
-import React, { Suspense, lazy } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { LazyWrapper, ComponentLoadingFallback, useIntersectionObserver } from '@/utils/lazy-loading';
 
 interface LazyComponentProps {
-  componentPath: string;
+  component: React.LazyExoticComponent<React.ComponentType<any>>;
+  componentProps?: Record<string, any>;
   fallback?: React.ReactNode;
+  rootMargin?: string;
+  threshold?: number;
 }
 
-const LazyComponent: React.FC<LazyComponentProps> = ({ 
-  componentPath, 
-  fallback = (
-    <div className="flex items-center justify-center p-8">
-      <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
-    </div>
-  )
+export const LazyComponent: React.FC<LazyComponentProps> = ({
+  component: Component,
+  componentProps = {},
+  fallback,
+  rootMargin = '50px',
+  threshold = 0.1
 }) => {
-  const LazyLoadedComponent = lazy(() => import(componentPath));
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useIntersectionObserver(
+    elementRef,
+    () => setShouldLoad(true),
+    { rootMargin, threshold }
+  );
 
   return (
-    <Suspense fallback={fallback}>
-      <LazyLoadedComponent />
-    </Suspense>
+    <div ref={elementRef}>
+      {shouldLoad ? (
+        <LazyWrapper fallback={fallback}>
+          <Component {...componentProps} />
+        </LazyWrapper>
+      ) : (
+        fallback || <ComponentLoadingFallback />
+      )}
+    </div>
   );
 };
 

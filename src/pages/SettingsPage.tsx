@@ -13,8 +13,8 @@ import { Save, User, Bell, Shield, Palette, Download, Upload, Crown } from 'luci
 import GenderSelector from '@/components/ui/gender-selector';
 import { PERSONA_OPTIONS } from '@/constants';
 
-const SettingsPage: React.FC = () => {
-  const { user } = useAuth();
+const SettingsPage = () => {
+  const { user, signOut } = useAuth();
   const { appData, updateAppData } = useFindom();
   const [isSaving, setIsSaving] = useState(false);
   
@@ -99,9 +99,8 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSignOut = async () => {
-    const { signOut } = useAuth();
     await signOut();
-    toast.success('Signed out successfully!');
+    toast.success('Signed out successfully');
   };
 
   const getPersonaOptions = () => {
@@ -215,11 +214,8 @@ const SettingsPage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white">Profile Visibility</p>
-              <p className="text-sm text-gray-400">Who can see your profile</p>
-            </div>
+          <div>
+            <Label className="text-gray-300">Profile Visibility</Label>
             <Select value={profileVisibility} onValueChange={(value: 'private' | 'friends' | 'public') => setProfileVisibility(value)}>
               <SelectTrigger className="bg-gray-900 border-gray-600 text-gray-200">
                 <SelectValue />

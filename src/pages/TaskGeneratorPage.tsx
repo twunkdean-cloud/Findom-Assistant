@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,113 +11,120 @@ import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from 'sonner';
 import { Loader2, Copy } from 'lucide-react';
 
-const TaskGeneratorPage: React.FC = () => {
-  const { callGemini, isLoading } = useGemini();
-  const { getSystemPrompt } = useGenderedContent();
-  const [input, setInput] = useState('');
+const TaskGeneratorPage = () => {
+  const { callGemini, isLoading, error } = useGemini();
+  const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
+  const [topic, setTopic] = useState('');
   const [intensity, setIntensity] = useState<'low' | 'medium' | 'high'>('medium');
-  const [output, setOutput] = useState('');
+  const [generatedTask, setGeneratedTask] = useState('');
 
-  const generateTask = async () => {
-    if (!input.trim()) {
+  const handleGenerateTask = async () => {
+    if (!topic.trim()) {
       toast.error('Please enter a topic for task.');
       return;
     }
 
-    try {
-      const systemPrompt = getSystemPrompt('task');
-      const userPrompt = `Generate a creative task about: ${input}`;
-      
-      const result = await callGemini(userPrompt, systemPrompt);
-      if (result) {
-        setOutput(result);
-        toast.success('Task generated successfully');
-      }
-    } catch (error) {
-      toast.error('Failed to generate task');
+    setGeneratedTask('');
+    const systemPrompt = getSystemPrompt('task') + ` 
+Generate a creative ${isMale ? 'findom' : 'femdom'} task for a sub based on the user's topic. 
+The task should be of ${intensity} intensity.
+Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
+Do not include any introductory or concluding remarks, just the task content.`;
+    
+    const userPrompt = `Generate a ${isMale ? 'findom' : 'femdom'} task about: ${topic}`;
+
+    const result = await callGemini(userPrompt, systemPrompt);
+    if (result) {
+      setGeneratedTask(result);
+      toast.success('Task generated successfully!');
+    } else if (error) {
+      toast.error(`Failed to generate task: ${error}`);
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(output);
-    toast.success('Copied to clipboard');
+  const handleCopyTask = () => {
+    if (generatedTask.trim()) {
+      navigator.clipboard.writeText(generatedTask.trim());
+      toast.success('Task copied to clipboard!');
+    } else {
+      toast.error('No task to copy.');
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-100">Task Generator</h1>
-      </div>
+      <h2 className="text-2xl font-bold text-gray-100">Task Generator</h2>
+      <p className="text-sm text-gray-400 mb-4">
+        Generate creative {isMale ? 'findom' : 'femdom'} tasks based on type and intensity.
+      </p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Generate Task</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm text-gray-300 mb-2 block">Task Topic</label>
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Enter your topic for task..."
-                rows={3}
-                className="bg-gray-900 border-gray-700 text-gray-200"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-gray-300 mb-2 block">Intensity</label>
-              <Select value={intensity} onValueChange={(value: 'low' | 'medium' | 'high') => setIntensity(value)}>
-                <SelectTrigger className="bg-gray-700 border-gray-600">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-700 border-gray-600">
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              onClick={generateTask}
+      <Card className="bg-gray-800 border border-gray-700 p-4">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Generate New Task</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="task-topic">Task Topic</Label>
+            <Textarea
+              id="task-topic"
+              placeholder={`Enter the topic for the task (e.g., ${isMale 
+                ? "'a public display of devotion', 'a financial challenge', 'a humiliating confession'" 
+                : "'an act of worship', 'a tribute ritual', 'a servitude demonstration'"})`}
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              rows={3}
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
               disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
-            >
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Generate Task
-            </Button>
-          </CardContent>
-        </Card>
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="task-intensity">Intensity</Label>
+            <Select value={intensity} onValueChange={(value: 'low' | 'medium' | 'high') => setIntensity(value)} disabled={isLoading}>
+              <SelectTrigger id="task-intensity" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+                <SelectValue placeholder="Select intensity" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            onClick={handleGenerateTask}
+            disabled={isLoading || !topic.trim()}
+            className="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 w-full flex items-center justify-center"
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Generate Task
+          </Button>
+        </CardContent>
+      </Card>
 
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Generated Task</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {output ? (
-              <Textarea
-                value={output}
-                readOnly
-                rows={6}
-                className="bg-gray-900 border-gray-700 text-gray-200"
-              />
-            ) : (
-              <p className="text-gray-500 text-center py-8">Your generated task will appear here...</p>
-            )}
-            
-            <Button
-              onClick={copyToClipboard}
-              disabled={!output}
-              className="w-full bg-blue-600 hover:bg-blue-700 mt-4"
-            >
-              <Copy className="mr-2 h-4 w-4" />
-              Copy to Clipboard
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="bg-gray-800 border border-gray-700 p-4">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Generated Task</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {generatedTask ? (
+            <Textarea
+              value={generatedTask}
+              readOnly
+              rows={6}
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+            />
+          ) : (
+            <p className="text-gray-500 text-center">Your generated task will appear here...</p>
+          )}
+          <Button
+            onClick={handleCopyTask}
+            disabled={!generatedTask.trim()}
+            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 w-full flex items-center justify-center"
+          >
+            <Copy className="mr-2 h-4 w-4" /> Copy Task
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };

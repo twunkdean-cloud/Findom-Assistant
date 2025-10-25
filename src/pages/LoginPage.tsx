@@ -10,9 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Crown, Heart } from 'lucide-react';
 
-const LoginPage: React.FC = () => {
+const LoginPage = () => {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -23,9 +22,8 @@ const LoginPage: React.FC = () => {
   // Handle email confirmation
   useEffect(() => {
     const confirmEmail = async () => {
-      const hashParams = new URLSearchParams(window.location.search);
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
       
       if (accessToken && refreshToken) {
         try {
@@ -36,21 +34,14 @@ const LoginPage: React.FC = () => {
           
           if (error) {
             toast.error('Error confirming email: ' + error.message);
-            navigate('/login');
-            return;
+          } else {
+            toast.success('Email confirmed successfully!');
+            navigate('/');
           }
-          
-          toast.success('Email confirmed successfully!');
-          // Clean up URL
-          const url = new URL(window.location.pathname);
-          window.history.replaceState({}, url.pathname);
-          navigate('/', { replace: true });
         } catch (error) {
-          console.error('Error confirming email:', error);
           toast.error('Error confirming email');
-          navigate('/login');
         }
-      };
+      }
     };
 
     confirmEmail();
@@ -91,7 +82,7 @@ const LoginPage: React.FC = () => {
         navigate('/');
       } else {
         toast.success('Account created! Please check your email to verify.');
-    }
+      }
     }
     setLoading(false);
   };
@@ -99,18 +90,12 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center space-x-2">
-              <Crown className="h-8 w-8 text-indigo-400" />
-              <Heart className="h-8 w-8 text-pink-400" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-white">Findom Assistant</CardTitle>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">Findom Assistant</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-700">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
@@ -125,7 +110,6 @@ const LoginPage: React.FC = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="Enter your email"
-                    className="bg-gray-900 border-gray-700 text-gray-200"
                   />
                 </div>
                 <div>
@@ -137,7 +121,6 @@ const LoginPage: React.FC = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Enter your password"
-                    className="bg-gray-900 border-gray-700 text-gray-200"
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
@@ -156,7 +139,6 @@ const LoginPage: React.FC = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="Enter your email"
-                    className="bg-gray-900 border-gray-700 text-gray-200"
                   />
                 </div>
                 <div>
@@ -169,21 +151,15 @@ const LoginPage: React.FC = () => {
                     required
                     placeholder="Create a password"
                     minLength={6}
-                    className="bg-gray-900 border-gray-700 text-gray-200"
                   />
                 </div>
-                <div className="flex flex space-x-2">
-                  <Button type="submit" className="flex-1 bg-green-600 hover:bg-green-700">
-                    {loading ? 'Creating account...' : 'Create Account'}
-                  </Button>
-                  <Button type="button" variant="secondary" onClick={() => setIsDialogOpen(false)} className="flex-1 bg-gray-600 hover:bg-gray-700">
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-              <p className="text-xs text-gray-400 text-center">
-                You'll receive a confirmation email after signing up
-              </p>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Creating account...' : 'Create Account'}
+                </Button>
+                <p className="text-xs text-gray-400 text-center">
+                  You'll receive a confirmation email after signing up
+                </p>
+              </form>
             </TabsContent>
           </Tabs>
         </CardContent>

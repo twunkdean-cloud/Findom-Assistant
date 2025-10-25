@@ -14,7 +14,7 @@ import {
   Crown
 } from 'lucide-react';
 
-const Index: React.FC = () => {
+const Index = () => {
   const { appData } = useFindom();
   const navigate = useNavigate();
 
@@ -75,7 +75,6 @@ const Index: React.FC = () => {
           <CardContent>
             <div className="text-2xl font-bold text-white">{completedTasks}/{totalTasks}</div>
             <Progress value={taskProgress} className="h-2 bg-gray-700 [&>*]:bg-purple-500" />
-            <p className="text-xs text-gray-500 mt-1">Daily tasks completed</p>
           </CardContent>
         </Card>
 
@@ -86,17 +85,9 @@ const Index: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p className="text-sm text-gray-400">Current: ${(appData.goal?.current || 0).toFixed(2)}</p>
+              <p className="text-2xl font-bold text-white">${(appData.goal?.current || 0).toFixed(2)}</p>
               <p className="text-sm text-gray-400">of ${(appData.goal?.target || 0).toFixed(2)}</p>
-              <Progress value={Math.min(goalProgress, 100)} className="h-2 bg-gray-700 [&>*]:bg-orange-500" />
-            </div>
-            <div className="text-center">
-              <span className={`text-2xl font-bold ${goalProgress >= 100 ? 'text-green-400' : 'text-yellow-400'}`}>
-                {goalProgress >= 100 ? 'Goal achieved! 🎉' : 'Keep going!'}
-              </span>
-              <p className="text-sm text-gray-500 mt-1">
-                {goalProgress >= 100 ? 'Goal achieved! 🎉' : 'Keep going!'}
-              </p>
+              <Progress value={Math.min(goalProgress, 100)} className="h-2 bg-gray-700 [&>*]:bg-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -114,30 +105,30 @@ const Index: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Button
               onClick={() => navigate('/tributes')}
-              className="bg-green-600 hover:bg-green-700 h-20 flex flex flex-col items-center justify-center"
+              className="bg-green-600 hover:bg-green-700 h-20 flex flex-col items-center justify-center"
             >
-              <DollarSign className="mr-2 h-4 w-4" />
+              <DollarSign className="h-6 w-6 mb-2" />
               <span>Add Tribute</span>
             </Button>
             <Button
               onClick={() => navigate('/tasks')}
-              className="bg-purple-600 hover:bg-purple-700 h-20 flex flex flex-col items-center justify-center"
+              className="bg-purple-600 hover:bg-purple-700 h-20 flex flex-col items-center justify-center"
             >
-              <CheckSquare className="mr-2 h-4 w-4" />
+              <CheckSquare className="h-6 w-6 mb-2" />
               <span>Generate Task</span>
             </Button>
             <Button
               onClick={() => navigate('/twitter')}
-              className="bg-blue-600 hover:bg-blue-700 h-20 flex flex flex-col items-center justify-center"
+              className="bg-blue-600 hover:bg-blue-700 h-20 flex flex-col items-center justify-center"
             >
-              <TrendingUp className="mr-2 h-4 w-4" />
+              <TrendingUp className="h-6 w-6 mb-2" />
               <span>Create Tweet</span>
             </Button>
             <Button
               onClick={() => navigate('/checklist')}
-              className="bg-orange-600 hover:bg-orange-700 h-20 flex flex flex-col items-center justify-center"
+              className="bg-orange-600 hover:bg-orange-700 h-20 flex flex-col items-center justify-center"
             >
-              <Calendar className="mr-2 h-4 w-4" />
+              <Calendar className="h-6 w-6 mb-2" />
               <span>View Calendar</span>
             </Button>
           </div>
@@ -158,17 +149,12 @@ const Index: React.FC = () => {
                 {recentTributes.map((tribute) => (
                   <div key={tribute.id} className="flex items-center justify-between">
                     <div>
-                      <p className="text-white font-medium">{tribute.from_sub}</p>
-                      <p className="text-gray-400 text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
-                      {tribute.reason && (
-                        <p className="text-gray-500 text-sm">{tribute.reason}</p>
-                      )}
+                      <p className="text-white font-medium">${tribute.amount.toFixed(2)}</p>
+                      <p className="text-gray-400 text-sm">{tribute.from_sub}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-green-400 font-semibold">${tribute.amount.toFixed(2)}</p>
-                      <Badge variant="outline" className="text-xs">
-                        {tribute.source}
-                      </Badge>
+                      <p className="text-gray-500 text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
+                      <p className="text-gray-600 text-xs">{tribute.source}</p>
                     </div>
                   </div>
                 ))}
@@ -184,19 +170,18 @@ const Index: React.FC = () => {
           </CardHeader>
           <CardContent>
             {upcomingEvents.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No upcoming events</p>
+              <p className="text-gray-500 text-center py-4">No upcoming events</p>
             ) : (
               <div className="space-y-3">
                 {upcomingEvents.map((event) => (
                   <div key={event.id} className="flex items-center justify-between">
                     <div>
                       <p className="text-white font-medium">{event.content.split('\n')[0]}</p>
-                      <p className="text-gray-400 text-sm">{new Date(event.datetime).toLocaleDateString()}</p>
-                      <p className="text-gray-500 text-sm">{event.platform}</p>
+                      <p className="text-gray-400 text-sm">{event.platform}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-gray-500 text-sm">{new Date(event.datetime).toLocaleTimeString()}</p>
-                      <p className="text-gray-600 text-xs">{event.platform}</p>
+                      <p className="text-gray-500 text-sm">{new Date(event.datetime).toLocaleDateString()}</p>
+                      <p className="text-gray-600 text-xs">{new Date(event.datetime).toLocaleTimeString()}</p>
                     </div>
                   </div>
                 ))}

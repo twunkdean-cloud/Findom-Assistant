@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { Plus, Edit, Trash2, DollarSign, Calendar } from 'lucide-react';
 import { Tribute } from '@/types';
 
-const TributeTrackerPage: React.FC = () => {
+const TributeTrackerPage = () => {
   const { appData, updateTributes } = useFindom();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -116,10 +116,7 @@ const TributeTrackerPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-100">Tribute Tracker</h2>
-      </div>
-
-      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-white">Tribute Tracker</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-indigo-600 hover:bg-indigo-700">
@@ -186,7 +183,7 @@ const TributeTrackerPage: React.FC = () => {
                   onChange={(e) => setTributeReason(e.target.value)}
                   placeholder="Reason for tribute..."
                   rows={3}
-                  className="w-full p-2 bg-gray-900 border-gray-600 text-white"
+                  className="bg-gray-900 border-gray-600 text-white"
                 />
               </div>
               <Button onClick={handleAddTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">
@@ -268,7 +265,7 @@ const TributeTrackerPage: React.FC = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="bg-gray-800 border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-white">Edit Tribute</DialogTitle>
           </DialogHeader>
@@ -327,7 +324,7 @@ const TributeTrackerPage: React.FC = () => {
                 onChange={(e) => setTributeReason(e.target.value)}
                 placeholder="Reason for tribute..."
                 rows={3}
-                className="w-full p-2 bg-gray-900 border-gray-600 text-white"
+                className="bg-gray-900 border-gray-600 text-white"
               />
             </div>
             <Button onClick={handleEditTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">
