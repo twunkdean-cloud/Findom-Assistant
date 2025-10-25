@@ -16,7 +16,6 @@ import {
   DollarSign, 
   MessageSquare, 
   FileText, 
-  Calendar, 
   Settings, 
   LogOut,
   TrendingUp,
@@ -24,75 +23,29 @@ import {
   Image,
   Twitter,
   MessageCircle,
-  CreditCard
+  CreditCard,
+  Bot,
+  Calendar
 } from 'lucide-react';
 
 const navigationItems = [
-  {
-    title: 'Dashboard',
-    icon: Home,
-    path: '/dashboard',
-  },
-  {
-    title: 'Subs',
-    icon: Users,
-    path: '/subs',
-  },
-  {
-    title: 'Tributes',
-    icon: DollarSign,
-    path: '/tributes',
-  },
-  {
-    title: 'Chat Assistant',
-    icon: MessageSquare,
-    path: '/chat',
-  },
-  {
-    title: 'Caption Generator',
-    icon: FileText,
-    path: '/captions',
-  },
-  {
-    title: 'Task Generator',
-    icon: CheckSquare,
-    path: '/tasks',
-  },
-  {
-    title: 'Response Templates',
-    icon: MessageCircle,
-    path: '/templates',
-  },
-  {
-    title: 'Twitter Generator',
-    icon: Twitter,
-    path: '/twitter',
-  },
-  {
-    title: 'Reddit Generator',
-    icon: MessageCircle,
-    path: '/reddit',
-  },
-  {
-    title: 'Image Vision',
-    icon: Image,
-    path: '/vision',
-  },
-  {
-    title: 'Checklists',
-    icon: CheckSquare,
-    path: '/checklists',
-  },
-  {
-    title: 'Pricing',
-    icon: CreditCard,
-    path: '/pricing',
-  },
-  {
-    title: 'Settings',
-    icon: Settings,
-    path: '/settings',
-  },
+  { title: 'Dashboard', icon: Home, path: '/' },
+  { title: 'Sub Tracker', icon: Users, path: '/subs' },
+  { title: 'Tributes', icon: DollarSign, path: '/tributes' },
+  { title: 'AI Assistant', icon: Bot, path: '/chat-assistant' },
+  { title: 'Checklist', icon: CheckSquare, path: '/checklist' },
+  { title: 'Content Calendar', icon: Calendar, path: '/calendar' },
+  { title: 'Pricing', icon: CreditCard, path: '/pricing' },
+  { title: 'Settings', icon: Settings, path: '/settings' },
+];
+
+const aiTools = [
+  { title: 'Twitter', icon: Twitter, path: '/twitter' },
+  { title: 'Reddit', icon: MessageCircle, path: '/reddit' },
+  { title: 'Captions', icon: FileText, path: '/caption' },
+  { title: 'Image Vision', icon: Image, path: '/image-vision' },
+  { title: 'Responses', icon: MessageSquare, path: '/responses' },
+  { title: 'Tasks', icon: CheckSquare, path: '/tasks' },
 ];
 
 interface AppSidebarProps {
@@ -121,7 +74,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
     <Sidebar className={className}>
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -139,19 +92,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
         <SidebarMenu>
           {navigationItems.map((item) => {
             const isActive = location.pathname === item.path;
-            
             return (
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton
                   isActive={isActive}
                   onClick={() => handleNavigation(item.path)}
-                  className={`
-                    w-full justify-start
-                    ${isActive 
-                      ? 'bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100' 
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                    }
-                  `}
+                  className={`w-full justify-start ${isActive ? 'bg-primary/10 text-primary' : ''}`}
                 >
                   <item.icon className="w-4 h-4 mr-3" />
                   <span className="font-medium">{item.title}</span>
@@ -178,5 +124,3 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
     </Sidebar>
   );
 };
-
-export default AppSidebar;
