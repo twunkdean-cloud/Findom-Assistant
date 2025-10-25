@@ -11,6 +11,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<ServiceResponse<{ user: User; session: Session }>>;
   signUp: (email: string, password: string) => Promise<ServiceResponse<{ user: User | null; session: Session | null }>>;
   signOut: () => Promise<ServiceResponse<void>>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +22,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshProfile = async () => {
+    if (user) {
+      const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      setProfile(userProfile);
+    }
+  };
+
   useEffect(() => {
     const getInitialSession = async () => {
       try {
@@ -28,9 +36,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (error) throw error;
         
         setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        if (currentUser) {
+          const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
           setProfile(userProfile);
         }
       } catch (error) {
@@ -45,9 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        if (currentUser) {
+          const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
           setProfile(userProfile);
         } else {
           setProfile(null);
@@ -96,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, profile, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, profile, signIn, signUp, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -49,7 +49,7 @@ const AppRoutes: React.FC = () => {
     );
   }
 
-  if (profile && !profile.onboardingCompleted) {
+  if (profile && !profile.onboarding_completed) {
     return (
       <Routes>
         <Route path="/onboarding" element={<Suspense fallback={<ComponentLoadingFallback />}><LazyOnboardingPage /></Suspense>} />

@@ -7,9 +7,11 @@ import { useFindom } from '@/context/FindomContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Crown, Heart, Sparkles, Users, ArrowRight } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const OnboardingPage = () => {
   const { appData, updateAppData } = useFindom();
+  const { refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [displayName, setDisplayName] = useState('');
@@ -31,13 +33,15 @@ const OnboardingPage = () => {
       
       try {
         await updateAppData('profile', {
-          displayName: displayName.trim(),
+          first_name: displayName.trim(),
           gender: selectedGender!,
           energy: selectedGender === 'male' ? 'masculine' : 'feminine',
           persona: selectedPersona,
-          onboardingCompleted: true,
-          onboardingCompletedAt: new Date().toISOString()
+          onboarding_completed: true,
+          onboarding_completed_at: new Date().toISOString()
         });
+        
+        await refreshProfile();
         
         toast.success('Welcome! Your profile has been set up.');
         navigate('/', { replace: true });
