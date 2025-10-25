@@ -13,6 +13,7 @@ import { useFindom } from '@/context/FindomContext';
 import { Sub } from '@/types/index';
 import { toast } from '@/utils/toast';
 import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const SubTrackerPage = () => {
   const { appData, updateSubs } = useFindom();
@@ -27,6 +28,8 @@ const SubTrackerPage = () => {
   const [subNotes, setSubNotes] = useState('');
   const [subConversationHistory, setSubConversationHistory] = useState<string | Record<string, any> | undefined>(undefined);
   const [conversationFileName, setConversationFileName] = useState<string | undefined>(undefined);
+  const [subTier, setSubTier] = useState('');
+  const [subTags, setSubTags] = useState('');
 
   const resetForm = () => {
     setSubName('');
@@ -37,6 +40,8 @@ const SubTrackerPage = () => {
     setSubConversationHistory(undefined);
     setConversationFileName(undefined);
     setCurrentSub(null);
+    setSubTier('');
+    setSubTags('');
   };
 
   const handleConversationUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +55,6 @@ const SubTrackerPage = () => {
       reader.onload = (e) => {
         try {
           const content = e.target?.result as string;
-          // Optionally parse and re-stringify to validate JSON
           JSON.parse(content);
           setSubConversationHistory(content);
           setConversationFileName(file.name);
@@ -85,6 +89,8 @@ const SubTrackerPage = () => {
       preferences: subPreferences,
       notes: subNotes,
       conversationHistory: subConversationHistory,
+      tier: subTier,
+      tags: subTags.split(',').map(tag => tag.trim()).filter(Boolean),
     };
 
     await updateSubs([...appData.subs, newSub]);
@@ -109,6 +115,8 @@ const SubTrackerPage = () => {
       preferences: subPreferences,
       notes: subNotes,
       conversationHistory: subConversationHistory,
+      tier: subTier,
+      tags: subTags.split(',').map(tag => tag.trim()).filter(Boolean),
     };
 
     await updateSubs(appData.subs.map(sub =>
@@ -130,12 +138,14 @@ const SubTrackerPage = () => {
   const openEditDialog = (sub: Sub) => {
     setCurrentSub(sub);
     setSubName(sub.name);
-    setSubTotal(sub.total.toString()); // Convert to string for input field
+    setSubTotal(sub.total.toString());
     setSubLastTribute(sub.lastTribute);
     setSubPreferences(sub.preferences);
     setSubNotes(sub.notes);
     setSubConversationHistory(sub.conversationHistory);
-    setConversationFileName(sub.conversationHistory ? 'conversation.json' : undefined); // Placeholder name
+    setConversationFileName(sub.conversationHistory ? 'conversation.json' : undefined);
+    setSubTier(sub.tier || '');
+    setSubTags(sub.tags ? sub.tags.join(', ') : '');
     setIsEditDialogOpen(true);
   };
 
@@ -187,6 +197,31 @@ const SubTrackerPage = () => {
                     type="date"
                     value={subLastTribute}
                     onChange={(e) => setSubLastTribute(e.target.value)}
+                    className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sub-tier">Tier</Label>
+                  <Select value={subTier} onValueChange={setSubTier}>
+                    <SelectTrigger className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+                      <SelectValue placeholder="Select a tier" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
+                      <SelectItem value="Bronze">Bronze</SelectItem>
+                      <SelectItem value="Silver">Silver</SelectItem>
+                      <SelectItem value="Gold">Gold</SelectItem>
+                      <SelectItem value="Platinum">Platinum</SelectItem>
+                      <SelectItem value="Diamond">Diamond</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="sub-tags">Tags (comma-separated)</Label>
+                  <Input
+                    id="sub-tags"
+                    placeholder="e.g., long-term, foot-worshipper"
+                    value={subTags}
+                    onChange={(e) => setSubTags(e.target.value)}
                     className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
                   />
                 </div>
@@ -248,6 +283,8 @@ const SubTrackerPage = () => {
                 <TableHeader>
                   <TableRow className="bg-gray-700 hover:bg-gray-700">
                     <TableHead className="text-gray-300">Name</TableHead>
+                    <TableHead className="text-gray-300">Tier</TableHead>
+                    <TableHead className="text-gray-300">Tags</TableHead>
                     <TableHead className="text-gray-300">Total Tributed</TableHead>
                     <TableHead className="text-gray-300">Last Tribute</TableHead>
                     <TableHead className="text-gray-300">History</TableHead>
@@ -258,6 +295,14 @@ const SubTrackerPage = () => {
                   {appData.subs.map((sub) => (
                     <TableRow key={sub.id} className="border-b border-gray-700 hover:bg-gray-700">
                       <TableCell className="font-medium text-gray-200">{sub.name}</TableCell>
+                      <TableCell>
+                        {sub.tier ? <Badge>{sub.tier}</Badge> : <span className="text-gray-500">N/A</span>}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {sub.tags?.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-green-400">${sub.total.toFixed(2)}</TableCell>
                       <TableCell className="text-gray-400">{sub.lastTribute || 'N/A'}</TableCell>
                       <TableCell>
@@ -320,6 +365,31 @@ const SubTrackerPage = () => {
                 type="date"
                 value={subLastTribute}
                 onChange={(e) => setSubLastTribute(e.target.value)}
+                className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-sub-tier">Tier</Label>
+              <Select value={subTier} onValueChange={setSubTier}>
+                <SelectTrigger className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+                  <SelectValue placeholder="Select a tier" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
+                  <SelectItem value="Bronze">Bronze</SelectItem>
+                  <SelectItem value="Silver">Silver</SelectItem>
+                  <SelectItem value="Gold">Gold</SelectItem>
+                  <SelectItem value="Platinum">Platinum</SelectItem>
+                  <SelectItem value="Diamond">Diamond</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-sub-tags">Tags (comma-separated)</Label>
+              <Input
+                id="edit-sub-tags"
+                placeholder="e.g., long-term, foot-worshipper"
+                value={subTags}
+                onChange={(e) => setSubTags(e.target.value)}
                 className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
               />
             </div>

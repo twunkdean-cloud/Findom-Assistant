@@ -8,6 +8,8 @@ export interface Sub {
   conversationHistory?: string | Record<string, any>;
   created_at?: string;
   updated_at?: string;
+  tier?: string;
+  tags?: string[];
 }
 
 export interface Tribute {
