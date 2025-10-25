@@ -27,7 +27,8 @@ import {
   LazyPricingPage,
   LazySettingsPage,
   LazyNotFound,
-  LazyAnalyticsPage
+  LazyAnalyticsPage,
+  LazyRedFlagPage
 } from '@/pages/lazy';
 
 const AppRoutes: React.FC = () => {
@@ -67,6 +68,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/" element={<LazyIndex />} />
           <Route path="/analytics" element={<LazyAnalyticsPage />} />
           <Route path="/subs" element={<LazySubTrackerPage />} />
+          <Route path="/redflags" element={<LazyRedFlagPage />} />
           <Route path="/tributes" element={<LazyTributeTrackerPage />} />
           <Route path="/chat-assistant" element={<LazyChatAssistantPage />} />
           <Route path="/caption" element={<LazyCaptionGeneratorPage />} />

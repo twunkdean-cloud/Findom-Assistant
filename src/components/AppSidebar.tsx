@@ -26,13 +26,15 @@ import {
   CreditCard,
   Bot,
   Calendar,
-  PieChart
+  PieChart,
+  Flag
 } from 'lucide-react';
 
 const navigationItems = [
   { title: 'Dashboard', icon: Home, path: '/' },
   { title: 'Analytics', icon: PieChart, path: '/analytics' },
   { title: 'Sub Tracker', icon: Users, path: '/subs' },
+  { title: 'Red Flags', icon: Flag, path: '/redflags' },
   { title: 'Tributes', icon: DollarSign, path: '/tributes' },
   { title: 'AI Assistant', icon: Bot, path: '/chat-assistant' },
   { title: 'Checklist', icon: CheckSquare, path: '/checklist' },
