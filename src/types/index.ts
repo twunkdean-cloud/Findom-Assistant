@@ -34,8 +34,8 @@ export interface RedFlag {
 export interface Checklist {
   id: string;
   date: string;
-  tasks: string[] | Record<string, any>;
-  completed: string[] | Record<string, boolean>;
+  tasks: string[];
+  completed: string[];
   weeklyTasks?: string[];
   weeklyCompleted?: string[];
   created_at?: string;
@@ -172,7 +172,7 @@ export interface FindomContextType {
 // Service response types
 export interface ServiceResponse<T = any> {
   data?: T;
-  error?: string | null;
+  error?: any;
   success: boolean;
   loading?: boolean;
 }

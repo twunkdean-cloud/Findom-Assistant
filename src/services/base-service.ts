@@ -4,7 +4,7 @@ import { ServiceResponse } from '@/types';
 export abstract class BaseService<T extends { id: string }> {
   protected supabase = supabase;
 
-  abstract getTableName(): string;
+  public abstract getTableName(): string;
 
   protected transformFromDB(items: any[]): T[] {
     return items as T[];
@@ -14,7 +14,7 @@ export abstract class BaseService<T extends { id: string }> {
     return item;
   }
 
-  async getAll(userId: string): Promise<ServiceResponse<T[]>> {
+  async getAll(userId: string): Promise<T[]> {
     try {
       const { data, error } = await this.supabase
         .from(this.getTableName())
@@ -25,22 +25,14 @@ export abstract class BaseService<T extends { id: string }> {
         throw error;
       }
       
-      return {
-        data: this.transformFromDB(data || []),
-        success: true,
-        error: null
-      };
+      return this.transformFromDB(data || []);
     } catch (error) {
       console.error(`Error fetching ${this.getTableName()}:`, error);
-      return {
-        data: [],
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+      return [];
     }
   }
 
-  async updateAll(userId: string, items: T[]): Promise<ServiceResponse<void>> {
+  async updateAll(userId: string, items: T[]): Promise<void> {
     try {
       await this.supabase
         .from(this.getTableName())
@@ -61,23 +53,13 @@ export abstract class BaseService<T extends { id: string }> {
           throw error;
         }
       }
-      
-      return {
-        data: undefined,
-        success: true,
-        error: null
-      };
     } catch (error) {
       console.error(`Error updating ${this.getTableName()}:`, error);
-      return {
-        data: undefined,
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+      throw error;
     }
   }
 
-  async create(userId: string, item: Omit<T, 'id'>): Promise<ServiceResponse<T>> {
+  async create(userId: string, item: Omit<T, 'id'>): Promise<T | null> {
     try {
       const { data, error } = await this.supabase
         .from(this.getTableName())
@@ -89,22 +71,14 @@ export abstract class BaseService<T extends { id: string }> {
         throw error;
       }
       
-      return {
-        data: this.transformFromDB([data])[0],
-        success: true,
-        error: null
-      };
+      return this.transformFromDB([data])[0];
     } catch (error) {
       console.error(`Error creating ${this.getTableName()}:`, error);
-      return {
-        data: undefined,
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+      return null;
     }
   }
 
-  async update(userId: string, id: string, updates: Partial<T>): Promise<ServiceResponse<T>> {
+  async update(userId: string, id: string, updates: Partial<T>): Promise<T | null> {
     try {
       const { data, error } = await this.supabase
         .from(this.getTableName())
@@ -118,22 +92,14 @@ export abstract class BaseService<T extends { id: string }> {
         throw error;
       }
       
-      return {
-        data: this.transformFromDB([data])[0],
-        success: true,
-        error: null
-      };
+      return this.transformFromDB([data])[0];
     } catch (error) {
       console.error(`Error updating ${this.getTableName()}:`, error);
-      return {
-        data: undefined,
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+      return null;
     }
   }
 
-  async delete(userId: string, id: string): Promise<ServiceResponse<void>> {
+  async delete(userId: string, id: string): Promise<boolean> {
     try {
       const { error } = await this.supabase
         .from(this.getTableName())
@@ -145,18 +111,10 @@ export abstract class BaseService<T extends { id: string }> {
         throw error;
       }
       
-      return {
-        data: undefined,
-        success: true,
-        error: null
-      };
+      return true;
     } catch (error) {
       console.error(`Error deleting ${this.getTableName()}:`, error);
-      return {
-        data: undefined,
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+      return false;
     }
   }
 }

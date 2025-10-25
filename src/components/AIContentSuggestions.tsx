@@ -30,9 +30,13 @@ const AIContentSuggestions = () => {
       return;
     }
 
-    const result = await generatePersonalizedContent(sub, contentType, tone);
-    setSuggestions(result);
-    toast.success('Content suggestions generated!');
+    const result = await generatePersonalizedContent({ sub, contentType, tone });
+    if (result.success && result.data) {
+      setSuggestions(result.data);
+      toast.success('Content suggestions generated!');
+    } else {
+      toast.error(result.error || 'Failed to generate suggestions');
+    }
   };
 
   const handleCopySuggestion = (content: string) => {
@@ -61,9 +65,9 @@ const AIContentSuggestions = () => {
 
   const getToneOptions = () => {
     const tones = getPersonaTones();
-    return Object.entries(tones).map(([value, description]) => ({
+    return Object.entries(tones).map(([value, { label }]) => ({
       value,
-      label: `${value.charAt(0).toUpperCase() + value.slice(1)} - ${description.split(',')[0]}`
+      label: `${value.charAt(0).toUpperCase() + value.slice(1)} - ${label.split(',')[0]}`
     }));
   };
 

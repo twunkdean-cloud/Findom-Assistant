@@ -25,7 +25,7 @@ const SubTrackerPage = () => {
   const [subLastTribute, setSubLastTribute] = useState('');
   const [subPreferences, setSubPreferences] = useState('');
   const [subNotes, setSubNotes] = useState('');
-  const [subConversationHistory, setSubConversationHistory] = useState<string | undefined>(undefined);
+  const [subConversationHistory, setSubConversationHistory] = useState<string | Record<string, any> | undefined>(undefined);
   const [conversationFileName, setConversationFileName] = useState<string | undefined>(undefined);
 
   const resetForm = () => {

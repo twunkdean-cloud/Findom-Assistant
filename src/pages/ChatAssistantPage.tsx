@@ -4,12 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMobile } from '@/hooks/use-mobile';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { MobileOptimizedCard } from '@/components/MobileOptimizedCard';
-import MobileLoadingSpinner from '@/components/MobileLoadingSpinner';
+import { MobileLoadingSpinner } from '@/components/MobileLoadingSpinner';
 import { useGestures } from '@/hooks/use-gestures';
 import { toast } from 'sonner';
-import { Loader2, Send, Bot, User, History, Brain, MessageSquare } from 'lucide-react';
-import { LazyWrapper, ComponentLoadingFallback } from '@/utils/lazy-loading';
-import VoiceInput from '@/components/ui/voice-input';
+import { Bot, Brain, History, MessageSquare } from 'lucide-react';
+import { LazyWrapper } from '@/utils/lazy-loading';
 
 // Lazy load AI components
 import {
@@ -22,6 +21,7 @@ const ChatAssistantPage: React.FC = () => {
   const { isMobile } = useMobile();
   const [activeTab, setActiveTab] = useState('chat');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -31,7 +31,7 @@ const ChatAssistantPage: React.FC = () => {
     toast.success('Chat refreshed');
   };
 
-  const gestureHandlers = useGestures({
+  useGestures(containerRef, {
     onSwipeLeft: () => {
       if (activeTab === 'chat') setActiveTab('suggestions');
       else if (activeTab === 'suggestions') setActiveTab('sentiment');
@@ -46,7 +46,7 @@ const ChatAssistantPage: React.FC = () => {
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-      <div className="space-y-6" {...gestureHandlers}>
+      <div className="space-y-6" ref={containerRef}>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">AI Assistant</h1>
           {isMobile && (

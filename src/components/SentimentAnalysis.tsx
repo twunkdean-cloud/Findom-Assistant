@@ -31,7 +31,7 @@ const SentimentAnalysis = () => {
       return;
     }
 
-    await analyzeSubConversation(sub.conversationHistory, sub.name);
+    await analyzeSubConversation({ conversationHistory: sub.conversationHistory as string, subName: sub.name });
     toast.success('Analysis complete!');
   };
 

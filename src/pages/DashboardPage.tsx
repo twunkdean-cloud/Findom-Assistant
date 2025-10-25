@@ -27,7 +27,7 @@ const DashboardPage: React.FC = () => {
   const { appData } = useFindom();
   const { isMobile } = useMobile();
 
-  const totalTributes = appData.tributes.reduce((sum, tribute) => sum + tribute.amount, 0);
+  const totalTributes = appData.tributes.reduce((sum, tribute) => sum + Number(tribute.amount), 0);
   const activeSubs = appData.subs.filter(sub => sub.lastTribute && 
     new Date(sub.lastTribute) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
   ).length;
@@ -111,7 +111,7 @@ const DashboardPage: React.FC = () => {
               {appData.tributes.slice(0, 3).map((tribute, index) => (
                 <div key={tribute.id} className="flex items-center justify-between p-3 bg-muted rounded">
                   <div>
-                    <p className="font-medium">{tribute.fromSub}</p>
+                    <p className="font-medium">{tribute.from_sub}</p>
                     <p className="text-sm text-muted-foreground">{tribute.reason}</p>
                   </div>
                   <div className="text-right">
@@ -127,7 +127,7 @@ const DashboardPage: React.FC = () => {
         </Card>
 
         <LazyWrapper>
-          <LazyTributeChart />
+          <LazyTributeChart tributes={appData.tributes} />
         </LazyWrapper>
       </div>
     );
@@ -174,7 +174,7 @@ const DashboardPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LazyWrapper>
-          <LazyTributeChart />
+          <LazyTributeChart tributes={appData.tributes} />
         </LazyWrapper>
         
         <LazyWrapper>

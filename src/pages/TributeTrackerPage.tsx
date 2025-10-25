@@ -24,7 +24,7 @@ const TributeTrackerPage = () => {
   const [tributeDate, setTributeDate] = useState(new Date().toISOString().split('T')[0]);
   const [tributeFrom, setTributeFrom] = useState('');
   const [tributeReason, setTributeReason] = useState('');
-  const [tributeSource, setTributeSource] = useState('cashapp');
+  const [tributeSource, setTributeSource] = useState<'cashapp' | 'venmo' | 'paypal' | 'other'>('cashapp');
 
   const resetForm = () => {
     setTributeAmount('');
@@ -163,7 +163,7 @@ const TributeTrackerPage = () => {
               </div>
               <div>
                 <Label htmlFor="source">Source</Label>
-                <Select value={tributeSource} onValueChange={setTributeSource}>
+                <Select value={tributeSource} onValueChange={(value) => setTributeSource(value as any)}>
                   <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
                     <SelectValue />
                   </SelectTrigger>
@@ -304,7 +304,7 @@ const TributeTrackerPage = () => {
             </div>
             <div>
               <Label htmlFor="edit-source">Source</Label>
-              <Select value={tributeSource} onValueChange={setTributeSource}>
+              <Select value={tributeSource} onValueChange={(value) => setTributeSource(value as any)}>
                 <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
