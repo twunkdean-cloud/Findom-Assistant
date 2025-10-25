@@ -1,30 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
+import { ServiceResponse } from '@/types';
 
 export class UserDataService {
-  async setApiKey(userId: string, apiKey: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('user_data')
-        .upsert({
-          user_id: userId,
-          data_type: 'apiKey',
-          data: { apiKey },
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error setting API key:', error);
-      throw error;
-    }
-  }
+  private supabase = supabase;
 
   async getApiKey(userId: string): Promise<string> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
-        .eq('data_type', 'apiKey')
+        .eq('data_type', 'api_key')
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -38,26 +24,28 @@ export class UserDataService {
     }
   }
 
-  async setPersona(userId: string, persona: string): Promise<void> {
+  async setApiKey(userId: string, apiKey: string): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'persona',
-          data: { persona },
+          data_type: 'api_key',
+          data: { apiKey },
+        }, {
+          onConflict: 'user_id,data_type',
         });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting persona:', error);
+      console.error('Error setting API key:', error);
       throw error;
     }
   }
 
   async getPersona(userId: string): Promise<string> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
@@ -75,26 +63,28 @@ export class UserDataService {
     }
   }
 
-  async setGoal(userId: string, goal: any): Promise<void> {
+  async setPersona(userId: string, persona: string): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'goal',
-          data: { goal },
+          data_type: 'persona',
+          data: { persona },
+        }, {
+          onConflict: 'user_id,data_type',
         });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting goal:', error);
+      console.error('Error setting persona:', error);
       throw error;
     }
   }
 
   async getGoal(userId: string): Promise<any> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
@@ -105,33 +95,35 @@ export class UserDataService {
         throw error;
       }
 
-      return data?.data?.goal || { weekly: 0, monthly: 0 };
+      return data?.data || { weekly: 0, monthly: 0 };
     } catch (error) {
       console.error('Error getting goal:', error);
       return { weekly: 0, monthly: 0 };
     }
   }
 
-  async setResponses(userId: string, responses: any): Promise<void> {
+  async setGoal(userId: string, goal: any): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'responses',
-          data: { responses },
+          data_type: 'goal',
+          data: goal,
+        }, {
+          onConflict: 'user_id,data_type',
         });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting responses:', error);
+      console.error('Error setting goal:', error);
       throw error;
     }
   }
 
-  async getResponses(userId: string): Promise<any> {
+  async getResponses(userId: string): Promise<Record<string, string>> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
@@ -142,37 +134,39 @@ export class UserDataService {
         throw error;
       }
 
-      return data?.data?.responses || {};
+      return data?.data || {};
     } catch (error) {
       console.error('Error getting responses:', error);
       return {};
     }
   }
 
-  async setScreenTime(userId: string, screenTime: number): Promise<void> {
+  async setResponses(userId: string, responses: Record<string, string>): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'screenTime',
-          data: { screenTime },
+          data_type: 'responses',
+          data: responses,
+        }, {
+          onConflict: 'user_id,data_type',
         });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting screen time:', error);
+      console.error('Error setting responses:', error);
       throw error;
     }
   }
 
   async getScreenTime(userId: string): Promise<number> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
-        .eq('data_type', 'screenTime')
+        .eq('data_type', 'screen_time')
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -186,30 +180,32 @@ export class UserDataService {
     }
   }
 
-  async setTimerStart(userId: string, timerStart: string | null): Promise<void> {
+  async setScreenTime(userId: string, screenTime: number): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'timerStart',
-          data: { timerStart },
+          data_type: 'screen_time',
+          data: { screenTime },
+        }, {
+          onConflict: 'user_id,data_type',
         });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting timer start:', error);
+      console.error('Error setting screen time:', error);
       throw error;
     }
   }
 
   async getTimerStart(userId: string): Promise<string | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
-        .eq('data_type', 'timerStart')
+        .eq('data_type', 'timer_start')
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -223,30 +219,32 @@ export class UserDataService {
     }
   }
 
-  async setUploadedImageData(userId: string, uploadedImageData: string | null): Promise<void> {
+  async setTimerStart(userId: string, timerStart: string | null): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'uploadedImageData',
-          data: { uploadedImageData },
+          data_type: 'timer_start',
+          data: { timerStart },
+        }, {
+          onConflict: 'user_id,data_type',
         });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting uploaded image data:', error);
+      console.error('Error setting timer start:', error);
       throw error;
     }
   }
 
   async getUploadedImageData(userId: string): Promise<string | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
-        .eq('data_type', 'uploadedImageData')
+        .eq('data_type', 'uploaded_image_data')
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -260,14 +258,53 @@ export class UserDataService {
     }
   }
 
-  async setProfile(userId: string, profile: any): Promise<void> {
+  async setUploadedImageData(userId: string, uploadedImageData: string | null): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'profile',
-          data: { profile },
+          data_type: 'uploaded_image_data',
+          data: { uploadedImageData },
+        }, {
+          onConflict: 'user_id,data_type',
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error setting uploaded image data:', error);
+      throw error;
+    }
+  }
+
+  async getProfile(userId: string): Promise<any> {
+    try {
+      const { data, error } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data || {};
+    } catch (error) {
+      console.error('Error getting profile:', error);
+      return {};
+    }
+  }
+
+  async setProfile(userId: string, profile: any): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          ...profile,
+        }, {
+          onConflict: 'id',
         });
 
       if (error) throw error;
@@ -277,46 +314,9 @@ export class UserDataService {
     }
   }
 
-  async getProfile(userId: string): Promise<any> {
-    try {
-      const { data, error } = await supabase
-        .from('user_data')
-        .select('data')
-        .eq('user_id', userId)
-        .eq('data_type', 'profile')
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      return data?.data?.profile || {};
-    } catch (error) {
-      console.error('Error getting profile:', error);
-      return {};
-    }
-  }
-
-  async setSettings(userId: string, settings: any): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('user_data')
-        .upsert({
-          user_id: userId,
-          data_type: 'settings',
-          data: { settings },
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error setting settings:', error);
-      throw error;
-    }
-  }
-
   async getSettings(userId: string): Promise<any> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
@@ -327,33 +327,49 @@ export class UserDataService {
         throw error;
       }
 
-      return data?.data?.settings || {};
+      return data?.data || {
+        emailNotifications: true,
+        pushNotifications: true,
+        dailyReminders: true,
+        profileVisibility: 'private',
+        dataSharing: false,
+        theme: 'auto',
+      };
     } catch (error) {
       console.error('Error getting settings:', error);
-      return {};
+      return {
+        emailNotifications: true,
+        pushNotifications: true,
+        dailyReminders: true,
+        profileVisibility: 'private',
+        dataSharing: false,
+        theme: 'auto',
+      };
     }
   }
 
-  async setSubscription(userId: string, subscription: string): Promise<void> {
+  async setSettings(userId: string, settings: any): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('user_data')
         .upsert({
           user_id: userId,
-          data_type: 'subscription',
-          data: { subscription },
+          data_type: 'settings',
+          data: settings,
+        }, {
+          onConflict: 'user_id,data_type',
         });
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting subscription:', error);
+      console.error('Error setting settings:', error);
       throw error;
     }
   }
 
   async getSubscription(userId: string): Promise<string> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('user_data')
         .select('data')
         .eq('user_id', userId)
@@ -364,10 +380,29 @@ export class UserDataService {
         throw error;
       }
 
-      return data?.data?.subscription || '';
+      return data?.data?.subscription || 'free';
     } catch (error) {
       console.error('Error getting subscription:', error);
-      return '';
+      return 'free';
+    }
+  }
+
+  async setSubscription(userId: string, subscription: string): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('user_data')
+        .upsert({
+          user_id: userId,
+          data_type: 'subscription',
+          data: { subscription },
+        }, {
+          onConflict: 'user_id,data_type',
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error setting subscription:', error);
+      throw error;
     }
   }
 }

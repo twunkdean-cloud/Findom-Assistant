@@ -22,7 +22,7 @@ import {
   checklistsService,
 } from '@/services/unified-service';
 import { migrationService } from '@/services/migration-service';
-import { userDataService } from '@/hooks/user-data-service';
+import { userDataService } from '@/services/user-data-service';
 
 export const useFindomActions = (
   appData: AppData, 
