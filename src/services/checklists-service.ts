@@ -25,7 +25,6 @@ export class ChecklistsService extends BaseService<Checklist> {
   protected transformToDB(item: Checklist): any {
     return {
       id: item.id,
-      user_id: (item as any).user_id,
       date: item.date,
       tasks: item.tasks,
       completed: item.completed,
