@@ -1,5 +1,14 @@
-export { default as LazyTributeChart } from './LazyTributeChart';
-export { default as LazyAIInsightsDashboard } from './LazyAIInsightsDashboard';
-export { default as LazyAIContentSuggestions } from './LazyAIContentSuggestions';
-export { default as LazySentimentAnalysis } from './LazySentimentAnalysis';
-export { default as LazyAIChatbot } from './LazyAIChatbot';
+import { lazy } from 'react';
+
+// AI Components
+export const LazyAIChatbot = lazy(() => import('../AIChatbot'));
+export const LazyAIContentSuggestions = lazy(() => import('../AIContentSuggestions'));
+export const LazyAIInsightsDashboard = lazy(() => import('../AIInsightsDashboard'));
+export const LazySentimentAnalysis = lazy(() => import('../SentimentAnalysis'));
+
+// Chart Components
+export const LazyTributeChart = lazy(() => import('../TributeChart'));
+
+// Utility Components
+export const LazyMigrationHelper = lazy(() => import('../MigrationHelper'));
+export const LazyPushNotificationManager = lazy(() => import('../PushNotificationManager'));

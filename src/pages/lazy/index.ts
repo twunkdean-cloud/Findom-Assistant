@@ -1,13 +1,27 @@
-export { default as LazyChatAssistantPage } from './LazyChatAssistantPage';
-export { default as LazyDashboardPage } from './LazyDashboardPage';
-export { default as LazySubTrackerPage } from './LazySubTrackerPage';
-export { default as LazyTributeTrackerPage } from './LazyTributeTrackerPage';
-export { default as LazyTaskGeneratorPage } from './LazyTaskGeneratorPage';
-export { default as LazyResponseTemplatesPage } from './LazyResponseTemplatesPage';
-export { default as LazyTwitterGeneratorPage } from './LazyTwitterGeneratorPage';
-export { default as LazyRedditGeneratorPage } from './LazyRedditGeneratorPage';
-export { default as LazyCaptionGeneratorPage } from './LazyCaptionGeneratorPage';
-export { default as LazyImageVisionPage } from './LazyImageVisionPage';
-export { default as LazyChecklistPage } from './LazyChecklistPage';
-export { default as LazyPricingPage } from './LazyPricingPage';
-export { default as LazySettingsPage } from './LazySettingsPage';
+import { lazy } from 'react';
+
+// Core pages
+export const LazyIndex = lazy(() => import('../Index'));
+export const LazyLoginPage = lazy(() => import('../LoginPage'));
+export const LazyAuthCallbackPage = lazy(() => import('../AuthCallbackPage'));
+export const LazyOnboardingPage = lazy(() => import('../OnboardingPage'));
+export const LazyNotFound = lazy(() => import('../NotFound'));
+
+// Dashboard and tracking
+export const LazyDashboardPage = lazy(() => import('../DashboardPage'));
+export const LazySubTrackerPage = lazy(() => import('../SubTrackerPage'));
+export const LazyTributeTrackerPage = lazy(() => import('../TributeTrackerPage'));
+export const LazyChecklistPage = lazy(() => import('../ChecklistPage'));
+
+// AI and generators
+export const LazyChatAssistantPage = lazy(() => import('../ChatAssistantPage'));
+export const LazyCaptionGeneratorPage = lazy(() => import('../CaptionGeneratorPage'));
+export const LazyTaskGeneratorPage = lazy(() => import('../TaskGeneratorPage'));
+export const LazyTwitterGeneratorPage = lazy(() => import('../TwitterGeneratorPage'));
+export const LazyRedditGeneratorPage = lazy(() => import('../RedditGeneratorPage'));
+export const LazyResponseTemplatesPage = lazy(() => import('../ResponseTemplatesPage'));
+export const LazyImageVisionPage = lazy(() => import('../ImageVisionPage'));
+
+// Settings and pricing
+export const LazyPricingPage = lazy(() => import('../PricingPage'));
+export const LazySettingsPage = lazy(() => import('../SettingsPage'));
