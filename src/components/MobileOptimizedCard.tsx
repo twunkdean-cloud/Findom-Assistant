@@ -1,65 +1,39 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import { useMobile } from '@/hooks/use-mobile';
 
 interface MobileOptimizedCardProps {
   children: React.ReactNode;
-  className?: string;
   title?: string;
-  subtitle?: string;
-  footer?: React.ReactNode;
-  onClick?: () => void;
-  swipeable?: boolean;
+  className?: string;
+  mobileClassName?: string;
+  desktopClassName?: string;
 }
 
-const MobileOptimizedCard: React.FC<MobileOptimizedCardProps> = ({
+export const MobileOptimizedCard: React.FC<MobileOptimizedCardProps> = ({
   children,
-  className,
   title,
-  subtitle,
-  footer,
-  onClick,
-  swipeable = false,
+  className = '',
+  mobileClassName = '',
+  desktopClassName = ''
 }) => {
-  const { isMobile } = useMobile();
+  const isMobile = useMobile();
 
-  const cardClasses = cn(
-    'transition-all duration-200',
-    {
-      'hover:shadow-lg active:scale-[0.98] cursor-pointer': onClick,
-      'touch-pan-y': swipeable && isMobile,
-    },
-    className
-  );
+  const cardClassName = [
+    className,
+    isMobile ? mobileClassName : desktopClassName
+  ].filter(Boolean).join(' ');
 
   return (
-    <Card className={cardClasses} onClick={onClick}>
-      {(title || subtitle) && (
-        <CardHeader className={cn('pb-3', { 'pb-2': isMobile })}>
-          {title && (
-            <CardTitle className={cn('text-lg', { 'text-base': isMobile })}>
-              {title}
-            </CardTitle>
-          )}
-          {subtitle && (
-            <p className={cn('text-sm text-gray-500', { 'text-xs': isMobile })}>
-              {subtitle}
-            </p>
-          )}
+    <Card className={cardClassName}>
+      {title && (
+        <CardHeader>
+          <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>{title}</CardTitle>
         </CardHeader>
       )}
-      <CardContent className={cn('pt-0', { 'pt-2': isMobile })}>
+      <CardContent className={isMobile ? 'p-4' : 'p-6'}>
         {children}
       </CardContent>
-      {footer && (
-        <div className={cn('px-6 pb-4', { 'px-4 pb-3': isMobile })}>
-          {footer}
-        </div>
-      )}
     </Card>
   );
 };
-
-export default MobileOptimizedCard;
-export { MobileOptimizedCard };

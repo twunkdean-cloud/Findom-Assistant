@@ -1,71 +1,78 @@
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useGemini } from '@/hooks/use-gemini';
-import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Loader2, Send, Bot } from 'lucide-react';
 
-const ChatTest = () => {
-  const { callGemini, isLoading, error } = useGemini();
-  const [input, setInput] = useState('');
+export const ChatTest = () => {
+  const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
+  const { callGemini, isLoading } = useGemini();
 
-  const handleTest = async () => {
-    console.log('Test button clicked');
-    setResponse('');
-    
-    const result = await callGemini(input, 'You are a helpful assistant. Respond briefly.');
-    
-    if (result) {
-      console.log('Got result:', result);
-      setResponse(result);
-    } else {
-      console.log('No result, error:', error);
-      setResponse(`Error: ${error}`);
+  const handleSend = async () => {
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt');
+      return;
+    }
+
+    try {
+      const result = await callGemini(prompt);
+      if (result) {
+        setResponse(result);
+        toast.success('Response received');
+      } else {
+        toast.error('No response received');
+      }
+    } catch (error) {
+      toast.error('Failed to get response');
     }
   };
 
   return (
-    <div className="p-4 space-y-4 max-w-2xl mx-auto">
-      <h3 className="text-lg font-bold">Chat AI Test</h3>
-      
-      <div>
-        <label className="text-sm text-gray-300 mb-2 block">Test Prompt:</label>
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Enter a simple test prompt..."
-          rows={3}
-          className="bg-gray-900 border-gray-700 text-gray-200"
-        />
-      </div>
-
-      <Button
-        onClick={handleTest}
-        disabled={isLoading || !input.trim()}
-        className="bg-indigo-600 hover:bg-indigo-700"
-      >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-        Test Chat AI
-      </Button>
-
-      {error && (
-        <div className="p-3 bg-red-900 border border-red-700 rounded text-red-200">
-          <strong>Error:</strong> {error}
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Bot className="h-5 w-5" />
+          Chat Test
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Textarea
+            placeholder="Enter your prompt here..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            className="min-h-[100px]"
+          />
         </div>
-      )}
+        
+        <Button 
+          onClick={handleSend} 
+          disabled={isLoading || !prompt.trim()}
+          className="w-full"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Thinking...
+            </>
+          ) : (
+            <>
+              <Send className="mr-2 h-4 w-4" />
+              Send
+            </>
+          )}
+        </Button>
 
-      {response && (
-        <div className="p-3 bg-gray-800 border border-gray-700 rounded">
-          <strong>Response:</strong>
-          <pre className="mt-2 text-sm text-gray-300 whitespace-pre-wrap">{response}</pre>
-        </div>
-      )}
-
-      <div className="text-xs text-gray-500">
-        Open browser console (F12) to see detailed logs
-      </div>
-    </div>
+        {response && (
+          <div className="mt-4 p-4 bg-muted rounded-lg">
+            <h4 className="font-medium mb-2">Response:</h4>
+            <p className="text-sm whitespace-pre-wrap">{response}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
-
-export default ChatTest;

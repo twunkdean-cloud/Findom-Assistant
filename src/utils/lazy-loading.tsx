@@ -1,125 +1,66 @@
-import React, { Suspense } from 'react';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { Suspense, lazy, ComponentType } from 'react';
+import { Loader2 } from 'lucide-react';
 
-interface LazyComponentProps {
+interface LazyWrapperProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
-  errorFallback?: React.ReactNode;
 }
 
-export const LazyWrapper: React.FC<LazyComponentProps> = ({ 
+export const LazyWrapper: React.FC<LazyWrapperProps> = ({ 
   children, 
-  fallback,
-  errorFallback
+  fallback = <ComponentLoadingFallback /> 
 }) => {
-  const defaultFallback = (
-    <div className="flex items-center justify-center min-h-[200px]">
-      <LoadingSpinner size="lg" />
-    </div>
-  );
-
-  const defaultErrorFallback = (
-    <div className="flex items-center justify-center min-h-[200px]">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-6">
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-red-600">Failed to Load</h3>
-            <p className="text-sm text-gray-600 mt-1">Please refresh the page and try again.</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
   return (
-    <Suspense fallback={fallback || defaultFallback}>
-      <ErrorBoundary fallback={errorFallback || defaultErrorFallback}>
-        {children}
-      </ErrorBoundary>
+    <Suspense fallback={fallback}>
+      {children}
     </Suspense>
   );
 };
 
-// Enhanced error boundary for lazy loading
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Lazy loading error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-
-    return this.props.children;
-  }
-}
-
-export const PageLoadingFallback: React.FC<{ title?: string }> = ({ 
-  title = "Loading..." 
-}) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-900">
-    <Card className="w-full max-w-md">
-      <CardContent className="p-6">
-        <div className="flex flex-col items-center space-y-4">
-          <LoadingSpinner size="lg" />
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-100">{title}</h3>
-            <p className="text-sm text-gray-400 mt-1">Please wait while we load your content...</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
-
-export const ComponentLoadingFallback: React.FC<{ message?: string }> = ({ 
-  message = "Loading component..." 
-}) => (
+export const ComponentLoadingFallback: React.FC = () => (
   <div className="flex items-center justify-center p-8">
-    <div className="text-center">
-      <LoadingSpinner size="md" />
-      <p className="text-sm text-gray-400 mt-2">{message}</p>
-    </div>
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
   </div>
 );
 
-// Preload utility for critical components
-export const preloadComponent = (importFunc: () => Promise<any>) => {
+export const createLazyComponent = <T extends ComponentType<any>>(
+  importFunc: () => Promise<{ default: T }>,
+  fallback?: React.ReactNode
+) => {
+  const LazyComponent = lazy(importFunc);
+  
+  return (props: React.ComponentProps<T>) => (
+    <LazyWrapper fallback={fallback}>
+      <LazyComponent {...props} />
+    </LazyWrapper>
+  );
+};
+
+// Preload critical components
+export const preloadComponent = (importFunc: () => Promise<{ default: ComponentType<any> }>) => {
   importFunc();
 };
 
-// Intersection Observer for lazy loading components
+// Intersection Observer for lazy loading
 export const useIntersectionObserver = (
-  ref: React.RefObject<Element>,
+  elementRef: React.RefObject<Element>,
   callback: () => void,
-  options: IntersectionObserverInit = {}
+  options?: IntersectionObserverInit
 ) => {
   React.useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        callback();
-        observer.disconnect();
-      }
-    }, options);
+    const element = elementRef.current;
+    if (!element) return;
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          callback();
+        }
+      },
+      options
+    );
 
+    observer.observe(element);
     return () => observer.disconnect();
-  }, [ref, callback, options]);
+  }, [elementRef, callback, options]);
 };

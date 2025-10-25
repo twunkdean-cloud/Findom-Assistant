@@ -1,63 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface PerformanceMetrics {
-  loadTime: number;
   renderTime: number;
-  memoryUsage: number;
-  fps: number;
+  componentCount: number;
+  reRenderCount: number;
 }
 
-export const usePerformance = () => {
-  const [metrics, setMetrics] = useState<PerformanceMetrics>({
-    loadTime: 0,
-    renderTime: 0,
-    memoryUsage: 0,
-    fps: 60,
-  });
+export const usePerformance = (componentName: string) => {
+  const renderCount = useRef(0);
+  const startTime = useRef<number>(Date.now());
 
   useEffect(() => {
-    // Measure initial load time
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-    if (navigation) {
-      setMetrics(prev => ({
-        ...prev,
-        loadTime: navigation.loadEventEnd - navigation.loadEventStart,
-      }));
-    }
-
-    // Monitor FPS
-    let lastTime = performance.now();
-    let frameCount = 0;
+    renderCount.current += 1;
+    const renderTime = Date.now() - startTime.current;
     
-    const measureFPS = () => {
-      frameCount++;
-      const currentTime = performance.now();
-      
-      if (currentTime >= lastTime + 1000) {
-        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-        setMetrics(prev => ({ ...prev, fps }));
-        frameCount = 0;
-        lastTime = currentTime;
-      }
-      
-      requestAnimationFrame(measureFPS);
-    };
-
-    requestAnimationFrame(measureFPS);
-
-    // Monitor memory usage (if available)
-    if ('memory' in performance) {
-      const checkMemory = () => {
-        const memory = (performance as any).memory;
-        setMetrics(prev => ({
-          ...prev,
-          memoryUsage: memory.usedJSHeapSize / 1024 / 1024, // Convert to MB
-        }));
-      };
-
-      setInterval(checkMemory, 5000); // Check every 5 seconds
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[PERF] ${componentName} render #${renderCount.current}: ${renderTime}ms`);
     }
+    
+    startTime.current = Date.now();
+  });
+
+  const getMetrics = (): PerformanceMetrics => ({
+    renderTime: Date.now() - startTime.current,
+    componentCount: 1,
+    reRenderCount: renderCount.current
+  });
+
+  return {
+    getMetrics
+  };
+};
+
+// Performance monitoring for component trees
+export const usePerformanceObserver = () => {
+  const observerRef = useRef<PerformanceObserver | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
+      observerRef.current = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.entryType === 'measure') {
+            // Only log in development
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`[PERF] ${entry.name}: ${entry.duration}ms`);
+            }
+          }
+        }
+      });
+
+      observerRef.current.observe({ entryTypes: ['measure'] });
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
   }, []);
 
-  return metrics;
+  const mark = (name: string) => {
+    if (typeof window !== 'undefined' && 'performance' in window) {
+      performance.mark(name);
+    }
+  };
+
+  const measure = (name: string, startMark: string, endMark?: string) => {
+    if (typeof window !== 'undefined' && 'performance' in window) {
+      performance.measure(name, startMark, endMark);
+    }
+  };
+
+  return {
+    mark,
+    measure
+  };
 };

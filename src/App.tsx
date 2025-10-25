@@ -1,217 +1,89 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { FindomProvider, useFindom } from './context/FindomContext';
-import Layout from './components/Layout';
-import { LoadingSpinner } from './components/ui/loading-spinner';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { LazyWrapper, PageLoadingFallback } from './utils/lazy-loading';
-import { usePreloadComponents } from './hooks/use-preload-components';
-import { monitorBundleSize } from './utils/bundle-analysis';
+import { AuthProvider } from '@/context/AuthContext';
+import { FindomProvider } from '@/context/FindomContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Layout } from '@/components/Layout';
+import { Toaster } from '@/components/ui/sonner';
+import { useAuth } from '@/context/AuthContext';
 
-// Lazy loaded pages
-import {
-  LazyDashboardPage,
-  LazySubTrackerPage,
-  LazyTributeTrackerPage,
-  LazyTaskGeneratorPage,
-  LazyResponseTemplatesPage,
-  LazyTwitterGeneratorPage,
-  LazyRedditGeneratorPage,
-  LazyCaptionGeneratorPage,
-  LazyImageVisionPage,
-  LazyChatAssistantPage,
-  LazyChecklistPage,
-  LazyPricingPage,
-  LazySettingsPage,
-} from './pages/lazy';
+// Pages
+import Index from '@/pages/Index';
+import LoginPage from '@/pages/LoginPage';
+import AuthCallbackPage from '@/pages/AuthCallbackPage';
+import OnboardingPage from '@/pages/OnboardingPage';
+import DashboardPage from '@/pages/DashboardPage';
+import SubTrackerPage from '@/pages/SubTrackerPage';
+import TributeTrackerPage from '@/pages/TributeTrackerPage';
+import ChatAssistantPage from '@/pages/ChatAssistantPage';
+import CaptionGeneratorPage from '@/pages/CaptionGeneratorPage';
+import TaskGeneratorPage from '@/pages/TaskGeneratorPage';
+import ResponseTemplatesPage from '@/pages/ResponseTemplatesPage';
+import TwitterGeneratorPage from '@/pages/TwitterGeneratorPage';
+import RedditGeneratorPage from '@/pages/RedditGeneratorPage';
+import ImageVisionPage from '@/pages/ImageVisionPage';
+import ChecklistPage from '@/pages/ChecklistPage';
+import PricingPage from '@/pages/PricingPage';
+import SettingsPage from '@/pages/SettingsPage';
+import NotFound from '@/pages/NotFound';
 
-// Regular pages (kept non-lazy for critical paths)
-import Index from './pages/Index';
-import LoginPage from './pages/LoginPage';
-import OnboardingPage from './pages/OnboardingPage';
-import AuthCallbackPage from './pages/AuthCallbackPage';
-import NotFound from './pages/NotFound';
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const AppRoutes: React.FC = () => {
   const { user, loading } = useAuth();
-  const { appData } = useFindom();
-  
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
-  
+
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
-
-  // Only redirect to onboarding if user has explicitly not completed it
-  // Check if onboarding was completed by checking if profile exists and has required fields
-  const hasCompletedOnboarding = appData.profile && 
-    appData.profile.gender && 
-    appData.profile.persona &&
-    appData.profile.displayName;
-
-  if (!hasCompletedOnboarding) {
-    return <Navigate to="/onboarding" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-const AppContent = () => {
-  // Preload critical components
-  usePreloadComponents();
-  
-  // Monitor bundle size in development
-  useEffect(() => {
-    monitorBundleSize();
-  }, []);
 
   return (
-    <ErrorBoundary>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/onboarding" element={<OnboardingPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Dashboard..." />}>
-                  <LazyDashboardPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/subs" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Sub Tracker..." />}>
-                  <LazySubTrackerPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/tributes" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Tribute Tracker..." />}>
-                  <LazyTributeTrackerPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/tasks" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Task Generator..." />}>
-                  <LazyTaskGeneratorPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/responses" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Response Templates..." />}>
-                  <LazyResponseTemplatesPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/twitter" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Twitter Generator..." />}>
-                  <LazyTwitterGeneratorPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/reddit" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Reddit Generator..." />}>
-                  <LazyRedditGeneratorPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/caption" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Caption Generator..." />}>
-                  <LazyCaptionGeneratorPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/image-vision" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Image Vision..." />}>
-                  <LazyImageVisionPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/chat-assistant" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Chat Assistant..." />}>
-                  <LazyChatAssistantPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/pricing" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Pricing..." />}>
-                  <LazyPricingPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/checklist" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Checklist..." />}>
-                  <LazyChecklistPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/settings" element={
-            <ProtectedRoute>
-              <Layout>
-                <LazyWrapper fallback={<PageLoadingFallback title="Loading Settings..." />}>
-                  <LazySettingsPage />
-                </LazyWrapper>
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </Router>
-    </ErrorBoundary>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/subs" element={<SubTrackerPage />} />
+        <Route path="/tributes" element={<TributeTrackerPage />} />
+        <Route path="/chat" element={<ChatAssistantPage />} />
+        <Route path="/captions" element={<CaptionGeneratorPage />} />
+        <Route path="/tasks" element={<TaskGeneratorPage />} />
+        <Route path="/templates" element={<ResponseTemplatesPage />} />
+        <Route path="/twitter" element={<TwitterGeneratorPage />} />
+        <Route path="/reddit" element={<RedditGeneratorPage />} />
+        <Route path="/vision" element={<ImageVisionPage />} />
+        <Route path="/checklists" element={<ChecklistPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Layout>
   );
 };
 
-const App = () => {
+const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <FindomProvider>
-        <AppContent />
-      </FindomProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <FindomProvider>
+          <Router>
+            <AppRoutes />
+            <Toaster />
+          </Router>
+        </FindomProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 

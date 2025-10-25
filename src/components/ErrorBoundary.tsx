@@ -15,75 +15,66 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-  };
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-  public static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({
       error,
-      errorInfo,
+      errorInfo
     });
+
+    // Log error to monitoring service in production
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Error caught by boundary:', error, errorInfo);
+    }
   }
 
-  private handleReset = () => {
+  handleReset = () => {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
-  private handleReload = () => {
-    window.location.reload();
-  };
-
-  public render() {
+  render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-          <Card className="w-full max-w-md bg-gray-800 border-gray-700">
-            <CardHeader className="text-center">
-              <div className="mx-auto w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="h-6 w-6 text-red-500" />
-              </div>
-              <CardTitle className="text-red-400">Oops! Something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-400 text-sm text-center">
-                An unexpected error occurred. Please try again or contact support if the problem persists.
-              </p>
-              
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="bg-gray-900 p-3 rounded text-xs text-gray-500 font-mono overflow-auto max-h-32">
-                  {this.state.error.message}
-                </div>
-              )}
-              
-              <div className="flex gap-2">
-                <Button 
-                  onClick={this.handleReset} 
-                  variant="outline" 
-                  className="flex-1"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Try Again
-                </Button>
-                <Button 
-                  onClick={this.handleReload} 
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700"
-                >
-                  Reload Page
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="w-full max-w-md mx-auto mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Something went wrong
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              An unexpected error occurred. Please try again.
+            </p>
+            
+            {process.env.NODE_ENV === 'development' && this.state.error && (
+              <details className="text-xs bg-muted p-2 rounded">
+                <summary className="cursor-pointer font-medium">Error Details</summary>
+                <pre className="mt-2 whitespace-pre-wrap">
+                  {this.state.error.toString()}
+                  {this.state.errorInfo && this.state.errorInfo.componentStack}
+                </pre>
+              </details>
+            )}
+            
+            <Button onClick={this.handleReset} className="w-full">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       );
     }
 

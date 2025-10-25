@@ -1,22 +1,55 @@
 import { useEffect } from 'react';
-import { preloadComponent } from '@/utils/lazy-loading';
 
-export const usePreloadComponents = () => {
+interface PreloadConfig {
+  componentPath: string;
+  priority: 'high' | 'medium' | 'low';
+  trigger: 'idle' | 'hover' | 'visible';
+}
+
+export const usePreloadComponents = (configs: PreloadConfig[]) => {
   useEffect(() => {
-    // Preload critical components after initial render
-    const timer = setTimeout(() => {
-      // Preload AI components (most likely to be used)
-      preloadComponent(() => import('@/components/AIChatbot'));
-      preloadComponent(() => import('@/components/AIContentSuggestions'));
-      preloadComponent(() => import('@/components/AIInsightsDashboard'));
-      
-      // Preload chart components
-      preloadComponent(() => import('@/components/TributeChart'));
-      
-      // Preload analytics components
-      preloadComponent(() => import('@/components/SentimentAnalysis'));
-    }, 2000); // Delay to not block initial render
+    const preloadComponent = async (config: PreloadConfig) => {
+      try {
+        await import(config.componentPath);
+      } catch (error) {
+        console.error(`Failed to preload component: ${config.componentPath}`, error);
+      }
+    };
 
-    return () => clearTimeout(timer);
-  }, []);
+    const preloadHighPriority = () => {
+      configs
+        .filter(config => config.priority === 'high' && config.trigger === 'idle')
+        .forEach(preloadComponent);
+    };
+
+    const preloadMediumPriority = () => {
+      configs
+        .filter(config => config.priority === 'medium' && config.trigger === 'idle')
+        .forEach(preloadComponent);
+    };
+
+    // Preload high priority components immediately
+    preloadHighPriority();
+
+    // Preload medium priority components after a short delay
+    const mediumTimer = setTimeout(preloadMediumPriority, 2000);
+
+    // Preload low priority components when user is idle
+    const idleCallback = () => {
+      configs
+        .filter(config => config.priority === 'low' && config.trigger === 'idle')
+        .forEach(preloadComponent);
+    };
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(idleCallback);
+    } else {
+      // Fallback for browsers that don't support requestIdleCallback
+      setTimeout(idleCallback, 5000);
+    }
+
+    return () => {
+      clearTimeout(mediumTimer);
+    };
+  }, [configs]);
 };
