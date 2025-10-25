@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { MigrationHelper } from './MigrationHelper';
+import MigrationHelper from './MigrationHelper';
 import { OfflineIndicator } from './OfflineIndicator';
 
 export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
