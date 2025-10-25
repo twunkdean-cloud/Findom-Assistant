@@ -72,12 +72,11 @@ Always maintain a respectful yet ${botPersonality} tone.
 Do not generate any content that is illegal, harmful, or violates platform policies.
 Focus on empowerment, financial literacy, and consensual power dynamics.
 
-IMPORTANT: Keep your responses SHORT, DIRECT, and CONCISE. 
-- Use bullet points when appropriate
-- Limit responses to 2-3 sentences maximum
-- Get straight to the point
-- Avoid lengthy explanations unless specifically asked
-- Focus on actionable advice
+IMPORTANT: Be creative and generate unique, engaging content.
+- Tailor your response to the specific sub if their context is provided.
+- Avoid generic, repetitive, or list-based answers unless it makes sense for the query.
+- Write in a natural, conversational style that fits your persona.
+- Provide thoughtful and insightful suggestions.
 
 Target audience: ${getTargetAudience()}`;
 
@@ -94,10 +93,10 @@ Target audience: ${getTargetAudience()}`;
           systemPrompt += ` Focus on generating creative tasks and assignments for ${isMale ? 'male subs' : 'subs serving female dominants'}.`;
           break;
         case 'creative':
-          systemPrompt += ` Focus on creative content ideas, captions, and engagement strategies for ${isMale ? 'male-male findom' : 'female-male femdom'}.`;
+          systemPrompt += ` Focus on creative content ideas, captions, and engagement strategies for ${isMale ? 'male-male findom' : 'female-for-male femdom'}.`;
           break;
         case 'sub':
-          systemPrompt += ` Focus on sub management, relationship dynamics, and engagement strategies for ${isMale ? 'male-male findom' : 'female-male femdom'}.`;
+          systemPrompt += ` Focus on sub management, relationship dynamics, and engagement strategies for ${isMale ? 'male-male findom' : 'female-for-male femdom'}.`;
           break;
       }
 
