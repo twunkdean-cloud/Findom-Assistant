@@ -19,7 +19,6 @@ import { LazyWrapper } from '@/utils/lazy-loading';
 
 // Lazy load dashboard components
 import {
-  LazyTributeChart,
   LazyAIInsightsDashboard
 } from '@/components/lazy';
 
@@ -125,10 +124,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
-        <LazyWrapper>
-          <LazyTributeChart tributes={appData.tributes} />
-        </LazyWrapper>
       </div>
     );
   }
@@ -173,10 +168,6 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LazyWrapper>
-          <LazyTributeChart tributes={appData.tributes} />
-        </LazyWrapper>
-        
         <LazyWrapper>
           <LazyAIInsightsDashboard />
         </LazyWrapper>

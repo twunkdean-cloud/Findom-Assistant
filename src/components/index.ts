@@ -4,7 +4,6 @@ export { PullToRefresh } from './PullToRefresh';
 export { default as AIChatbot } from './AIChatbot';
 export { default as AIContentSuggestions } from './AIContentSuggestions';
 export { default as SentimentAnalysis } from './SentimentAnalysis';
-export { default as TributeChart } from './TributeChart';
 export { MobileOptimizedCard } from './MobileOptimizedCard';
 export { default as AIInsightsDashboard } from './AIInsightsDashboard';
 export { MobileLoadingSpinner } from './MobileLoadingSpinner';

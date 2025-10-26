@@ -11,7 +11,7 @@ export const DEFAULT_APP_DATA: AppData = {
   calendar: [],
   goal: { weekly: 0, monthly: 0 },
   profile: {
-    displayName: '',
+    first_name: '',
     bio: '',
     persona: 'dominant',
     gender: 'male',
