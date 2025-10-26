@@ -91,6 +91,60 @@ export const useFindomActions = (
     }
   };
 
+  const createSub = async (sub: Omit<Sub, 'id' | 'created_at' | 'updated_at'>): Promise<Sub | null> => {
+    if (!user) return null;
+    try {
+      const newSub = await subsService.create(user.id, sub);
+      if (newSub) {
+        setAppData(prev => ({ ...prev, subs: [...prev.subs, newSub] }));
+        return newSub;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error creating sub:', error);
+      toast.error('Error creating sub');
+      return null;
+    }
+  };
+
+  const updateSub = async (id: string, updates: Partial<Sub>): Promise<Sub | null> => {
+    if (!user) return null;
+    try {
+      const updatedSub = await subsService.update(user.id, id, updates);
+      if (updatedSub) {
+        setAppData(prev => ({
+          ...prev,
+          subs: prev.subs.map(s => (s.id === id ? { ...s, ...updatedSub } : s)),
+        }));
+        return updatedSub;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error updating sub:', error);
+      toast.error('Error updating sub');
+      return null;
+    }
+  };
+
+  const deleteSub = async (id: string): Promise<void> => {
+    if (!user) return;
+    try {
+      const success = await subsService.delete(user.id, id);
+      if (success) {
+        setAppData(prev => ({
+          ...prev,
+          subs: prev.subs.filter(s => s.id !== id),
+        }));
+        toast.success('Sub deleted.');
+      } else {
+        toast.error('Failed to delete sub.');
+      }
+    } catch (error) {
+      console.error('Error deleting sub:', error);
+      toast.error('Error deleting sub');
+    }
+  };
+
   const updateTributes = async (tributes: Tribute[]): Promise<void> => {
     if (!user) return;
     setAppData(prev => ({ ...prev, tributes }));
@@ -268,6 +322,9 @@ export const useFindomActions = (
     deleteChecklistTask,
     migrateFromLocalStorage,
     updateSubs,
+    createSub,
+    updateSub,
+    deleteSub,
     updateTributes,
     updateCustomPrices,
     updateCalendar,

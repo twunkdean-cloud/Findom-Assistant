@@ -16,7 +16,7 @@ import { PlusCircle, Edit, Trash2, UploadCloud } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const SubTrackerPage = () => {
-  const { appData, updateSubs } = useFindom();
+  const { appData, createSub, updateSub, deleteSub } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentSub, setCurrentSub] = useState<Sub | null>(null);
@@ -81,11 +81,10 @@ const SubTrackerPage = () => {
     }
     const parsedTotal = parseFloat(subTotal as string) || 0;
 
-    const newSub: Sub = {
-      id: Date.now().toString(),
+    const newSubData: Omit<Sub, 'id' | 'created_at' | 'updated_at'> = {
       name: subName.trim(),
       total: parsedTotal,
-      lastTribute: subLastTribute,
+      lastTribute: subLastTribute || undefined,
       preferences: subPreferences,
       notes: subNotes,
       conversationHistory: subConversationHistory,
@@ -93,10 +92,15 @@ const SubTrackerPage = () => {
       tags: subTags.split(',').map(tag => tag.trim()).filter(Boolean),
     };
 
-    await updateSubs([...appData.subs, newSub]);
-    toast.success(`${newSub.name} added to tracker!`);
-    setIsAddDialogOpen(false);
-    resetForm();
+    const newSub = await createSub(newSubData);
+
+    if (newSub) {
+      toast.success(`${newSub.name} added to tracker!`);
+      setIsAddDialogOpen(false);
+      resetForm();
+    } else {
+      toast.error('Failed to add sub.');
+    }
   };
 
   const handleEditSub = async (e: React.FormEvent) => {
@@ -107,11 +111,10 @@ const SubTrackerPage = () => {
     }
     const parsedTotal = parseFloat(subTotal as string) || 0;
 
-    const updatedSub: Sub = {
-      ...currentSub,
+    const updatedSubData: Partial<Sub> = {
       name: subName.trim(),
       total: parsedTotal,
-      lastTribute: subLastTribute,
+      lastTribute: subLastTribute || undefined,
       preferences: subPreferences,
       notes: subNotes,
       conversationHistory: subConversationHistory,
@@ -119,19 +122,20 @@ const SubTrackerPage = () => {
       tags: subTags.split(',').map(tag => tag.trim()).filter(Boolean),
     };
 
-    await updateSubs(appData.subs.map(sub =>
-      sub.id === updatedSub.id ? updatedSub : sub
-    ));
-    toast.success(`${updatedSub.name} updated!`);
-    setIsEditDialogOpen(false);
-    resetForm();
+    const updatedSub = await updateSub(currentSub.id, updatedSubData);
+
+    if (updatedSub) {
+      toast.success(`${updatedSub.name} updated!`);
+      setIsEditDialogOpen(false);
+      resetForm();
+    } else {
+      toast.error('Failed to update sub.');
+    }
   };
 
   const handleDeleteSub = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this sub?')) {
-      const updatedSubs = appData.subs.filter(sub => sub.id !== id);
-      await updateSubs(updatedSubs);
-      toast.success('Sub deleted.');
+      await deleteSub(id);
     }
   };
 
@@ -139,9 +143,9 @@ const SubTrackerPage = () => {
     setCurrentSub(sub);
     setSubName(sub.name);
     setSubTotal(sub.total.toString());
-    setSubLastTribute(sub.lastTribute);
-    setSubPreferences(sub.preferences);
-    setSubNotes(sub.notes);
+    setSubLastTribute(sub.lastTribute || '');
+    setSubPreferences(sub.preferences || '');
+    setSubNotes(sub.notes || '');
     setSubConversationHistory(sub.conversationHistory);
     setConversationFileName(sub.conversationHistory ? 'conversation.json' : undefined);
     setSubTier(sub.tier || '');

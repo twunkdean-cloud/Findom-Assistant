@@ -163,6 +163,9 @@ export interface FindomContextType {
   deleteChecklistTask: (task: string) => Promise<void>;
   migrateFromLocalStorage: () => Promise<void>;
   updateSubs: (subs: Sub[]) => Promise<void>;
+  createSub: (sub: Omit<Sub, 'id' | 'created_at' | 'updated_at'>) => Promise<Sub | null>;
+  updateSub: (id: string, updates: Partial<Sub>) => Promise<Sub | null>;
+  deleteSub: (id: string) => Promise<void>;
   updateTributes: (tributes: Tribute[]) => Promise<void>;
   updateCustomPrices: (customPrices: CustomPrice[]) => Promise<void>;
   updateCalendar: (calendar: CalendarEvent[]) => Promise<void>;
