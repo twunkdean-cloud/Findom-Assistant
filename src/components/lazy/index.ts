@@ -7,7 +7,7 @@ export const LazyAIInsightsDashboard = lazy(() => import('../AIInsightsDashboard
 export const LazySentimentAnalysis = lazy(() => import('../SentimentAnalysis'));
 
 // Chart Components
-export const LazyTributeChart = lazy(() => import('../TributeChart'));
+// No lazy loaded chart components in this file anymore
 
 // Utility Components
 export const LazyMigrationHelper = lazy(() => import('../MigrationHelper'));
