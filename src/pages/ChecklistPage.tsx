@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from '@/utils/toast';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { Plus, Trash2, Edit, Brain } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -14,14 +14,23 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { useAI } from '@/hooks/use-ai';
 
 const ChecklistPage = () => {
-  const { appData, updateAppData, addChecklistTask, editChecklistTask, deleteChecklistTask, handleToggleWeeklyTask } = useFindom();
+  const { appData, updateAppData, addChecklistTask, editChecklistTask, deleteChecklistTask, handleToggleWeeklyTask, addWeeklyTask, editWeeklyTask, deleteWeeklyTask } = useFindom();
   const { checklist } = appData;
+  const { callGemini, isLoading: isAILoading } = useAI();
+  
   const [isAddTaskDialogOpen, setIsAddTaskDialogOpen] = useState(false);
   const [isEditTaskDialogOpen, setIsEditTaskDialogOpen] = useState(false);
+  const [isAddWeeklyTaskDialogOpen, setIsAddWeeklyTaskDialogOpen] = useState(false);
+  const [isEditWeeklyTaskDialogOpen, setIsEditWeeklyTaskDialogOpen] = useState(false);
+
   const [newTask, setNewTask] = useState('');
-  const [editingTask, setEditingTask] = useState<string | null>(null);
+  const [newWeeklyTask, setNewWeeklyTask] = useState('');
+  const [editingTask, setEditingTask] = useState<{ type: 'daily' | 'weekly', task: string } | null>(null);
   const [editedTaskName, setEditedTaskName] = useState('');
 
   useEffect(() => {
@@ -49,10 +58,24 @@ const ChecklistPage = () => {
     }
   };
 
+  const handleAddWeeklyTask = () => {
+    if (newWeeklyTask.trim()) {
+      addWeeklyTask(newWeeklyTask.trim());
+      setNewWeeklyTask('');
+      setIsAddWeeklyTaskDialogOpen(false);
+    } else {
+      toast.error('Task name cannot be empty.');
+    }
+  };
+
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingTask && editedTaskName.trim()) {
-      editChecklistTask(editingTask, editedTaskName.trim());
+      if (editingTask.type === 'daily') {
+        editChecklistTask(editingTask.task, editedTaskName.trim());
+      } else {
+        editWeeklyTask(editingTask.task, editedTaskName.trim());
+      }
       setIsEditTaskDialogOpen(false);
       setEditingTask(null);
       setEditedTaskName('');
@@ -68,89 +91,145 @@ const ChecklistPage = () => {
     updateAppData('checklist', { ...checklist, completed: newCompleted });
   };
 
+  const getAIGoalSuggestion = async (timeframe: 'daily' | 'weekly') => {
+    const prompt = `Based on my findom assistant data, suggest one actionable ${timeframe} goal for me. My current daily tasks are: ${checklist.tasks.join(', ')}. My weekly tasks are: ${checklist.weeklyTasks?.join(', ')}.`;
+    const result = await callGemini(prompt, `You are an expert findom coach. Provide a single, concise, and actionable goal suggestion.`);
+    if (result) {
+      toast.success(result, { duration: 10000 });
+    } else {
+      toast.error('Could not generate a suggestion at this time.');
+    }
+  };
+
+  const dailyProgress = (checklist.tasks.length > 0 ? (checklist.completed.length / checklist.tasks.length) * 100 : 0);
+  const weeklyProgress = (checklist.weeklyTasks && checklist.weeklyTasks.length > 0 ? ((checklist.weeklyCompleted?.length || 0) / checklist.weeklyTasks.length) * 100 : 0);
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Daily Checklist</h2>
-      <p className="text-sm text-gray-400">Tasks for {todayFormatted}</p>
+      <h2 className="text-2xl font-bold text-white">Checklist & Goals</h2>
+      <p className="text-sm text-gray-400">Today is {todayFormatted}</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-white">Daily Tasks</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {checklist.tasks.map((task, index) => (
-              <div key={index} className="flex items-center justify-between p-2 rounded-md bg-gray-900/50">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id={`task-${index}`}
-                    checked={checklist.completed.includes(task)}
-                    onCheckedChange={() => handleToggleTask(task)}
-                  />
-                  <label
-                    htmlFor={`task-${index}`}
-                    className={`text-sm font-medium leading-none cursor-pointer ${
-                      checklist.completed.includes(task) ? 'line-through text-gray-500' : 'text-gray-200'
-                    }`}
-                  >
-                    {task}
-                  </label>
+      <Tabs defaultValue="daily" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="daily">Daily</TabsTrigger>
+          <TabsTrigger value="weekly">Weekly</TabsTrigger>
+        </TabsList>
+        <TabsContent value="daily">
+          <Card className="bg-gray-800 border-gray-700 mt-4">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-white">Daily Tasks</CardTitle>
+              <Progress value={dailyProgress} className="w-full mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {checklist.tasks.map((task, index) => (
+                <div key={index} className="flex items-center justify-between p-2 rounded-md bg-gray-900/50">
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id={`task-${index}`}
+                      checked={checklist.completed.includes(task)}
+                      onCheckedChange={() => handleToggleTask(task)}
+                    />
+                    <label
+                      htmlFor={`task-${index}`}
+                      className={`text-sm font-medium leading-none cursor-pointer ${
+                        checklist.completed.includes(task) ? 'line-through text-gray-500' : 'text-gray-200'
+                      }`}
+                    >
+                      {task}
+                    </label>
+                  </div>
+                  <div className="flex">
+                    <Button variant="ghost" size="icon" onClick={() => {
+                      setEditingTask({ type: 'daily', task });
+                      setEditedTaskName(task);
+                      setIsEditTaskDialogOpen(true);
+                    }} className="text-blue-400 hover:text-blue-300 h-6 w-6">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteChecklistTask(task)} className="text-red-400 hover:text-red-300 h-6 w-6">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex">
-                  <Button variant="ghost" size="icon" onClick={() => {
-                    setEditingTask(task);
-                    setEditedTaskName(task);
-                    setIsEditTaskDialogOpen(true);
-                  }} className="text-blue-400 hover:text-blue-300 h-6 w-6">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteChecklistTask(task)} className="text-red-400 hover:text-red-300 h-6 w-6">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            <div className="flex space-x-2 pt-2">
-              <Input
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-                placeholder="Add a new task"
-                className="bg-gray-900 border-gray-600 text-white"
-              />
-              <Button onClick={handleAddTask} size="icon">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-white">Weekly Tasks</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {checklist.weeklyTasks?.map((task, index) => (
-              <div key={index} className="flex items-center space-x-3 p-2">
-                <Checkbox
-                  id={`weekly-task-${index}`}
-                  checked={checklist.weeklyCompleted?.includes(task)}
-                  onCheckedChange={() => handleToggleWeeklyTask(task)}
+              ))}
+              <div className="flex space-x-2 pt-2">
+                <Input
+                  value={newTask}
+                  onChange={(e) => setNewTask(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+                  placeholder="Add a new daily task"
+                  className="bg-gray-900 border-gray-600 text-white"
                 />
-                <label
-                  htmlFor={`weekly-task-${index}`}
-                  className={`text-sm font-medium leading-none cursor-pointer ${
-                    checklist.weeklyCompleted?.includes(task) ? 'line-through text-gray-500' : 'text-gray-200'
-                  }`}
-                >
-                  {task}
-                </label>
+                <Button onClick={handleAddTask} size="icon">
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-      
+              <Button variant="outline" className="w-full mt-2" onClick={() => getAIGoalSuggestion('daily')} disabled={isAILoading}>
+                <Brain className="mr-2 h-4 w-4" />
+                {isAILoading ? 'Thinking...' : 'Get AI Suggestion'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="weekly">
+          <Card className="bg-gray-800 border-gray-700 mt-4">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-white">Weekly Tasks</CardTitle>
+              <Progress value={weeklyProgress} className="w-full mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {checklist.weeklyTasks?.map((task, index) => (
+                <div key={index} className="flex items-center justify-between p-2 rounded-md bg-gray-900/50">
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id={`weekly-task-${index}`}
+                      checked={checklist.weeklyCompleted?.includes(task)}
+                      onCheckedChange={() => handleToggleWeeklyTask(task)}
+                    />
+                    <label
+                      htmlFor={`weekly-task-${index}`}
+                      className={`text-sm font-medium leading-none cursor-pointer ${
+                        checklist.weeklyCompleted?.includes(task) ? 'line-through text-gray-500' : 'text-gray-200'
+                      }`}
+                    >
+                      {task}
+                    </label>
+                  </div>
+                  <div className="flex">
+                    <Button variant="ghost" size="icon" onClick={() => {
+                      setEditingTask({ type: 'weekly', task });
+                      setEditedTaskName(task);
+                      setIsEditTaskDialogOpen(true);
+                    }} className="text-blue-400 hover:text-blue-300 h-6 w-6">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteWeeklyTask(task)} className="text-red-400 hover:text-red-300 h-6 w-6">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <div className="flex space-x-2 pt-2">
+                <Input
+                  value={newWeeklyTask}
+                  onChange={(e) => setNewWeeklyTask(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddWeeklyTask()}
+                  placeholder="Add a new weekly task"
+                  className="bg-gray-900 border-gray-600 text-white"
+                />
+                <Button onClick={handleAddWeeklyTask} size="icon">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button variant="outline" className="w-full mt-2" onClick={() => getAIGoalSuggestion('weekly')} disabled={isAILoading}>
+                <Brain className="mr-2 h-4 w-4" />
+                {isAILoading ? 'Thinking...' : 'Get AI Suggestion'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
       <Dialog open={isEditTaskDialogOpen} onOpenChange={setIsEditTaskDialogOpen}>
         <DialogContent className="bg-gray-800 border border-gray-700 text-gray-200">
           <DialogHeader>
