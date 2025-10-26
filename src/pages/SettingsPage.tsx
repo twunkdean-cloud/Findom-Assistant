@@ -19,7 +19,7 @@ const SettingsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   
   // Profile settings
-  const [displayName, setDisplayName] = useState(appData.profile?.displayName || '');
+  const [firstName, setFirstName] = useState(appData.profile?.first_name || '');
   const [bio, setBio] = useState(appData.profile?.bio || '');
   const [persona, setPersona] = useState(appData.profile?.persona || 'dominant');
   const [gender, setGender] = useState<'male' | 'female'>(appData.profile?.gender || 'male');
@@ -42,7 +42,7 @@ const SettingsPage = () => {
     try {
       // Update profile
       await updateAppData('profile', {
-        displayName,
+        first_name: firstName,
         bio,
         persona,
         gender,
@@ -129,8 +129,8 @@ const SettingsPage = () => {
           <div>
             <Label className="text-gray-300">Display Name</Label>
             <Input
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               placeholder="How you want to be known"
               className="bg-gray-900 border-gray-600 text-gray-200"
             />

@@ -89,7 +89,7 @@ export interface AppData {
     current?: number;
   };
   profile?: {
-    displayName: string;
+    first_name: string;
     bio: string;
     persona: 'dominant' | 'seductive' | 'strict' | 'caring';
     gender: 'male' | 'female';
