@@ -3,6 +3,7 @@ import { useGenderedContent } from './use-gendered-content';
 import { API_BASE_URL, API_TOKEN } from '@/constants';
 import { toast } from '@/utils/toast';
 import { Sub, AIContentSuggestion, ServiceResponse } from '@/types';
+import { cache } from '@/utils/cache';
 
 interface AIAnalytics {
   sentimentScore: number;
@@ -50,6 +51,13 @@ export const useAI = () => {
     prompt: string, 
     systemPrompt?: string
   ): Promise<string | null> => {
+    const cacheKey = `gemini:${prompt}:${systemPrompt}`;
+    const cached = cache.get<string>(cacheKey);
+    if (cached) {
+      toast.info('Returning cached AI response.');
+      return cached;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -74,7 +82,13 @@ export const useAI = () => {
       }
 
       const data: GeminiResponse = await response.json();
-      return data.response || data.content || null;
+      const result = data.response || data.content || null;
+      
+      if (result) {
+        cache.set(cacheKey, result);
+      }
+
+      return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
@@ -89,6 +103,13 @@ export const useAI = () => {
     imageData: string,
     prompt?: string
   ): Promise<string | null> => {
+    const cacheKey = `gemini-vision:${imageData.substring(0, 50)}:${prompt}`;
+    const cached = cache.get<string>(cacheKey);
+    if (cached) {
+      toast.info('Returning cached AI vision response.');
+      return cached;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -122,7 +143,13 @@ export const useAI = () => {
       }
 
       const data: GeminiResponse = await response.json();
-      return data.response || data.content || null;
+      const result = data.response || data.content || null;
+
+      if (result) {
+        cache.set(cacheKey, result);
+      }
+
+      return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
