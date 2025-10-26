@@ -7,6 +7,40 @@ class SubsService extends BaseService<Sub> {
   public getTableName(): string {
     return 'subs';
   }
+
+  protected transformToDB(item: Partial<Sub>): any {
+    const { lastTribute, conversationHistory, ...rest } = item;
+    const dbItem: any = { ...rest };
+    if (lastTribute !== undefined) {
+      dbItem.last_tribute = lastTribute;
+    }
+    if (conversationHistory !== undefined) {
+      dbItem.conversation_history =
+        typeof conversationHistory === 'object' && conversationHistory !== null
+          ? JSON.stringify(conversationHistory)
+          : conversationHistory;
+    }
+    return dbItem;
+  }
+
+  protected transformFromDB(items: any[]): Sub[] {
+    return items.map(item => {
+      const { user_id, last_tribute, conversation_history, ...rest } = item;
+      let parsedHistory = conversation_history;
+      if (typeof conversation_history === 'string') {
+        try {
+          parsedHistory = JSON.parse(conversation_history);
+        } catch (e) {
+          // it's just a string, leave it
+        }
+      }
+      return {
+        ...rest,
+        lastTribute: last_tribute,
+        conversationHistory: parsedHistory,
+      } as Sub;
+    });
+  }
 }
 
 class TributesService extends BaseService<Tribute> {

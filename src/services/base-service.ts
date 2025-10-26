@@ -10,7 +10,7 @@ export abstract class BaseService<T extends { id: string }> {
     return items as T[];
   }
 
-  protected transformToDB(item: T): any {
+  protected transformToDB(item: Partial<T>): any {
     return item;
   }
 
@@ -63,7 +63,7 @@ export abstract class BaseService<T extends { id: string }> {
     try {
       const { data, error } = await this.supabase
         .from(this.getTableName())
-        .insert({ ...this.transformToDB(item as T), user_id: userId })
+        .insert({ ...this.transformToDB(item as Partial<T>), user_id: userId })
         .select()
         .single();
 
@@ -82,7 +82,7 @@ export abstract class BaseService<T extends { id: string }> {
     try {
       const { data, error } = await this.supabase
         .from(this.getTableName())
-        .update(this.transformToDB(updates as T))
+        .update(this.transformToDB(updates))
         .eq('id', id)
         .eq('user_id', userId)
         .select()
