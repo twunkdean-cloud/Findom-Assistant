@@ -41,6 +41,10 @@ interface GeminiResponse {
   error?: string;
 }
 
+// Helper utilities to reduce token usage
+const compactText = (str?: string) => (str ? str.replace(/\s+/g, ' ').trim() : '');
+const trimTail = (str: string, maxChars: number) => (str.length > maxChars ? str.slice(str.length - maxChars) : str);
+
 export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +55,11 @@ export const useAI = () => {
     prompt: string, 
     systemPrompt?: string
   ): Promise<string | null> => {
-    const cacheKey = `gemini:${prompt}:${systemPrompt}`;
+    // Compact inputs to reduce tokens
+    const compactPrompt = compactText(prompt);
+    const compactSystem = compactText(systemPrompt || getGenderedSystemPrompt('general'));
+
+    const cacheKey = `gemini:${compactPrompt}:${compactSystem}`;
     const cached = cache.get<string>(cacheKey);
     if (cached) {
       toast.info('Returning cached AI response.');
@@ -63,8 +71,8 @@ export const useAI = () => {
 
     try {
       const payload: GeminiRequest = {
-        prompt: prompt,
-        systemInstruction: systemPrompt || getGenderedSystemPrompt('general'),
+        prompt: compactPrompt,
+        systemInstruction: compactSystem,
       };
 
       const response = await fetch(`${API_BASE_URL}/gemini-chat`, {
@@ -125,7 +133,8 @@ export const useAI = () => {
       const payload: GeminiVisionRequest = {
         image: base64Data,
         mimeType: mimeType,
-        prompt: prompt || 'Analyze this image and provide a detailed description.',
+        // Shorter default prompt to reduce tokens
+        prompt: compactText(prompt) || 'Describe this image briefly.',
       };
 
       const response = await fetch(`${API_BASE_URL}/gemini-vision`, {
@@ -169,17 +178,16 @@ export const useAI = () => {
   ): Promise<ServiceResponse<AIAnalytics>> => {
     setIsLoading(true);
     setError(null);
-    const systemPrompt = `You are an expert in findom relationship dynamics and sentiment analysis.
-    Analyze conversation history and provide:
-    1. Sentiment score (-100 to 100, where negative indicates dissatisfaction)
-    2. Engagement level (high/medium/low based on response frequency and enthusiasm)
-    3. Risk level (low/medium/high based on warning signs like payment delays, complaints, etc.)
-    4. Suggested actions to improve relationship
-    5. Content suggestions for next interactions
-    
-    Return your response as a JSON object with these exact keys: sentimentScore, engagementLevel, riskLevel, suggestedActions (array), contentSuggestions (array).`;
 
-    const userPrompt = `Analyze this conversation with ${request.subName}: ${request.conversationHistory}`;
+    // Concise, schema-first system prompt
+    const systemPrompt = compactText(`Act as a findom relationship analyst.
+Return ONLY JSON with keys:
+sentimentScore:number, engagementLevel:'high'|'medium'|'low', riskLevel:'low'|'medium'|'high',
+suggestedActions:string[], contentSuggestions:string[].`);
+
+    // Trim long history, then compact
+    const history = compactText(trimTail(request.conversationHistory, 4000));
+    const userPrompt = `Analyze conversation with ${request.subName}. History: ${history}`;
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
@@ -214,14 +222,13 @@ export const useAI = () => {
   ): Promise<ServiceResponse<AIContentSuggestion[]>> => {
     setIsLoading(true);
     setError(null);
-    const systemPrompt = `You are a creative findom content creator specializing in personalized content.
-    Generate 3 content suggestions based on sub's profile and preferences.
-    Each suggestion should include content, tone, and reasoning for why it would work well.
-    
-    Return ONLY a JSON array with objects containing: type, content, tone, reasoning, targetSub.`;
 
-    const userPrompt = `Generate ${request.contentType} content for ${request.sub.name} with a ${request.tone} tone.
-    Sub details: Total contributed: $${request.sub.total}, Preferences: ${request.sub.preferences || 'None specified'}, Notes: ${request.sub.notes || 'No notes'}`;
+    // Concise, schema-first system prompt
+    const systemPrompt = compactText(`Return ONLY a compact JSON array of 3 items with keys:
+type, content, tone, reasoning, targetSub.`);
+
+    const userPrompt = compactText(`Create ${request.contentType} suggestions for ${request.sub.name} with ${request.tone} tone.
+Total:$${request.sub.total}. Prefs:${request.sub.preferences || 'None'}. Notes:${request.sub.notes || 'None'}.`);
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
@@ -271,11 +278,11 @@ export const useAI = () => {
 
     const { sub, recentTributes = [], recentMessages = [], currentTone, gender } = params;
 
-    const systemPrompt = `You are a strategic assistant for a financial domination creator.
-Provide the next best 3 actions to maximize engagement and revenue while maintaining consent and boundaries.
-Tailor to the specific sub's history when provided.
-Return ONLY a JSON array with objects using keys: action, reason, confidence ('high'|'medium'|'low'), suggestedTone (optional: 'dominant'|'seductive'|'strict'|'caring'|'playful'), type (optional: 'nudge'|'tribute_escalation'|'check_in'|'reward'|'boundary'|'task').`;
+    // Concise, schema-first system prompt
+    const systemPrompt = compactText(`Return ONLY a compact JSON array (3 items) with keys:
+action, reason, confidence:'high'|'medium'|'low', suggestedTone?:'dominant'|'seductive'|'strict'|'caring'|'playful', type?:'nudge'|'tribute_escalation'|'check_in'|'reward'|'boundary'|'task'.`);
 
+    // Minify JSON context
     const summary = {
       sub: sub
         ? {
@@ -294,7 +301,7 @@ Return ONLY a JSON array with objects using keys: action, reason, confidence ('h
       },
     };
 
-    const userPrompt = `Context JSON:\n${JSON.stringify(summary, null, 2)}\n\nGenerate 3 next best actions.`;
+    const userPrompt = `CTX:${JSON.stringify(summary)} Next best 3 actions.`;
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
@@ -325,14 +332,13 @@ Return ONLY a JSON array with objects using keys: action, reason, confidence ('h
   ): Promise<ServiceResponse<string>> => {
     setIsLoading(true);
     setError(null);
-    const systemPrompt = `You are an AI assistant for a findom dominant.
-    Generate appropriate, professional responses to routine inquiries.
-    Maintain dominant persona while being helpful and clear.
-    Keep responses concise and actionable.
-    Do not make promises about specific amounts or timelines.`;
 
-    const userPrompt = `Generate a response to this message from ${subName}: "${message}"
-    Context: ${context}`;
+    // Concise system prompt
+    const systemPrompt = compactText(`You are a findom assistant.
+Write a concise, professional, dominant reply.
+Avoid promises or specifics.`);
+
+    const userPrompt = compactText(`From ${subName}: "${message}". Ctx: ${context}`);
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
