@@ -10,13 +10,16 @@ import { useAI } from '@/hooks/use-ai';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from '@/utils/toast';
 import { Loader2, Copy } from 'lucide-react';
+import { usePersona, PersonaTone } from '@/hooks/use-persona';
 
 const TaskGeneratorPage = () => {
   const { callGemini, isLoading, error } = useAI();
   const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
+  const { persona, gender, presets, buildSystemPrompt } = usePersona();
   const [topic, setTopic] = useState('');
   const [intensity, setIntensity] = useState<'low' | 'medium' | 'high'>('medium');
   const [generatedTask, setGeneratedTask] = useState('');
+  const [nextTone, setNextTone] = useState<PersonaTone | null>(null);
 
   const handleGenerateTask = async () => {
     if (!topic.trim()) {
@@ -25,11 +28,12 @@ const TaskGeneratorPage = () => {
     }
 
     setGeneratedTask('');
-    const systemPrompt = getSystemPrompt('task') + ` 
-Generate a creative ${isMale ? 'findom' : 'femdom'} task for a sub based on the user's topic. 
+    const systemPrompt = buildSystemPrompt('task', { tone: (nextTone || persona) as PersonaTone, gender }) + `
+Generate a creative ${isMale ? 'findom' : 'femdom'} task for a sub based on the user's topic.
 The task should be of ${intensity} intensity.
-Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
 Do not include any introductory or concluding remarks, just the task content.`;
+
+    setNextTone(null);
     
     const userPrompt = `Generate a ${isMale ? 'findom' : 'femdom'} task about: ${topic}`;
 
@@ -63,6 +67,21 @@ Do not include any introductory or concluding remarks, just the task content.`;
           <CardTitle className="text-lg font-semibold">Generate New Task</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-300">Quick tone for this task:</span>
+            {presets.map(p => (
+              <Button
+                key={p}
+                size="sm"
+                variant={nextTone === p ? 'default' : 'outline'}
+                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-gray-200'}`}
+                onClick={() => setNextTone(prev => (prev === p ? null : p))}
+                disabled={isLoading}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </Button>
+            ))}
+          </div>
           <div className="space-y-2">
             <Label htmlFor="task-topic">Task Topic</Label>
             <Textarea

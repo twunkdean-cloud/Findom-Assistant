@@ -11,15 +11,18 @@ import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { useFindom } from '@/context/FindomContext';
 import { toast } from '@/utils/toast';
 import { Loader2, Save, Copy } from 'lucide-react';
+import { usePersona, PersonaTone } from '@/hooks/use-persona';
 
 const ResponseTemplatesPage = () => {
   const { appData, updateAppData } = useFindom();
   const { callGemini, isLoading, error } = useAI();
   const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
+  const { persona, gender, presets, buildSystemPrompt } = usePersona();
 
   const [responseType, setResponseType] = useState<string>('initial');
   const [context, setContext] = useState<string>('');
   const [generatedResponse, setGeneratedResponse] = useState<string>('');
+  const [nextTone, setNextTone] = useState<PersonaTone | null>(null);
 
   // Load saved response for the current type when type changes
   useEffect(() => {
@@ -34,10 +37,12 @@ const ResponseTemplatesPage = () => {
 
     setGeneratedResponse('');
     let userPrompt = '';
-    let systemInstruction = getSystemPrompt('response') + ` 
-Generate a ${responseType} response based on the user's topic. 
-Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
+    let systemInstruction = buildSystemPrompt('response', { tone: (nextTone || persona) as PersonaTone, gender }) + `
+Generate a ${responseType} response based on the user's topic.
 Do not include any introductory or concluding remarks, just the response content.`;
+
+    // clear one-time tone after use
+    setNextTone(null);
 
     switch (responseType) {
       case 'initial':
@@ -108,6 +113,22 @@ Do not include any introductory or concluding remarks, just the response content
           <CardTitle className="text-lg font-semibold">Generate Response</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-300">Quick tone for this response:</span>
+            {presets.map(p => (
+              <Button
+                key={p}
+                size="sm"
+                variant={nextTone === p ? 'default' : 'outline'}
+                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-gray-200'}`}
+                onClick={() => setNextTone(prev => (prev === p ? null : p))}
+                disabled={isLoading}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </Button>
+            ))}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="response-type">Response Type</Label>
             <Select value={responseType} onValueChange={setResponseType} disabled={isLoading}>

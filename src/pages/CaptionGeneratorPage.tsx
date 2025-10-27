@@ -6,13 +6,16 @@ import { useAI } from '@/hooks/use-ai';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from '@/utils/toast';
 import { Loader2, Copy, Image } from 'lucide-react';
+import { usePersona, PersonaTone } from '@/hooks/use-persona';
 
 const CaptionGeneratorPage = () => {
   const { callGemini, isLoading, error } = useAI();
   const { getSystemPrompt, getPersonaTones, isMale, isFemale } = useGenderedContent();
+  const { persona, gender, presets, buildSystemPrompt } = usePersona();
   const [imageDescription, setImageDescription] = useState('');
   const [captionStyle, setCaptionStyle] = useState('dominant');
   const [generatedCaption, setGeneratedCaption] = useState('');
+  const [nextTone, setNextTone] = useState<PersonaTone | null>(null);
 
   const handleGenerateCaption = async () => {
     if (!imageDescription.trim()) {
@@ -21,10 +24,9 @@ const CaptionGeneratorPage = () => {
     }
 
     setGeneratedCaption('');
-    const systemPrompt = getSystemPrompt('caption') + ` 
+    const systemPrompt = buildSystemPrompt('caption', { tone: (nextTone || persona) as PersonaTone, gender }) + `
 Generate a ${captionStyle} caption for a photo based on the user's description. 
 Include relevant emojis and hashtags. 
-Use ${isMale ? 'masculine, commanding' : 'feminine, seductive'} tone appropriate for ${isMale ? 'male-for-male findom' : 'female-for-male femdom'}.
 Do not include any introductory or concluding remarks, just the caption content.`;
     
     const userPrompt = `Generate a caption for this image: ${imageDescription}`;
@@ -67,6 +69,21 @@ Do not include any introductory or concluding remarks, just the caption content.
           <CardTitle className="text-lg font-semibold">Image Description</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-300">Quick tone for this caption:</span>
+            {presets.map(p => (
+              <Button
+                key={p}
+                size="sm"
+                variant={nextTone === p ? 'default' : 'outline'}
+                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-gray-200'}`}
+                onClick={() => setNextTone(prev => (prev === p ? null : p))}
+                disabled={isLoading}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </Button>
+            ))}
+          </div>
           <Textarea
             placeholder={`Describe the image (e.g., ${isMale 
               ? "'me in black boots holding a whip', 'close-up of my feet in black nail polish', 'sitting on a throne looking dominant'" 
