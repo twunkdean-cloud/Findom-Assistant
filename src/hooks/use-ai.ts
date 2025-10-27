@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useGenderedContent } from './use-gendered-content';
-import { API_BASE_URL } from '@/constants';
+import { API_BASE_URL } from '@/config/env';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/utils/toast';
 import { Sub, AIContentSuggestion, ServiceResponse } from '@/types';

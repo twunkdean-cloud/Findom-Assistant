@@ -2,6 +2,7 @@ import React, { createContext, useContext, ReactNode, useState, useEffect } from
 import { Session, User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceResponse } from '@/types';
+import { mapProfileFromDB } from '@/services/profile-mapper';
 
 interface AuthContextType {
   user: User | null;
@@ -22,22 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const mapProfileFromDB = (row: any) => {
-    if (!row) return null;
-    return {
-      id: row.id,
-      firstName: row.first_name ?? '',
-      lastName: row.last_name ?? '',
-      avatarUrl: row.avatar_url ?? null,
-      bio: row.bio ?? '',
-      persona: row.persona ?? 'dominant',
-      gender: row.gender ?? 'male',
-      energy: row.energy ?? 'masculine',
-      onboardingCompleted: row.onboarding_completed ?? false,
-      onboardingCompletedAt: row.onboarding_completed_at ?? null,
-      updated_at: row.updated_at ?? null,
-    };
-  };
+  // Mapped via shared utility
 
   const refreshProfile = async () => {
     if (user) {

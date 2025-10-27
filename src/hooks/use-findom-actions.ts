@@ -23,6 +23,7 @@ import {
 } from '@/services/unified-service';
 import { migrationService } from '@/services/migration-service';
 import { userDataService } from '@/services/user-data-service';
+import { toggleWeeklyCompleted } from '@/utils/checklist';
 
 export const useFindomActions = (
   appData: AppData, 
@@ -289,17 +290,8 @@ export const useFindomActions = (
   };
 
   const handleToggleWeeklyTask = (task: string) => {
-    const isCompleted = appData.checklist?.weeklyCompleted?.includes(task) || false;
-    
-    if (isCompleted) {
-      // Remove from completed
-      const updatedWeeklyCompleted = (appData.checklist?.weeklyCompleted || []).filter(t => t !== task);
-      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
-    } else {
-      // Add to completed
-      const updatedWeeklyCompleted = [...(appData.checklist?.weeklyCompleted || []), task];
-      updateChecklist('weeklyCompleted', updatedWeeklyCompleted);
-    }
+    const updated = toggleWeeklyCompleted(appData.checklist?.weeklyCompleted || [], task);
+    updateChecklist('weeklyCompleted', updated);
   };
 
   const migrateFromLocalStorage = async (): Promise<void> => {
