@@ -62,7 +62,7 @@ serve(async (req) => {
       try {
         const modelEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
         
-        const requestBody = {
+        const geminiRequestBody: any = {
           contents: [{
             parts: [{
               text: prompt
@@ -78,7 +78,7 @@ serve(async (req) => {
 
         // Add system instruction if provided
         if (systemInstruction) {
-          requestBody.systemInstruction = {
+          geminiRequestBody.systemInstruction = {
             parts: [{
               text: systemInstruction
             }]
@@ -90,7 +90,7 @@ serve(async (req) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(geminiRequestBody),
         });
         
         if (response.ok) {
