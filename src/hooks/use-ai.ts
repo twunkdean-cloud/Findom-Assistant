@@ -253,6 +253,71 @@ export const useAI = () => {
     }
   };
 
+  // NEW: Next Best Actions generator
+  type RecentMessage = { role: 'user' | 'assistant'; content: string };
+  interface NextBestActionsParams {
+    sub?: Sub | null;
+    recentTributes?: { amount: number; date: string; reason?: string; notes?: string }[];
+    recentMessages?: RecentMessage[];
+    currentTone?: 'dominant' | 'seductive' | 'strict' | 'caring' | 'playful';
+    gender?: 'male' | 'female';
+  }
+
+  const generateNextBestActions = async (
+    params: NextBestActionsParams
+  ): Promise<ServiceResponse<import('@/types').NextBestAction[]>> => {
+    setIsLoading(true);
+    setError(null);
+
+    const { sub, recentTributes = [], recentMessages = [], currentTone, gender } = params;
+
+    const systemPrompt = `You are a strategic assistant for a financial domination creator.
+Provide the next best 3 actions to maximize engagement and revenue while maintaining consent and boundaries.
+Tailor to the specific sub's history when provided.
+Return ONLY a JSON array with objects using keys: action, reason, confidence ('high'|'medium'|'low'), suggestedTone (optional: 'dominant'|'seductive'|'strict'|'caring'|'playful'), type (optional: 'nudge'|'tribute_escalation'|'check_in'|'reward'|'boundary'|'task').`;
+
+    const summary = {
+      sub: sub
+        ? {
+            name: sub.name,
+            total: sub.total,
+            lastTribute: sub.lastTribute ?? null,
+            preferences: sub.preferences ?? null,
+            notes: sub.notes ?? null,
+          }
+        : null,
+      recentTributes: recentTributes.slice(0, 5),
+      recentMessages: recentMessages.slice(-10),
+      context: {
+        tone: currentTone ?? 'dominant',
+        gender: gender ?? 'male',
+      },
+    };
+
+    const userPrompt = `Context JSON:\n${JSON.stringify(summary, null, 2)}\n\nGenerate 3 next best actions.`;
+
+    try {
+      const result = await callGemini(userPrompt, systemPrompt);
+      if (result) {
+        const jsonMatch = result.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]) as import('@/types').NextBestAction[];
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return { data: parsed.slice(0, 3), success: true };
+          }
+        }
+      }
+      throw new Error('Failed to parse AI response for next best actions.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Next best action generation failed';
+      console.error('Error generating next best actions:', err);
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const generateAutomatedResponse = async (
     message: string,
     subName: string,
@@ -292,5 +357,6 @@ export const useAI = () => {
     analyzeSubConversation,
     generatePersonalizedContent,
     generateAutomatedResponse,
+    generateNextBestActions,
   };
 };

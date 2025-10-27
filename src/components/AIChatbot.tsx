@@ -10,6 +10,8 @@ import { useMobile } from '@/hooks/use-mobile';
 import { useGenderedContent } from '@/hooks/use-gendered-content';
 import { toast } from '@/utils/toast';
 import { Loader2, Send, Copy, Bot, User, Brain, MessageSquare, Settings } from 'lucide-react';
+import { usePersona, PersonaTone } from '@/hooks/use-persona';
+import type { NextBestAction } from '@/types';
 
 interface Message {
   id: string;
@@ -19,15 +21,19 @@ interface Message {
 }
 
 const AIChatbot = () => {
-  const { callGemini, isLoading, error } = useAI();
+  const { callGemini, isLoading, error, generateNextBestActions } = useAI();
   const { appData } = useFindom();
   const { getSystemPrompt, getTargetAudience, isMale, isFemale } = useGenderedContent();
   const { isMobile } = useMobile();
+  const { persona, gender, presets, buildSystemPrompt } = usePersona();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [selectedSub, setSelectedSub] = useState<string>('general');
   const [chatMode, setChatMode] = useState<'general' | 'sub' | 'task' | 'creative'>('general');
-  const [botPersonality, setBotPersonality] = useState<'dominant' | 'caring' | 'strict' | 'playful'>('dominant');
+  const [botPersonality, setBotPersonality] = useState<'dominant' | 'caring' | 'strict' | 'playful' | 'seductive'>((persona as any) || 'dominant');
+  const [nextTone, setNextTone] = useState<PersonaTone | null>(null);
+  const [suggestions, setSuggestions] = useState<NextBestAction[]>([]);
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -38,8 +44,9 @@ const AIChatbot = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) {
+  const handleSendMessage = async (overrideContent?: string) => {
+    const contentToSend = (overrideContent ?? input).trim();
+    if (!contentToSend) {
       toast.error('Please enter a message');
       return;
     }
@@ -47,22 +54,37 @@ const AIChatbot = () => {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim(),
+      content: contentToSend,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = input.trim();
-    setInput('');
+    // Clear input only if not overriding
+    if (!overrideContent) setInput('');
+    // Determine tone for this message (use one-time preset if set)
+    const toneForThisMessage = (nextTone || botPersonality) as PersonaTone;
+    // Clear one-time preset after use
+    setNextTone(null);
 
     try {
-      let contextPrompt = currentInput;
+      let contextPrompt = contentToSend;
       
       const promptType = chatMode === 'general' ? 'response' : 
                         chatMode === 'sub' ? 'response' : 
                         chatMode === 'creative' ? 'response' : 
                         chatMode;
-      let systemPrompt = getSystemPrompt(promptType);
+      let systemPrompt = buildSystemPrompt(promptType, {
+        tone: toneForThisMessage,
+        gender,
+        extraFocus:
+          chatMode === 'task'
+            ? `Generate creative tasks and assignments for ${isMale ? 'male subs' : 'subs serving female dominants'}.`
+            : chatMode === 'creative'
+            ? `Generate creative content ideas, captions, and engagement strategies for ${isMale ? 'male-male findom' : 'female-for-male femdom'}.`
+            : chatMode === 'sub'
+            ? `Focus on sub management, relationship dynamics, and engagement strategies for ${isMale ? 'male-male findom' : 'female-for-male femdom'}.`
+            : 'Provide a helpful, persona-aligned response.',
+      });
       
       systemPrompt += `
 
@@ -83,21 +105,9 @@ Target audience: ${getTargetAudience()}`;
       if (selectedSub && selectedSub !== 'general') {
         const sub = appData.subs.find(s => s.name === selectedSub);
         if (sub) {
-          contextPrompt = `Regarding ${selectedSub} (${sub.total} total tributed): ${currentInput}`;
+          contextPrompt = `Regarding ${selectedSub} (${sub.total} total tributed): ${contentToSend}`;
           systemPrompt += ` You are currently discussing ${selectedSub}. Use their tribute history and your established dynamic to provide personalized advice.`;
         }
-      }
-
-      switch (chatMode) {
-        case 'task':
-          systemPrompt += ` Focus on generating creative tasks and assignments for ${isMale ? 'male subs' : 'subs serving female dominants'}.`;
-          break;
-        case 'creative':
-          systemPrompt += ` Focus on creative content ideas, captions, and engagement strategies for ${isMale ? 'male-male findom' : 'female-for-male femdom'}.`;
-          break;
-        case 'sub':
-          systemPrompt += ` Focus on sub management, relationship dynamics, and engagement strategies for ${isMale ? 'male-male findom' : 'female-for-male femdom'}.`;
-          break;
       }
 
       const result = await callGemini(contextPrompt, systemPrompt);
@@ -128,6 +138,39 @@ Target audience: ${getTargetAudience()}`;
   const handleClearChat = () => {
     setMessages([]);
     toast.success('Chat cleared');
+  };
+
+  const handleSuggestActions = async () => {
+    setIsSuggesting(true);
+    setSuggestions([]);
+    try {
+      const sub = selectedSub !== 'general' ? appData.subs.find(s => s.name === selectedSub) : null;
+      const recentTributes = sub
+        ? appData.tributes
+            .filter(t => t.from_sub === sub.name)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .slice(0, 5)
+            .map(t => ({ amount: t.amount, date: t.date, reason: t.reason, notes: t.notes }))
+        : [];
+
+      const simpleMessages = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+      const res = await generateNextBestActions({
+        sub: sub || undefined,
+        recentTributes,
+        recentMessages: simpleMessages as any,
+        currentTone: (nextTone || botPersonality) as PersonaTone,
+        gender,
+      });
+
+      if (res.success && res.data) {
+        setSuggestions(res.data);
+        toast.success('Suggested next actions generated.');
+      } else {
+        toast.error(res.error || 'Failed to generate suggestions');
+      }
+    } finally {
+      setIsSuggesting(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -217,6 +260,90 @@ Target audience: ${getTargetAudience()}`;
             </Select>
           </div>
         </div>
+
+        {/* NEW: Quick Persona Presets (per message) */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-high-contrast">Quick tone for this message:</span>
+          {presets.map(p => (
+            <Button
+              key={p}
+              size="sm"
+              variant={nextTone === p ? 'default' : 'outline'}
+              className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-dark text-medium-contrast'}`}
+              onClick={() => setNextTone(prev => (prev === p ? null : p))}
+              disabled={isLoading}
+            >
+              {p.charAt(0).toUpperCase() + p.slice(1)}
+            </Button>
+          ))}
+        </div>
+
+        {/* NEW: Next Best Actions trigger */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-high-contrast">
+            Get suggestions based on {selectedSub !== 'general' ? `${selectedSub}'s` : 'recent'} history.
+          </div>
+          <Button
+            onClick={handleSuggestActions}
+            disabled={isSuggesting}
+            className="bg-indigo-600 hover:bg-indigo-700"
+          >
+            {isSuggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
+            <span className="ml-2">Suggest Next Best Actions</span>
+          </Button>
+        </div>
+
+        {/* NEW: Next Best Actions list */}
+        {suggestions.length > 0 && (
+          <div className="space-y-2">
+            {suggestions.map((sug, idx) => (
+              <div key={idx} className="rounded-md border border-dark bg-dark-input p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      {sug.suggestedTone && (
+                        <Badge className="bg-indigo-600">{sug.suggestedTone}</Badge>
+                      )}
+                      {sug.type && (
+                        <Badge variant="outline" className="border-dark text-medium-contrast">
+                          {sug.type}
+                        </Badge>
+                      )}
+                      <Badge
+                        variant="outline"
+                        className={`border-dark text-medium-contrast`}
+                      >
+                        {sug.confidence} confidence
+                      </Badge>
+                    </div>
+                    <p className="mt-2 text-sm text-high-contrast whitespace-pre-wrap">{sug.action}</p>
+                    <p className="mt-1 text-xs text-muted-high-contrast">Why: {sug.reason}</p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-dark text-medium-contrast"
+                      onClick={() => {
+                        setInput(prev => (prev ? `${prev}\n\n${sug.action}` : sug.action));
+                        toast.success('Inserted into input.');
+                      }}
+                    >
+                      Insert
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                      onClick={() => handleSendMessage(sug.action)}
+                    >
+                      Send
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Chat Messages */}
         <div className={`border-dark rounded-lg bg-dark-input ${isMobile ? 'h-[50vh]' : 'h-[400px]'} overflow-y-auto p-4 space-y-4`}>

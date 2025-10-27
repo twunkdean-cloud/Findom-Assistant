@@ -126,6 +126,15 @@ export interface AIContentSuggestion {
   priority?: 'high' | 'medium' | 'low';
 }
 
+// NEW: AI next best action suggestion type
+export interface NextBestAction {
+  action: string;
+  reason: string;
+  confidence: 'high' | 'medium' | 'low';
+  suggestedTone?: 'dominant' | 'seductive' | 'strict' | 'caring' | 'playful';
+  type?: 'nudge' | 'tribute_escalation' | 'check_in' | 'reward' | 'boundary' | 'task';
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
