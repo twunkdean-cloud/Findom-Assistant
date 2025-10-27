@@ -105,7 +105,7 @@ Target audience: ${getTargetAudience()}`;
       if (selectedSub && selectedSub !== 'general') {
         const sub = appData.subs.find(s => s.name === selectedSub);
         if (sub) {
-          contextPrompt = `Regarding ${selectedSub} (${sub.total} total tributed): ${contentToSend}`;
+          contextPrompt = `Regarding ${selectedSub}: ${contentToSend}`;
           systemPrompt += ` You are currently discussing ${selectedSub}. Use their tribute history and your established dynamic to provide personalized advice.`;
         }
       }

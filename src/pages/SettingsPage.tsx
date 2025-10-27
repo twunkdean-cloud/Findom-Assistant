@@ -12,6 +12,8 @@ import { toast } from '@/utils/toast';
 import { Save, User, Bell, Shield, Palette, Download, Upload, Crown } from 'lucide-react';
 import GenderSelector from '@/components/ui/gender-selector';
 import { PERSONA_OPTIONS } from '@/constants';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import type { AppData, Sub, Tribute, CustomPrice, CalendarEvent, RedFlag } from '@/types';
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -35,6 +37,65 @@ const SettingsPage = () => {
   
   // Theme settings
   const [theme, setTheme] = useState<'dark' | 'light' | 'auto'>(appData.settings?.theme || 'dark');
+
+  // Import preview/persistence state
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingImport, setPendingImport] = useState<Partial<AppData> | null>(null);
+  const [previewCounts, setPreviewCounts] = useState<{ subs: number; tributes: number; customPrices: number; calendarEvents: number; redflags: number } | null>(null);
+  const [importMode, setImportMode] = useState<'replace' | 'merge'>('replace');
+
+  const mergeById = <T extends { id: string }>(current: T[], incoming: T[]): T[] => {
+    const map = new Map<string, T>();
+    current.forEach(i => map.set(i.id, i));
+    incoming.forEach(i => map.set(i.id, i));
+    return Array.from(map.values());
+  };
+
+  const performImport = async () => {
+    if (!pendingImport) return;
+    const data = pendingImport;
+
+    // Collections
+    if (data.subs) {
+      const list = importMode === 'replace' ? data.subs : mergeById(appData.subs, data.subs as Sub[]);
+      await updateSubs(list as Sub[]);
+    }
+    if (data.tributes) {
+      const list = importMode === 'replace' ? data.tributes : mergeById(appData.tributes, data.tributes as Tribute[]);
+      await updateTributes(list as Tribute[]);
+    }
+    if (data.customPrices) {
+      const list = importMode === 'replace' ? data.customPrices : mergeById(appData.customPrices, data.customPrices as CustomPrice[]);
+      await updateCustomPrices(list as CustomPrice[]);
+    }
+    const incomingCalendar = (data.calendarEvents || data.calendar) as CalendarEvent[] | undefined;
+    if (incomingCalendar) {
+      const list = importMode === 'replace' ? incomingCalendar : mergeById(appData.calendarEvents, incomingCalendar);
+      await updateCalendar(list as CalendarEvent[]);
+    }
+    if (data.redflags) {
+      const list = importMode === 'replace' ? data.redflags : mergeById(appData.redflags, data.redflags as RedFlag[]);
+      await updateRedflags(list as RedFlag[]);
+    }
+
+    // Singletons and user_data-backed fields
+    if (data.profile) await updateAppData('profile', data.profile);
+    if (data.settings) await updateAppData('settings', data.settings);
+    if (typeof data.persona !== 'undefined') await updateAppData('persona', data.persona);
+    if (typeof data.goal !== 'undefined') await updateAppData('goal', data.goal);
+    if (typeof data.responses !== 'undefined') await updateAppData('responses', data.responses);
+    if (typeof data.apiKey !== 'undefined') await updateAppData('apiKey', data.apiKey);
+    if (typeof data.screenTime !== 'undefined') await updateAppData('screenTime', data.screenTime);
+    if (typeof data.timerStart !== 'undefined') await updateAppData('timerStart', data.timerStart);
+    if (typeof data.uploadedImageData !== 'undefined') await updateAppData('uploadedImageData', data.uploadedImageData);
+    if (typeof data.subscription !== 'undefined') await updateAppData('subscription', data.subscription);
+    if (data.checklist) await updateAppData('checklist', data.checklist);
+
+    setImportDialogOpen(false);
+    setPendingImport(null);
+    setPreviewCounts(null);
+    toast.success('Import completed.');
+  };
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
@@ -88,9 +149,19 @@ const SettingsPage = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const importedData = JSON.parse(e.target?.result as string);
-        // Here you would validate and merge imported data
-        toast.success('Data imported successfully!');
+        const importedData = JSON.parse(e.target?.result as string) as Partial<AppData>;
+        // Basic validation and summary
+        const counts = {
+          subs: importedData.subs?.length || 0,
+          tributes: importedData.tributes?.length || 0,
+          customPrices: importedData.customPrices?.length || 0,
+          calendarEvents: (importedData.calendarEvents || importedData.calendar || []).length,
+          redflags: importedData.redflags?.length || 0,
+        };
+        setPreviewCounts(counts);
+        setPendingImport(importedData);
+        setImportMode('replace');
+        setImportDialogOpen(true);
       } catch (error) {
         toast.error('Failed to import data. Please check the file format.');
       }
@@ -302,6 +373,49 @@ const SettingsPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Import Preview Dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="bg-gray-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Confirm Import</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Review what will be imported and choose whether to replace or merge with your current data.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 text-gray-200">
+            <p>Subs: <span className="text-gray-300">{previewCounts?.subs ?? 0}</span></p>
+            <p>Tributes: <span className="text-gray-300">{previewCounts?.tributes ?? 0}</span></p>
+            <p>Custom Prices: <span className="text-gray-300">{previewCounts?.customPrices ?? 0}</span></p>
+            <p>Calendar Events: <span className="text-gray-300">{previewCounts?.calendarEvents ?? 0}</span></p>
+            <p>Red Flags: <span className="text-gray-300">{previewCounts?.redflags ?? 0}</span></p>
+          </div>
+          <div className="flex items-center gap-2 pt-2">
+            <Button
+              variant={importMode === 'replace' ? 'default' : 'outline'}
+              className={importMode === 'replace' ? 'bg-indigo-600' : 'border-gray-600 text-gray-300'}
+              onClick={() => setImportMode('replace')}
+            >
+              Replace
+            </Button>
+            <Button
+              variant={importMode === 'merge' ? 'default' : 'outline'}
+              className={importMode === 'merge' ? 'bg-indigo-600' : 'border-gray-600 text-gray-300'}
+              onClick={() => setImportMode('merge')}
+            >
+              Merge
+            </Button>
+          </div>
+          <DialogFooter className="pt-2">
+            <Button variant="outline" className="border-gray-600 text-gray-300" onClick={() => setImportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-green-600 hover:bg-green-700" onClick={performImport}>
+              Confirm Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Account Actions */}
       <Card className="bg-gray-800 border-gray-700">

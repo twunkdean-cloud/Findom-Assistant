@@ -19,57 +19,57 @@ export class MigrationService {
       }
 
       // Migrate subs
-      const subsData = localStorage.getItem('subs');
+      const subsData = localStorage.getItem('findom_subs');
       if (subsData) {
         const subs = JSON.parse(subsData);
         await subsService.updateAll(userId, subs);
       }
 
       // Migrate tributes
-      const tributesData = localStorage.getItem('tributes');
+      const tributesData = localStorage.getItem('findom_tributes');
       if (tributesData) {
         const tributes = JSON.parse(tributesData);
         await tributesService.updateAll(userId, tributes);
       }
 
       // Migrate custom prices
-      const customPricesData = localStorage.getItem('customPrices');
+      const customPricesData = localStorage.getItem('findom_customPrices');
       if (customPricesData) {
         const customPrices = JSON.parse(customPricesData);
         await customPricesService.updateAll(userId, customPrices);
       }
 
       // Migrate calendar events
-      const calendarData = localStorage.getItem('calendarEvents');
+      const calendarData = localStorage.getItem('findom_calendar');
       if (calendarData) {
         const calendarEvents = JSON.parse(calendarData);
         await calendarService.updateAll(userId, calendarEvents);
       }
 
       // Migrate red flags
-      const redflagsData = localStorage.getItem('redflags');
+      const redflagsData = localStorage.getItem('findom_redflags');
       if (redflagsData) {
         const redflags = JSON.parse(redflagsData);
         await redflagsService.updateAll(userId, redflags);
       }
 
       // Migrate user data
-      const apiKey = localStorage.getItem('apiKey');
+      const apiKey = localStorage.getItem('findom_apiKey');
       if (apiKey) {
         await userDataService.setApiKey(userId, apiKey);
       }
 
-      const persona = localStorage.getItem('persona');
+      const persona = localStorage.getItem('findom_persona');
       if (persona) {
         await userDataService.setPersona(userId, persona);
       }
 
-      const goal = localStorage.getItem('goal');
+      const goal = localStorage.getItem('findom_goal');
       if (goal) {
         await userDataService.setGoal(userId, JSON.parse(goal));
       }
 
-      const responses = localStorage.getItem('responses');
+      const responses = localStorage.getItem('findom_responses');
       if (responses) {
         await userDataService.setResponses(userId, JSON.parse(responses));
       }

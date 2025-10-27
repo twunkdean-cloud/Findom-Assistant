@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/utils/toast';
 import { Sub, AIContentSuggestion, ServiceResponse } from '@/types';
 import { cache } from '@/utils/cache';
+import { sanitizeAiText } from '@/utils/ai-sanitize';
 
 interface AIAnalytics {
   sentimentScore: number;
@@ -69,8 +70,11 @@ export const useAI = () => {
     // Compact inputs to reduce tokens
     const compactPrompt = compactText(prompt);
     const compactSystem = compactText(systemPrompt || getGenderedSystemPrompt('general'));
+    // Sanitize to remove currency/total references everywhere
+    const sanitizedPrompt = sanitizeAiText(compactPrompt);
+    const sanitizedSystem = sanitizeAiText(compactSystem);
 
-    const cacheKey = `gemini:${compactPrompt}:${compactSystem}`;
+    const cacheKey = `gemini:${sanitizedPrompt}:${sanitizedSystem}`;
     const cached = cache.get<string>(cacheKey);
     if (cached) {
       toast.info('Returning cached AI response.');
@@ -82,8 +86,8 @@ export const useAI = () => {
 
     try {
       const payload: GeminiRequest = {
-        prompt: compactPrompt,
-        systemInstruction: compactSystem,
+        prompt: sanitizedPrompt,
+        systemInstruction: sanitizedSystem,
       };
 
       const response = await fetch(`${API_BASE_URL}/gemini-chat`, {
@@ -144,8 +148,8 @@ export const useAI = () => {
       const payload: GeminiVisionRequest = {
         image: base64Data,
         mimeType: mimeType,
-        // Shorter default prompt to reduce tokens
-        prompt: compactText(prompt) || 'Describe this image briefly.',
+        // Shorter default prompt and sanitized to remove money references
+        prompt: sanitizeAiText(compactText(prompt) || 'Describe this image briefly.'),
       };
 
       const response = await fetch(`${API_BASE_URL}/gemini-vision`, {
@@ -300,7 +304,7 @@ action, reason, confidence:'high'|'medium'|'low', suggestedTone?:'dominant'|'sed
       sub: sub
         ? {
             name: sub.name,
-            total: sub.total,
+            // Intentionally exclude numeric totals to prevent currency leakage
             lastTribute: sub.lastTribute ?? null,
             preferences: sub.preferences ?? null,
             notes: sub.notes ?? null,
