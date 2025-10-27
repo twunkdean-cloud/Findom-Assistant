@@ -236,10 +236,12 @@ suggestedActions:string[], contentSuggestions:string[].`);
 
     // Concise, schema-first system prompt
     const systemPrompt = compactText(`Return ONLY a compact JSON array of 3 items with keys:
-type, content, tone, reasoning, targetSub.`);
+    type, content, tone, reasoning, targetSub.
+    Rules: Do NOT include any currency amounts or propose specific dollar values; avoid referencing tribute totals.`);
 
     const userPrompt = compactText(`Create ${request.contentType} suggestions for ${request.sub.name} with ${request.tone} tone.
-Total:$${request.sub.total}. Prefs:${request.sub.preferences || 'None'}. Notes:${request.sub.notes || 'None'}.`);
+    Context: Prefs=${request.sub.preferences || 'None'}; Notes=${request.sub.notes || 'None'}.
+    Focus on relationship dynamics and actionable phrasing, without mentioning money or dollar amounts.`);
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
