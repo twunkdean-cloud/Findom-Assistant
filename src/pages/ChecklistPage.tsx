@@ -19,7 +19,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAI } from '@/hooks/use-ai';
 
 const ChecklistPage = () => {
-  const { appData, updateAppData, addChecklistTask, editChecklistTask, deleteChecklistTask, handleToggleWeeklyTask, addWeeklyTask, editWeeklyTask, deleteWeeklyTask } = useFindom();
+  const { appData, updateAppData, addChecklistTask, editChecklistTask, deleteChecklistTask, handleToggleWeeklyTask } = useFindom();
   const { checklist } = appData;
   const { callGemini, isLoading: isAILoading } = useAI();
   
@@ -58,9 +58,43 @@ const ChecklistPage = () => {
     }
   };
 
+  const addWeeklyTaskLocal = async (task: string) => {
+    const tasks = checklist.weeklyTasks || [];
+    if (tasks.includes(task)) {
+      toast.error('Task already exists.');
+      return;
+    }
+    const updatedWeeklyTasks = [...tasks, task];
+    await updateAppData('checklist', { ...checklist, weeklyTasks: updatedWeeklyTasks });
+    toast.success('Weekly task added!');
+  };
+
+  const editWeeklyTaskLocal = async (oldTask: string, newTask: string) => {
+    if (oldTask === newTask) {
+      toast.info('No change made to task.');
+      return;
+    }
+    const tasks = checklist.weeklyTasks || [];
+    if (tasks.includes(newTask)) {
+      toast.error('A task with this name already exists.');
+      return;
+    }
+    const updatedWeeklyTasks = tasks.map(t => (t === oldTask ? newTask : t));
+    const updatedWeeklyCompleted = (checklist.weeklyCompleted || []).map(t => (t === oldTask ? newTask : t));
+    await updateAppData('checklist', { ...checklist, weeklyTasks: updatedWeeklyTasks, weeklyCompleted: updatedWeeklyCompleted });
+    toast.success('Weekly task updated!');
+  };
+
+  const deleteWeeklyTaskLocal = async (task: string) => {
+    const updatedWeeklyTasks = (checklist.weeklyTasks || []).filter(t => t !== task);
+    const updatedWeeklyCompleted = (checklist.weeklyCompleted || []).filter(t => t !== task);
+    await updateAppData('checklist', { ...checklist, weeklyTasks: updatedWeeklyTasks, weeklyCompleted: updatedWeeklyCompleted });
+    toast.success('Weekly task deleted!');
+  };
+
   const handleAddWeeklyTask = () => {
     if (newWeeklyTask.trim()) {
-      addWeeklyTask(newWeeklyTask.trim());
+      addWeeklyTaskLocal(newWeeklyTask.trim());
       setNewWeeklyTask('');
       setIsAddWeeklyTaskDialogOpen(false);
     } else {
@@ -74,7 +108,7 @@ const ChecklistPage = () => {
       if (editingTask.type === 'daily') {
         editChecklistTask(editingTask.task, editedTaskName.trim());
       } else {
-        editWeeklyTask(editingTask.task, editedTaskName.trim());
+        editWeeklyTaskLocal(editingTask.task, editedTaskName.trim());
       }
       setIsEditTaskDialogOpen(false);
       setEditingTask(null);
@@ -203,7 +237,7 @@ const ChecklistPage = () => {
                     }} className="text-blue-400 hover:text-blue-300 h-6 w-6">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteWeeklyTask(task)} className="text-red-400 hover:text-red-300 h-6 w-6">
+                    <Button variant="ghost" size="icon" onClick={() => deleteWeeklyTaskLocal(task)} className="text-red-400 hover:text-red-300 h-6 w-6">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>

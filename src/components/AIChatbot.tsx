@@ -421,7 +421,7 @@ Target audience: ${getTargetAudience()}`;
           />
           <div className="flex space-x-2">
             <Button
-              onClick={handleSendMessage}
+              onClick={() => handleSendMessage()}
               disabled={isLoading || !input.trim()}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
