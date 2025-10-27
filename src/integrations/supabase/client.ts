@@ -11,16 +11,47 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
-function createMissingEnvProxy(): SupabaseClient {
+function createMissingEnvStub(): SupabaseClient {
   const message = 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment.';
-  return new Proxy({} as SupabaseClient, {
-    get() {
-      throw new Error(message);
+  const notConfiguredResponse = Promise.resolve({ data: null, error: { message } } as any);
+
+  const chain: any = {
+    select: () => chain,
+    upsert: () => notConfiguredResponse,
+    insert: () => notConfiguredResponse,
+    update: () => notConfiguredResponse,
+    delete: () => notConfiguredResponse,
+    eq: () => chain,
+    single: () => notConfiguredResponse,
+    order: () => chain,
+    limit: () => chain,
+  };
+
+  const stub: any = {
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: { message } } as any),
+      signInWithPassword: () => notConfiguredResponse,
+      signUp: () => notConfiguredResponse,
+      signOut: () => Promise.resolve({ error: { message } } as any),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } }, error: null } as any),
     },
-  });
+    from: () => chain,
+    functions: {
+      invoke: () => notConfiguredResponse,
+    },
+    storage: {
+      from: () => ({
+        upload: () => notConfiguredResponse,
+        download: () => notConfiguredResponse,
+        list: () => notConfiguredResponse,
+      }),
+    },
+  };
+
+  return stub as SupabaseClient;
 }
 
 export const supabase: SupabaseClient =
-  SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
-    ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
-    : createMissingEnvProxy();
+  isSupabaseConfigured
+    ? createClient(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!)
+    : createMissingEnvStub();
