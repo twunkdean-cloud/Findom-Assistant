@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { Session, User, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { ServiceResponse } from '@/types';
 import { mapProfileFromDB } from '@/services/profile-mapper';
 
@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Mapped via shared utility
 
   const refreshProfile = async () => {
+    if (!isSupabaseConfigured || !user) return;
     if (user) {
       const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       setProfile(mapProfileFromDB(userProfile));
@@ -34,6 +35,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const getInitialSession = async () => {
+      if (!isSupabaseConfigured) {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
@@ -54,6 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     getInitialSession();
 
+    if (!isSupabaseConfigured) return;
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
@@ -73,6 +82,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string): Promise<ServiceResponse<{ user: User; session: Session }>> => {
+    if (!isSupabaseConfigured) {
+      return { error: 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.', success: false };
+    }
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) return { error, success: false };
@@ -83,6 +95,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string): Promise<ServiceResponse<{ user: User | null; session: Session | null }>> => {
+    if (!isSupabaseConfigured) {
+      return { error: 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.', success: false };
+    }
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -99,6 +114,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async (): Promise<ServiceResponse<void>> => {
+    if (!isSupabaseConfigured) {
+      return { error: 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.', success: false };
+    }
     try {
       const { error } = await supabase.auth.signOut();
       if (error) return { error, success: false };
