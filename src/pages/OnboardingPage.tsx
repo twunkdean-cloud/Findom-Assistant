@@ -33,12 +33,12 @@ const OnboardingPage = () => {
       
       try {
         await updateAppData('profile', {
-          first_name: displayName.trim(),
+          firstName: displayName.trim(),
           gender: selectedGender!,
           energy: selectedGender === 'male' ? 'masculine' : 'feminine',
           persona: selectedPersona,
-          onboarding_completed: true,
-          onboarding_completed_at: new Date().toISOString()
+          onboardingCompleted: true,
+          onboardingCompletedAt: new Date().toISOString()
         });
         
         await refreshProfile();

@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useFindom } from '@/context/FindomContext';
 import { useAI } from '@/hooks/use-ai';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { 
   Brain, 
   TrendingUp, 

@@ -4,6 +4,39 @@ import { ServiceResponse } from '@/types';
 export class UserDataService {
   private supabase = supabase;
 
+  private mapProfileFromDB(row: any) {
+    if (!row) return {};
+    return {
+      id: row.id,
+      firstName: row.first_name ?? '',
+      lastName: row.last_name ?? '',
+      avatarUrl: row.avatar_url ?? null,
+      bio: row.bio ?? '',
+      persona: row.persona ?? 'dominant',
+      gender: row.gender ?? 'male',
+      energy: row.energy ?? 'masculine',
+      onboardingCompleted: row.onboarding_completed ?? false,
+      onboardingCompletedAt: row.onboarding_completed_at ?? null,
+      updated_at: row.updated_at ?? null,
+    };
+  }
+
+  private mapProfileToDB(profile: any) {
+    if (!profile) return {};
+    const mapped: any = {
+      first_name: profile.firstName ?? null,
+      last_name: profile.lastName ?? null,
+      avatar_url: profile.avatarUrl ?? null,
+      bio: profile.bio ?? null,
+      persona: profile.persona ?? null,
+      gender: profile.gender ?? null,
+      energy: profile.energy ?? null,
+      onboarding_completed: profile.onboardingCompleted ?? null,
+      onboarding_completed_at: profile.onboardingCompletedAt ?? null,
+    };
+    return mapped;
+  }
+
   async getApiKey(userId: string): Promise<string> {
     try {
       const { data, error } = await this.supabase
@@ -289,7 +322,7 @@ export class UserDataService {
         throw error;
       }
 
-      return data || {};
+      return this.mapProfileFromDB(data) || {};
     } catch (error) {
       console.error('Error getting profile:', error);
       return {};
@@ -298,12 +331,13 @@ export class UserDataService {
 
   async setProfile(userId: string, profile: any): Promise<void> {
     try {
+      const payload = {
+        id: userId,
+        ...this.mapProfileToDB(profile),
+      };
       const { error } = await this.supabase
         .from('profiles')
-        .upsert({
-          id: userId,
-          ...profile,
-        }, {
+        .upsert(payload, {
           onConflict: 'id',
         });
 

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useFindom } from '@/context/FindomContext';
 import { useMobile } from '@/hooks/use-mobile';
-import { toast } from 'sonner';
+import { toast } from '@/utils/toast';
 import { 
   DollarSign, 
   Users, 

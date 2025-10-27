@@ -26,7 +26,7 @@ const Index = () => {
   const totalTasks = appData.checklist?.tasks?.length || 0;
   const taskProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
   const currentTime = new Date();
-  const upcomingEvents = appData.calendar
+  const upcomingEvents = appData.calendarEvents
     .filter(event => new Date(event.datetime) > currentTime)
     .slice(0, 3);
 

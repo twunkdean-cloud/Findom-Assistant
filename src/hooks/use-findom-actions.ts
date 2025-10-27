@@ -169,7 +169,7 @@ export const useFindomActions = (
 
   const updateCalendar = async (calendar: CalendarEvent[]): Promise<void> => {
     if (!user) return;
-    setAppData(prev => ({ ...prev, calendarEvents: calendar, calendar }));
+    setAppData(prev => ({ ...prev, calendarEvents: calendar }));
     try {
       await calendarService.updateAll(user.id, calendar);
     } catch (error) {

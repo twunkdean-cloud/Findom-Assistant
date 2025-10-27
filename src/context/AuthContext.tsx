@@ -22,10 +22,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const mapProfileFromDB = (row: any) => {
+    if (!row) return null;
+    return {
+      id: row.id,
+      firstName: row.first_name ?? '',
+      lastName: row.last_name ?? '',
+      avatarUrl: row.avatar_url ?? null,
+      bio: row.bio ?? '',
+      persona: row.persona ?? 'dominant',
+      gender: row.gender ?? 'male',
+      energy: row.energy ?? 'masculine',
+      onboardingCompleted: row.onboarding_completed ?? false,
+      onboardingCompletedAt: row.onboarding_completed_at ?? null,
+      updated_at: row.updated_at ?? null,
+    };
+  };
+
   const refreshProfile = async () => {
     if (user) {
       const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      setProfile(userProfile);
+      setProfile(mapProfileFromDB(userProfile));
     }
   };
 
@@ -40,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentUser);
         if (currentUser) {
           const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-          setProfile(userProfile);
+          setProfile(mapProfileFromDB(userProfile));
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -58,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentUser);
         if (currentUser) {
           const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-          setProfile(userProfile);
+          setProfile(mapProfileFromDB(userProfile));
         } else {
           setProfile(null);
         }

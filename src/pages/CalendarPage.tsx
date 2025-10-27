@@ -43,7 +43,7 @@ const ChecklistPage = () => {
       content: eventContent,
     };
 
-    const updatedCalendar = [...appData.calendar, newEvent];
+    const updatedCalendar = [...appData.calendarEvents, newEvent];
     await updateCalendar(updatedCalendar);
     
     resetForm();
@@ -65,8 +65,8 @@ const ChecklistPage = () => {
     };
 
     const updatedCalendar = editingEvent
-      ? appData.calendar.map(e => e.id === editingEvent.id ? updatedEvent : e)
-      : [...appData.calendar, updatedEvent];
+      ? appData.calendarEvents.map(e => e.id === editingEvent.id ? updatedEvent : e)
+      : [...appData.calendarEvents, updatedEvent];
     
     await updateCalendar(updatedCalendar);
     
@@ -78,7 +78,7 @@ const ChecklistPage = () => {
 
   const handleDeleteEvent = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
-      const updatedCalendar = appData.calendar.filter(e => e.id !== id);
+      const updatedCalendar = appData.calendarEvents.filter(e => e.id !== id);
       await updateCalendar(updatedCalendar);
       toast.success('Event deleted successfully!');
     }
@@ -93,7 +93,7 @@ const ChecklistPage = () => {
     setIsEditDialogOpen(true);
   };
 
-  const sortedEvents = [...appData.calendar].sort((a, b) => 
+  const sortedEvents = [...appData.calendarEvents].sort((a, b) => 
     new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
   );
 
@@ -179,7 +179,7 @@ const ChecklistPage = () => {
             <Calendar className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{appData.calendar.length}</div>
+            <div className="text-2xl font-bold text-white">{appData.calendarEvents.length}</div>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
@@ -199,7 +199,7 @@ const ChecklistPage = () => {
           <CardTitle className="text-white">Calendar Events</CardTitle>
         </CardHeader>
         <CardContent>
-          {appData.calendar.length === 0 ? (
+          {appData.calendarEvents.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No events yet. Add your first event!</p>
           ) : (
             <div className="space-y-4">

@@ -13,7 +13,7 @@ const CaptionGeneratorPage = () => {
   const { getSystemPrompt, getPersonaTones, isMale, isFemale } = useGenderedContent();
   const { persona, gender, presets, buildSystemPrompt } = usePersona();
   const [imageDescription, setImageDescription] = useState('');
-  const [captionStyle, setCaptionStyle] = useState('dominant');
+  const [captionStyle, setCaptionStyle] = useState(persona);
   const [generatedCaption, setGeneratedCaption] = useState('');
   const [nextTone, setNextTone] = useState<PersonaTone | null>(null);
 
@@ -32,6 +32,7 @@ Do not include any introductory or concluding remarks, just the caption content.
     const userPrompt = `Generate a caption for this image: ${imageDescription}`;
 
     const result = await callGemini(userPrompt, systemPrompt);
+    setNextTone(null);
     if (result) {
       setGeneratedCaption(result);
       toast.success('Caption generated successfully!');

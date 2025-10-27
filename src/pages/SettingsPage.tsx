@@ -19,7 +19,7 @@ const SettingsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   
   // Profile settings
-  const [firstName, setFirstName] = useState(appData.profile?.first_name || '');
+  const [firstName, setFirstName] = useState(appData.profile?.firstName || '');
   const [bio, setBio] = useState(appData.profile?.bio || '');
   const [persona, setPersona] = useState(appData.profile?.persona || 'dominant');
   const [gender, setGender] = useState<'male' | 'female'>(appData.profile?.gender || 'male');
@@ -42,7 +42,7 @@ const SettingsPage = () => {
     try {
       // Update profile
       await updateAppData('profile', {
-        first_name: firstName,
+        firstName: firstName,
         bio,
         persona,
         gender,

@@ -5,6 +5,7 @@ import { FindomProvider } from '@/context/FindomContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Layout } from '@/components/Layout';
 import { Toaster } from '@/components/ui/sonner';
+import { TOAST_CONFIG } from '@/constants';
 import { ComponentLoadingFallback } from '@/utils/lazy-loading';
 
 // Lazy loaded pages
@@ -52,7 +53,7 @@ const AppRoutes: React.FC = () => {
     );
   }
 
-  if (profile && !profile.onboarding_completed) {
+  if (profile && !profile.onboardingCompleted) {
     return (
       <Routes>
         <Route path="/onboarding" element={<Suspense fallback={<ComponentLoadingFallback />}><LazyOnboardingPage /></Suspense>} />
@@ -95,7 +96,7 @@ const App: React.FC = () => {
         <AuthProvider>
           <FindomProvider>
             <AppRoutes />
-            <Toaster />
+            <Toaster position={TOAST_CONFIG.POSITION} duration={TOAST_CONFIG.DURATION} />
           </FindomProvider>
         </AuthProvider>
       </Router>
