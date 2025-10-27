@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useGenderedContent } from './use-gendered-content';
-import { API_BASE_URL, API_TOKEN } from '@/constants';
+import { API_BASE_URL } from '@/constants';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/utils/toast';
 import { Sub, AIContentSuggestion, ServiceResponse } from '@/types';
 import { cache } from '@/utils/cache';
@@ -45,6 +46,16 @@ interface GeminiResponse {
 const compactText = (str?: string) => (str ? str.replace(/\s+/g, ' ').trim() : '');
 const trimTail = (str: string, maxChars: number) => (str.length > maxChars ? str.slice(str.length - maxChars) : str);
 
+// Helper to get current user's JWT
+const getAuthToken = async (): Promise<string> => {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) {
+    throw new Error('You must be signed in to use AI features.');
+  }
+  return token;
+};
+
 export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +90,7 @@ export const useAI = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_TOKEN}`,
+          'Authorization': `Bearer ${await getAuthToken()}`,
         },
         body: JSON.stringify(payload),
       });
@@ -141,7 +152,7 @@ export const useAI = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_TOKEN}`,
+          'Authorization': `Bearer ${await getAuthToken()}`,
         },
         body: JSON.stringify(payload),
       });
