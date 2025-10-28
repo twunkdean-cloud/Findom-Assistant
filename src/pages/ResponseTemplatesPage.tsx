@@ -16,7 +16,7 @@ import { usePersona, PersonaTone } from '@/hooks/use-persona';
 const ResponseTemplatesPage = () => {
   const { appData, updateAppData } = useFindom();
   const { callGemini, isLoading, error } = useAI();
-  const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
+  const { getSystemPrompt, isMale } = useGenderedContent();
   const { persona, gender, presets, buildSystemPrompt } = usePersona();
 
   const [responseType, setResponseType] = useState<string>('initial');

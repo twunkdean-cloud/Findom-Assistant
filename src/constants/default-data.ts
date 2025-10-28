@@ -1,5 +1,5 @@
 import { AppData } from '@/types';
-import { DEFAULT_WEEKLY_TASKS, DEFAULT_CHECKLIST_TASKS } from './index';
+import { DEFAULT_WEEKLY_TASKS } from './index';
 
 export const DEFAULT_APP_DATA: AppData = {
   subs: [],

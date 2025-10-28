@@ -14,7 +14,7 @@ import { usePersona, PersonaTone } from '@/hooks/use-persona';
 
 const TaskGeneratorPage = () => {
   const { callGemini, isLoading, error } = useAI();
-  const { getSystemPrompt, isMale, isFemale } = useGenderedContent();
+  const { getSystemPrompt, isMale } = useGenderedContent();
   const { persona, gender, presets, buildSystemPrompt } = usePersona();
   const [topic, setTopic] = useState('');
   const [intensity, setIntensity] = useState<'low' | 'medium' | 'high'>('medium');

@@ -1,6 +1,6 @@
 import { BaseService } from './base-service';
 import { checklistsService } from './checklists-service';
-import { ServiceResponse, Sub, Tribute, CustomPrice, CalendarEvent, RedFlag } from '@/types';
+import { Sub, Tribute, CustomPrice, CalendarEvent, RedFlag } from '@/types';
 
 // Create typed service classes extending BaseService
 class SubsService extends BaseService<Sub> {
