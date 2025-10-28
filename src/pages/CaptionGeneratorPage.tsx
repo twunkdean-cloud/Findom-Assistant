@@ -13,7 +13,7 @@ const CaptionGeneratorPage = () => {
   const { getSystemPrompt, getPersonaTones, isMale, isFemale } = useGenderedContent();
   const { persona, gender, presets, buildSystemPrompt } = usePersona();
   const [imageDescription, setImageDescription] = useState('');
-  const [captionStyle, setCaptionStyle] = useState(persona);
+  const [captionStyle, setCaptionStyle] = useState<PersonaTone>(persona as PersonaTone);
   const [generatedCaption, setGeneratedCaption] = useState('');
   const [nextTone, setNextTone] = useState<PersonaTone | null>(null);
 
@@ -99,7 +99,7 @@ Do not include any introductory or concluding remarks, just the caption content.
             <label className="text-sm text-gray-300">Caption Style</label>
             <select
               value={captionStyle}
-              onChange={(e) => setCaptionStyle(e.target.value)}
+              onChange={(e) => setCaptionStyle(e.target.value as PersonaTone)}
               className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
               disabled={isLoading}
             >

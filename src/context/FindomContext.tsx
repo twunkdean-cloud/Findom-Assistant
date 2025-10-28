@@ -94,6 +94,7 @@ export const FindomProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           tributes,
           customPrices,
           calendarEvents: calendar,
+          calendar,
           redflags,
           checklists: [checklist], // Wrap in array
           checklist: {
