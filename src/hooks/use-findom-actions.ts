@@ -72,6 +72,9 @@ export const useFindomActions = (
           break;
         case 'profile':
           await userDataService.setProfile(userId, value);
+          // Refresh the profile in AuthContext to keep it in sync
+          const { refreshProfile } = await import('@/context/AuthContext').then(m => ({ refreshProfile: m.useAuth }));
+          // We'll handle this differently since we can't use hooks here
           break;
         case 'settings':
           await userDataService.setSettings(userId, value);

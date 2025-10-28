@@ -111,11 +111,16 @@ const SettingsPage = () => {
     try {
       // Update profile
       await updateAppData('profile', {
+        id: user?.id,
         firstName: firstName,
+        lastName: appData.profile?.lastName || '',
         bio,
         persona,
         gender,
-        energy: gender === 'male' ? 'masculine' : 'feminine'
+        energy: gender === 'male' ? 'masculine' : 'feminine',
+        avatarUrl: appData.profile?.avatarUrl || null,
+        onboardingCompleted: appData.profile?.onboardingCompleted || false,
+        onboardingCompletedAt: appData.profile?.onboardingCompletedAt || null,
       });
       
       // Update settings

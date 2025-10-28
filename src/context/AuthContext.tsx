@@ -70,7 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentUser);
         if (currentUser) {
           const { data: userProfile } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-          setProfile(mapProfileFromDB(userProfile));
+          const mappedProfile = mapProfileFromDB(userProfile);
+          setProfile(mappedProfile);
         } else {
           setProfile(null);
         }
