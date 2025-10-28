@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const OnboardingPage = () => {
   const { appData, updateAppData } = useFindom();
-  const { refreshProfile } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [displayName, setDisplayName] = useState('');
