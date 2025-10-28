@@ -79,15 +79,15 @@ const AIContentSuggestions = () => {
           AI Content Suggestions
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 text-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="text-sm text-gray-300 mb-2 block">Select {isMale ? 'Sub' : 'Worshipper'}</label>
             <Select value={selectedSub} onValueChange={setSelectedSub}>
-              <SelectTrigger className="bg-gray-900 border-gray-700">
+              <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-200 placeholder:text-gray-400">
                 <SelectValue placeholder={`Choose a ${isMale ? 'sub' : 'worshipper'}`} />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                 {appData.subs.map((sub) => (
                   <SelectItem key={sub.id} value={sub.name}>
                     {sub.name} (${sub.total.toFixed(2)})
@@ -100,10 +100,10 @@ const AIContentSuggestions = () => {
           <div>
             <label className="text-sm text-gray-300 mb-2 block">Content Type</label>
             <Select value={contentType} onValueChange={(value: any) => setContentType(value)}>
-              <SelectTrigger className="bg-gray-900 border-gray-700">
+              <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-200 placeholder:text-gray-400">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                 <SelectItem value="message">Personal Message</SelectItem>
                 <SelectItem value="task">Task Assignment</SelectItem>
                 <SelectItem value="caption">Social Caption</SelectItem>
@@ -114,10 +114,10 @@ const AIContentSuggestions = () => {
           <div>
             <label className="text-sm text-gray-300 mb-2 block">Tone</label>
             <Select value={tone} onValueChange={(value: any) => setTone(value)}>
-              <SelectTrigger className="bg-gray-900 border-gray-700">
+              <SelectTrigger className="bg-gray-900 border-gray-700 text-gray-200 placeholder:text-gray-400">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                 {getToneOptions().map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
