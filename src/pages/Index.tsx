@@ -13,6 +13,8 @@ import {
   Target,
   Crown
 } from 'lucide-react';
+import { PerformanceMonitor } from '@/components/PerformanceMonitor';
+import BaselineMetricsPanel from '@/components/BaselineMetricsPanel';
 
 const Index = () => {
   const { appData } = useFindom();
@@ -36,6 +38,9 @@ const Index = () => {
 
   return (
     <div className="space-y-6">
+      {/* DEV-only performance HUD */}
+      <PerformanceMonitor componentName="Index" />
+      
       <div>
         <h1 className="text-3xl font-bold text-white">Dashboard</h1>
         <p className="text-gray-400 mt-1">
@@ -190,6 +195,9 @@ const Index = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Baseline metrics panel */}
+      <BaselineMetricsPanel />
     </div>
   );
 };
