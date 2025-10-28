@@ -369,6 +369,69 @@ export class UserDataService {
     }
   }
 
+  async getNotificationSettings(userId: string): Promise<{
+    enabled: boolean;
+    newTributes: boolean;
+    newSubs: boolean;
+    reminders: boolean;
+    weeklyReports: boolean;
+  }> {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_data')
+        .select('data')
+        .eq('user_id', userId)
+        .eq('data_type', 'notification_settings')
+        .single();
+
+      if (error && (error as any).code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data?.data || {
+        enabled: false,
+        newTributes: true,
+        newSubs: true,
+        reminders: true,
+        weeklyReports: false,
+      };
+    } catch (error) {
+      console.error('Error getting notification settings:', error);
+      return {
+        enabled: false,
+        newTributes: true,
+        newSubs: true,
+        reminders: true,
+        weeklyReports: false,
+      };
+    }
+  }
+
+  async setNotificationSettings(userId: string, settings: {
+    enabled: boolean;
+    newTributes: boolean;
+    newSubs: boolean;
+    reminders: boolean;
+    weeklyReports: boolean;
+  }): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('user_data')
+        .upsert({
+          user_id: userId,
+          data_type: 'notification_settings',
+          data: settings,
+        }, {
+          onConflict: 'user_id,data_type',
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error setting notification settings:', error);
+      throw error;
+    }
+  }
+
   async getSubscription(userId: string): Promise<string> {
     try {
       const { data, error } = await this.supabase

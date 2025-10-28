@@ -7,6 +7,7 @@ import { Layout } from '@/components/Layout';
 import { Toaster } from '@/components/ui/sonner';
 import { TOAST_CONFIG } from '@/constants';
 import { ComponentLoadingFallback } from '@/utils/lazy-loading';
+import EnvWarningBanner from '@/components/EnvWarningBanner';
 
 // Lazy loaded pages
 import {
@@ -97,6 +98,7 @@ const App: React.FC = () => {
           <FindomProvider>
             <AppRoutes />
             <Toaster position={TOAST_CONFIG.POSITION} duration={TOAST_CONFIG.DURATION} />
+            <EnvWarningBanner />
           </FindomProvider>
         </AuthProvider>
       </Router>

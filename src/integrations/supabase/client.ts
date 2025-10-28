@@ -17,6 +17,9 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.warn('Supabase env vars missing; using built-in fallback credentials.');
 }
 
+// NEW: Export whether we are using fallback credentials (env vars missing)
+export const usingFallbackCredentials = !(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+
 export const isSupabaseConfigured = Boolean(RESOLVED_URL && RESOLVED_KEY);
 
 function createMissingEnvStub(): SupabaseClient {

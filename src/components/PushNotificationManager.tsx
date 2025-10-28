@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/utils/toast';
 import { Bell, BellOff, Settings, CheckCircle } from 'lucide-react';
 import { useMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/context/AuthContext';
+import { userDataService } from '@/services/user-data-service';
 
 interface NotificationSettings {
   enabled: boolean;
@@ -17,6 +19,7 @@ interface NotificationSettings {
 
 const PushNotificationManager: React.FC = () => {
   const { isMobile } = useMobile();
+  const { user } = useAuth();
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [settings, setSettings] = useState<NotificationSettings>({
     enabled: false,
@@ -28,20 +31,48 @@ const PushNotificationManager: React.FC = () => {
   const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
-    // Check if notifications are supported
     setIsSupported('Notification' in window);
-    
-    // Get current permission
     if ('Notification' in window) {
       setPermission(Notification.permission);
     }
 
-    // Load settings from localStorage
-    const savedSettings = localStorage.getItem('notificationSettings');
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+    // Load settings: prefer Supabase; fallback to localStorage for legacy users
+    const load = async () => {
+      const local = localStorage.getItem('notificationSettings');
+      try {
+        if (user) {
+          const remote = await userDataService.getNotificationSettings(user.id);
+          setSettings(remote);
+          // Optional: migrate local to remote if remote looks default but local exists
+          if (local) {
+            const parsed = JSON.parse(local) as NotificationSettings;
+            const looksDefault = !remote.enabled && remote.newTributes && remote.newSubs && remote.reminders && !remote.weeklyReports;
+            if (looksDefault && (parsed.enabled || parsed.weeklyReports !== false)) {
+              await userDataService.setNotificationSettings(user.id, parsed);
+              setSettings(parsed);
+              localStorage.removeItem('notificationSettings');
+            }
+          }
+        } else if (local) {
+          setSettings(JSON.parse(local));
+        }
+      } catch (e) {
+        console.error('Failed to load notification settings:', e);
+        if (local) {
+          setSettings(JSON.parse(local));
+        }
+      }
+    };
+    load();
+  }, [user]);
+
+  const persistSettings = async (newSettings: NotificationSettings) => {
+    setSettings(newSettings);
+    localStorage.setItem('notificationSettings', JSON.stringify(newSettings));
+    if (user) {
+      await userDataService.setNotificationSettings(user.id, newSettings);
     }
-  }, []);
+  };
 
   const requestPermission = async () => {
     if (!isSupported) {
@@ -55,9 +86,9 @@ const PushNotificationManager: React.FC = () => {
       
       if (result === 'granted') {
         toast.success('Notifications enabled!');
-        setSettings(prev => ({ ...prev, enabled: true }));
-        saveSettings({ ...settings, enabled: true });
-        
+        const updated = { ...settings, enabled: true };
+        await persistSettings(updated);
+
         // Send a test notification
         new Notification('Findom Assistant', {
           body: 'Notifications are now enabled!',
@@ -66,7 +97,8 @@ const PushNotificationManager: React.FC = () => {
         });
       } else if (result === 'denied') {
         toast.error('Notification permission denied');
-        setSettings(prev => ({ ...prev, enabled: false }));
+        const updated = { ...settings, enabled: false };
+        await persistSettings(updated);
       }
     } catch (error) {
       console.error('Error requesting notification permission:', error);
@@ -74,14 +106,9 @@ const PushNotificationManager: React.FC = () => {
     }
   };
 
-  const saveSettings = (newSettings: NotificationSettings) => {
-    localStorage.setItem('notificationSettings', JSON.stringify(newSettings));
-  };
-
-  const updateSetting = (key: keyof NotificationSettings, value: boolean) => {
+  const updateSetting = async (key: keyof NotificationSettings, value: boolean) => {
     const newSettings = { ...settings, [key]: value };
-    setSettings(newSettings);
-    saveSettings(newSettings);
+    await persistSettings(newSettings);
   };
 
   const sendTestNotification = () => {
