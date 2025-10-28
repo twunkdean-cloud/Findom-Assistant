@@ -160,7 +160,7 @@ const SubTrackerPage = () => {
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-semibold">Your Subs</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-100">Your Subs</CardTitle>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">

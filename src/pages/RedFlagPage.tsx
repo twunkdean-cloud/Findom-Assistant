@@ -99,7 +99,7 @@ const RedFlagPage = () => {
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-semibold">Flagged Users</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-100">Flagged Users</CardTitle>
           <Button onClick={openAddDialog} className="bg-indigo-600 hover:bg-indigo-700 text-white">
             <PlusCircle className="mr-2 h-4 w-4" /> Add New Flag
           </Button>
