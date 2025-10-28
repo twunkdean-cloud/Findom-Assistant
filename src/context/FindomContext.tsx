@@ -14,6 +14,7 @@ import {
 import { userDataService } from '@/services/user-data-service';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/utils/toast';
+import { loadLocalAppData } from '@/utils/persistence';
 
 const FindomContext = createContext<FindomContextType | undefined>(undefined);
 
@@ -33,7 +34,9 @@ export const FindomProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     if (!user) {
-      setAppData(DEFAULT_APP_DATA);
+      // Load from localStorage when not authenticated
+      const local = loadLocalAppData();
+      setAppData({ ...DEFAULT_APP_DATA, ...local });
       setLoading(false);
       return;
     }

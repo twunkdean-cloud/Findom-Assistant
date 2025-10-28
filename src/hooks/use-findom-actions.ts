@@ -24,6 +24,7 @@ import {
 import { migrationService } from '@/services/migration-service';
 import { userDataService } from '@/services/user-data-service';
 import { toggleWeeklyCompleted } from '@/utils/checklist';
+import { saveLocalAppData, clearLocalAppData } from '@/utils/persistence';
 
 export const useFindomActions = (
   appData: AppData, 
@@ -32,9 +33,15 @@ export const useFindomActions = (
   const { user } = useAuth();
 
   const updateAppData = async (key: keyof AppData, value: any): Promise<void> => {
-    if (!user) return;
-
+    // Always update local state
     setAppData(prev => ({ ...prev, [key]: value }));
+
+    // If not authenticated, persist locally and stop
+    if (!user) {
+      saveLocalAppData({ [key]: value } as Partial<AppData>);
+      return;
+    }
+
     const userId = user.id;
 
     try {
@@ -203,10 +210,22 @@ export const useFindomActions = (
   const saveAllAppData = (newData?: AppData): void => {
     const dataToSave = newData || appData;
     setAppData(dataToSave);
+    // Persist locally when logged out
+    if (!user) {
+      saveLocalAppData(dataToSave);
+    }
   };
 
   const clearAllData = async (): Promise<void> => {
-    if (!user) return;
+    // Allow clearing even while logged out (local fallback)
+    if (!user) {
+      if (window.confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+        setAppData(DEFAULT_APP_DATA);
+        clearLocalAppData();
+        toast.success('All data has been cleared.');
+      }
+      return;
+    }
     
     if (window.confirm('Are you sure you want to clear all data? This cannot be undone.')) {
       try {
