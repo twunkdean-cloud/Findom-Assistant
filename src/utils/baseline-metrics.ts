@@ -1,4 +1,4 @@
-import { getCLS, getFID, getLCP, getFCP, getTTFB, Metric } from 'web-vitals';
+import { onCLS, onFID, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
 
 export type CoreWebVitals = {
   FCP?: number;
@@ -59,11 +59,11 @@ export const collectCoreWebVitals = (): Promise<CoreWebVitals> => {
       checkDone();
     };
 
-    getFCP(wrap('FCP'));
-    getLCP(wrap('LCP'));
-    getCLS(wrap('CLS'));
-    getFID(wrap('FID'));
-    getTTFB(wrap('TTFB'));
+    onFCP(wrap('FCP'));
+    onLCP(wrap('LCP'));
+    onCLS(wrap('CLS'));
+    onFID(wrap('FID'));
+    onTTFB(wrap('TTFB'));
   });
 };
 
