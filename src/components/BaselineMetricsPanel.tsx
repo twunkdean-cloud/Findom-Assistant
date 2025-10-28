@@ -55,7 +55,7 @@ const BaselineMetricsPanel: React.FC = () => {
           <MetricRow label="FCP" value={current?.coreWebVitals.FCP} />
           <MetricRow label="LCP" value={current?.coreWebVitals.LCP} />
           <MetricRow label="CLS" value={current?.coreWebVitals.CLS} />
-          <MetricRow label="FID" value={current?.coreWebVitals.FID} />
+          <MetricRow label="INP" value={current?.coreWebVitals.INP} />
           <MetricRow label="TTFB" value={current?.coreWebVitals.TTFB} />
         </div>
 
