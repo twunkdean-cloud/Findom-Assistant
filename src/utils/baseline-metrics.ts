@@ -1,10 +1,10 @@
-import { onCLS, onFID, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
+import { onCLS, onINP, onLCP, onFCP, onTTFB, Metric } from 'web-vitals';
 
 export type CoreWebVitals = {
   FCP?: number;
   LCP?: number;
   CLS?: number;
-  FID?: number;
+  INP?: number;
   TTFB?: number;
 };
 
@@ -47,7 +47,7 @@ export const collectCoreWebVitals = (): Promise<CoreWebVitals> => {
         vitals.FCP !== undefined &&
         vitals.LCP !== undefined &&
         vitals.CLS !== undefined &&
-        vitals.FID !== undefined &&
+        vitals.INP !== undefined &&
         vitals.TTFB !== undefined
       ) {
         resolve(vitals);
@@ -62,7 +62,7 @@ export const collectCoreWebVitals = (): Promise<CoreWebVitals> => {
     onFCP(wrap('FCP'));
     onLCP(wrap('LCP'));
     onCLS(wrap('CLS'));
-    onFID(wrap('FID'));
+    onINP(wrap('INP'));
     onTTFB(wrap('TTFB'));
   });
 };
