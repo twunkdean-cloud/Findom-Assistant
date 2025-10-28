@@ -91,6 +91,42 @@
 }
 
 @layer base {
+  /* Lighten gray text when placed on dark cards/sections */
+  .bg-gray-800 .text-gray-400,
+  .bg-gray-900 .text-gray-400 {
+    @apply text-gray-200;
+  }
+
+  .bg-gray-800 .text-gray-500,
+  .bg-gray-900 .text-gray-500 {
+    @apply text-gray-300;
+  }
+
+  .bg-gray-800 .text-gray-600,
+  .bg-gray-900 .text-gray-600 {
+    @apply text-gray-300;
+  }
+
+  /* Improve placeholder readability on dark inputs */
+  .bg-gray-900 input::placeholder,
+  .bg-gray-900 textarea::placeholder,
+  .bg-dark-input input::placeholder,
+  .bg-dark-input textarea::placeholder {
+    color: rgb(229 231 235); /* gray-200 */
+  }
+
+  /* Slightly brighter links in dark sections */
+  .bg-gray-800 a,
+  .bg-gray-900 a {
+    @apply text-indigo-300;
+  }
+  .bg-gray-800 a:hover,
+  .bg-gray-900 a:hover {
+    @apply text-indigo-200;
+  }
+}
+
+@layer base {
   * {
     @apply border-border;
   }
