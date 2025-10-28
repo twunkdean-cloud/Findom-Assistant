@@ -57,8 +57,7 @@ export default defineConfig({
           'chunk-ai': [
             './src/pages/ChatAssistantPage',
             './src/pages/ImageVisionPage',
-            './src/hooks/use-gemini',
-            './src/hooks/use-ai-analytics'
+            './src/hooks/use-ai'
           ]
         }
       }
