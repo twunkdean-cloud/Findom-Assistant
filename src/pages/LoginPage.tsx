@@ -25,6 +25,16 @@ const LoginPage = () => {
   }, []);
 
   useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/', { replace: true });
+      }
+    };
+    checkSession();
+  }, [navigate]);
+
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         toast.success('Signed in successfully!');
