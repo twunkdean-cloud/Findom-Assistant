@@ -17,7 +17,15 @@ import type { AppData, Sub, Tribute, CustomPrice, CalendarEvent, RedFlag } from 
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
-  const { appData, updateAppData } = useFindom();
+  const { 
+    appData, 
+    updateAppData,
+    updateSubs,
+    updateTributes,
+    updateCustomPrices,
+    updateCalendar,
+    updateRedflags
+  } = useFindom();
   const [isSaving, setIsSaving] = useState(false);
   
   // Profile settings
