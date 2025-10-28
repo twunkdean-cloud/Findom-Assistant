@@ -44,8 +44,25 @@ interface GeminiResponse {
 }
 
 // Helper utilities to reduce token usage
-const compactText = (str?: string) => (str ? str.replace(/\s+/g, ' ').trim() : '');
-const trimTail = (str: string, maxChars: number) => (str.length > maxChars ? str.slice(str.length - maxChars) : str);
+const toCompactString = (input: unknown): string => {
+  if (input == null) return '';
+  if (typeof input === 'string') return input;
+  try {
+    return JSON.stringify(input);
+  } catch {
+    return String(input);
+  }
+};
+
+const compactText = (input?: unknown) => {
+  const str = toCompactString(input);
+  return str ? str.replace(/\s+/g, ' ').trim() : '';
+};
+
+const trimTail = (input: unknown, maxChars: number) => {
+  const str = toCompactString(input);
+  return str.length > maxChars ? str.slice(str.length - maxChars) : str;
+};
 
 // Helper to get current user's JWT
 const getAuthToken = async (): Promise<string> => {
