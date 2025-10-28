@@ -155,12 +155,12 @@ const SubTrackerPage = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-100">Sub Tracker</h2>
-      <p className="text-sm text-gray-400 mb-4">Keep track of your loyal subs, their tributes, and preferences.</p>
+      <h2 className="text-2xl font-bold text-foreground">Sub Tracker</h2>
+      <p className="text-sm text-muted-foreground mb-4">Keep track of your loyal subs, their tributes, and preferences.</p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-semibold text-gray-100">Your Subs</CardTitle>
+          <CardTitle className="text-lg font-semibold text-card-foreground">Your Subs</CardTitle>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
@@ -286,13 +286,13 @@ const SubTrackerPage = () => {
               <Table className="min-w-full">
                 <TableHeader>
                   <TableRow className="bg-gray-700 hover:bg-gray-700">
-                    <TableHead className="text-gray-300">Name</TableHead>
-                    <TableHead className="text-gray-300">Tier</TableHead>
-                    <TableHead className="text-gray-300">Tags</TableHead>
-                    <TableHead className="text-gray-300">Total Tributed</TableHead>
-                    <TableHead className="text-gray-300">Last Tribute</TableHead>
-                    <TableHead className="text-gray-300">History</TableHead>
-                    <TableHead className="text-gray-300">Actions</TableHead>
+                    <TableHead className="text-muted-foreground">Name</TableHead>
+                    <TableHead className="text-muted-foreground">Tier</TableHead>
+                    <TableHead className="text-muted-foreground">Tags</TableHead>
+                    <TableHead className="text-muted-foreground">Total Tributed</TableHead>
+                    <TableHead className="text-muted-foreground">Last Tribute</TableHead>
+                    <TableHead className="text-muted-foreground">History</TableHead>
+                    <TableHead className="text-muted-foreground">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -308,7 +308,7 @@ const SubTrackerPage = () => {
                         </div>
                       </TableCell>
                       <TableCell className="text-green-400">${sub.total.toFixed(2)}</TableCell>
-                      <TableCell className="text-gray-400">{sub.lastTribute || 'N/A'}</TableCell>
+                      <TableCell className="text-muted-foreground">{sub.lastTribute || 'N/A'}</TableCell>
                       <TableCell>
                         {sub.conversationHistory ? (
                           <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">Has History</span>

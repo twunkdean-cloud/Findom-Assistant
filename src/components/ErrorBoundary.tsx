@@ -1,7 +1,8 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Bug } from 'lucide-react';
+import { toast } from '@/utils/toast';
 
 interface Props {
   children: ReactNode;
@@ -69,10 +70,24 @@ export class ErrorBoundary extends Component<Props, State> {
               </details>
             )}
             
-            <Button onClick={this.handleReset} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
-            </Button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Button onClick={this.handleReset} className="w-full">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Try Again
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  const details = `${this.state.error?.toString() ?? 'Unknown error'}\n${this.state.errorInfo?.componentStack ?? ''}`;
+                  navigator.clipboard.writeText(details);
+                  toast.success('Error details copied. Please paste them into your bug report.');
+                }}
+              >
+                <Bug className="mr-2 h-4 w-4" />
+                Report Issue
+              </Button>
+            </div>
           </CardContent>
         </Card>
       );

@@ -8,13 +8,15 @@ const STORAGE_KEY = 'hideEnvWarning';
 
 const EnvWarningBanner: React.FC = () => {
   const [hidden, setHidden] = useState<boolean>(false);
+  const isDev = import.meta.env.DEV;
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     setHidden(stored === '1');
   }, []);
 
-  if (!usingFallbackCredentials || hidden) return null;
+  // Only show in development when using fallback credentials
+  if (!isDev || !usingFallbackCredentials || hidden) return null;
 
   const dismiss = () => {
     localStorage.setItem(STORAGE_KEY, '1');

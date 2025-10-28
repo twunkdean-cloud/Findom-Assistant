@@ -94,12 +94,12 @@ const RedFlagPage = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-100">Red Flag System</h2>
-      <p className="text-sm text-gray-400 mb-4">Keep a private record of users to avoid.</p>
+      <h2 className="text-2xl font-bold text-foreground">Red Flag System</h2>
+      <p className="text-sm text-muted-foreground mb-4">Keep a private record of users to avoid.</p>
 
       <Card className="bg-gray-800 border border-gray-700 p-4">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-semibold text-gray-100">Flagged Users</CardTitle>
+          <CardTitle className="text-lg font-semibold text-card-foreground">Flagged Users</CardTitle>
           <Button onClick={openAddDialog} className="bg-indigo-600 hover:bg-indigo-700 text-white">
             <PlusCircle className="mr-2 h-4 w-4" /> Add New Flag
           </Button>
@@ -112,10 +112,10 @@ const RedFlagPage = () => {
               <Table className="min-w-full">
                 <TableHeader>
                   <TableRow className="bg-gray-700 hover:bg-gray-700">
-                    <TableHead className="text-gray-300">Username</TableHead>
-                    <TableHead className="text-gray-300">Reason</TableHead>
-                    <TableHead className="text-gray-300">Severity</TableHead>
-                    <TableHead className="text-gray-300">Actions</TableHead>
+                    <TableHead className="text-muted-foreground">Username</TableHead>
+                    <TableHead className="text-muted-foreground">Reason</TableHead>
+                    <TableHead className="text-muted-foreground">Severity</TableHead>
+                    <TableHead className="text-muted-foreground">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

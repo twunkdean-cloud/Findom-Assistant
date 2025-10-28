@@ -8,17 +8,25 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as strin
 const FALLBACK_URL = 'https://qttmhbtaguiioomcjqbt.supabase.co';
 const FALLBACK_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0dG1oYnRhZ3VpaW9vbWNqcWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MjQ5MDMsImV4cCI6MjA3NjMwMDkwM30.M4AiSRnA0xfmDgmtxYaKr4GT7bvzoFS3ukxpsN3b8K0';
 
-// Resolve config using env or fallback
-const RESOLVED_URL = SUPABASE_URL || FALLBACK_URL;
-const RESOLVED_KEY = SUPABASE_PUBLISHABLE_KEY || FALLBACK_ANON_KEY;
+// DEV-only fallback usage
+const ALLOW_FALLBACK = import.meta.env.DEV;
+
+// Resolve config using env or dev-only fallback
+const RESOLVED_URL = SUPABASE_URL || (ALLOW_FALLBACK ? FALLBACK_URL : undefined);
+const RESOLVED_KEY = SUPABASE_PUBLISHABLE_KEY || (ALLOW_FALLBACK ? FALLBACK_ANON_KEY : undefined);
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  // eslint-disable-next-line no-console
-  console.warn('Supabase env vars missing; using built-in fallback credentials.');
+  if (ALLOW_FALLBACK) {
+    // eslint-disable-next-line no-console
+    console.warn('Supabase env vars missing; using built-in fallback credentials (development only).');
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('Supabase env vars missing in production; Supabase will be disabled.');
+  }
 }
 
-// NEW: Export whether we are using fallback credentials (env vars missing)
-export const usingFallbackCredentials = !(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+// NEW: Export whether we are using fallback credentials (env vars missing) — dev only
+export const usingFallbackCredentials = ALLOW_FALLBACK && !(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
 export const isSupabaseConfigured = Boolean(RESOLVED_URL && RESOLVED_KEY);
 
@@ -64,5 +72,5 @@ function createMissingEnvStub(): SupabaseClient {
 
 export const supabase: SupabaseClient =
   isSupabaseConfigured
-    ? createClient(RESOLVED_URL, RESOLVED_KEY)
+    ? createClient(RESOLVED_URL!, RESOLVED_KEY!)
     : createMissingEnvStub();
