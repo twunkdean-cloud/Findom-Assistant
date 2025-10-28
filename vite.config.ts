@@ -31,34 +31,6 @@ export default defineConfig({
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'vendor-charts': ['recharts'],
           'vendor-utils': ['date-fns', 'sonner'],
-          
-          // Feature chunks
-          'chunk-auth': [
-            './src/context/AuthContext',
-            './src/pages/LoginPage',
-            './src/pages/AuthCallbackPage'
-          ],
-          'chunk-dashboard': [
-            './src/pages/DashboardPage',
-            './src/pages/Index'
-          ],
-          'chunk-generators': [
-            './src/pages/CaptionGeneratorPage',
-            './src/pages/TaskGeneratorPage',
-            './src/pages/TwitterGeneratorPage',
-            './src/pages/RedditGeneratorPage',
-            './src/pages/ResponseTemplatesPage'
-          ],
-          'chunk-tracking': [
-            './src/pages/SubTrackerPage',
-            './src/pages/TributeTrackerPage',
-            './src/pages/ChecklistPage'
-          ],
-          'chunk-ai': [
-            './src/pages/ChatAssistantPage',
-            './src/pages/ImageVisionPage',
-            './src/hooks/use-ai'
-          ]
         }
       }
     },
