@@ -7,6 +7,8 @@ import { toast } from '@/utils/toast';
 import { Sub, AIContentSuggestion, ServiceResponse } from '@/types';
 import { cache } from '@/utils/cache';
 import { sanitizeAiText } from '@/utils/ai-sanitize';
+import { streamGemini } from '@/services/ai-stream';
+import { parseCompactJson } from '@/utils/json-contract';
 
 interface AIAnalytics {
   sentimentScore: number;
@@ -239,6 +241,44 @@ export const useAI = () => {
     }
   }, []);
 
+  const callGeminiStream = useCallback(async (
+    prompt: string,
+    systemPrompt?: string,
+    onChunk?: (delta: string) => void
+  ): Promise<string | null> => {
+    if (!isSupabaseConfigured) {
+      const m = 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
+      setError(m);
+      toast.error(m);
+      return null;
+    }
+
+    const compactPrompt = compactText(prompt);
+    const compactSystem = compactText(systemPrompt || getGenderedSystemPrompt('general'));
+    const sanitizedPrompt = sanitizeAiText(compactPrompt);
+    const sanitizedSystem = sanitizeAiText(compactSystem);
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await streamGemini({
+        prompt: sanitizedPrompt,
+        systemInstruction: sanitizedSystem,
+        onChunk: (d) => onChunk?.(d),
+      });
+      return result || null;
+    } catch (err) {
+      const rawMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = mapFriendlyError(rawMessage);
+      setError(errorMessage);
+      console.error('Gemini stream error:', err);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getGenderedSystemPrompt]);
+
   const getSystemPrompt = useCallback(() => {
     return getGenderedSystemPrompt('general');
   }, [getGenderedSystemPrompt]);
@@ -262,9 +302,8 @@ suggestedActions:string[], contentSuggestions:string[].`);
     try {
       const result = await callGemini(userPrompt, systemPrompt);
       if (result) {
-        const jsonMatch = result.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
+        const parsed = parseCompactJson(result, 'object');
+        if (parsed) {
           const analyticsData: AIAnalytics = {
             sentimentScore: parsed.sentimentScore || 0,
             engagementLevel: parsed.engagementLevel || 'medium',
@@ -306,9 +345,8 @@ suggestedActions:string[], contentSuggestions:string[].`);
     try {
       const result = await callGemini(userPrompt, systemPrompt);
       if (result) {
-        const jsonMatch = result.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
+        const parsed = parseCompactJson(result, 'array');
+        if (parsed) {
           if (Array.isArray(parsed) && parsed.length > 0) {
             const suggestions: AIContentSuggestion[] = parsed.map((item, index) => ({
               type: item.type || request.contentType,
@@ -380,12 +418,9 @@ action, reason, confidence:'high'|'medium'|'low', suggestedTone?:'dominant'|'sed
     try {
       const result = await callGemini(userPrompt, systemPrompt);
       if (result) {
-        const jsonMatch = result.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]) as import('@/types').NextBestAction[];
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return { data: parsed.slice(0, 3), success: true };
-          }
+        const parsed = parseCompactJson(result, 'array') as import('@/types').NextBestAction[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return { data: parsed.slice(0, 3), success: true };
         }
       }
       throw new Error('Failed to parse AI response for next best actions.');
@@ -432,6 +467,7 @@ Avoid promises or specifics.`);
   return {
     callGemini,
     callGeminiVision,
+    callGeminiStream,
     isLoading,
     error,
     getSystemPrompt,
