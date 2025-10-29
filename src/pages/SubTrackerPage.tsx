@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -11,12 +11,22 @@ import { toast } from "@/utils/toast";
 import { getConversationHistorySignedUrl } from "@/services/storage-service";
 import SubForm from "@/components/subs/SubForm";
 import SubTable from "@/components/subs/SubTable";
+import { useLocation } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SubTrackerPage = () => {
-  const { appData, createSub, updateSub, deleteSub } = useFindom();
+  const { appData, createSub, updateSub, deleteSub, loading } = useFindom();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentSub, setCurrentSub] = useState<Sub | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("new") === "1") {
+      setIsAddDialogOpen(true);
+    }
+  }, [location.search]);
 
   const openEditDialog = (sub: Sub) => {
     setCurrentSub(sub);
@@ -68,12 +78,20 @@ const SubTrackerPage = () => {
           </Dialog>
         </CardHeader>
         <CardContent>
-          <SubTable
-            subs={appData.subs}
-            onEdit={(sub) => openEditDialog(sub)}
-            onDelete={(id) => handleDeleteSub(id)}
-            onDownloadHistory={(path) => handleDownloadHistory(path)}
-          />
+          {loading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full bg-gray-700" />
+              ))}
+            </div>
+          ) : (
+            <SubTable
+              subs={appData.subs}
+              onEdit={(sub) => openEditDialog(sub)}
+              onDelete={(id) => handleDeleteSub(id)}
+              onDownloadHistory={(path) => handleDownloadHistory(path)}
+            />
+          )}
         </CardContent>
       </Card>
 

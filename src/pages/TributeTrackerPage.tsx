@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,12 +12,23 @@ import { useFindom } from '@/context/FindomContext';
 import { toast } from '@/utils/toast';
 import { Plus, Edit, Trash2, DollarSign, Calendar } from 'lucide-react';
 import { Tribute } from '@/types';
+import { useLocation } from 'react-router-dom';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const TributeTrackerPage = () => {
-  const { appData, updateTributes } = useFindom();
+  const { appData, updateTributes, loading } = useFindom();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTribute, setEditingTribute] = useState<Tribute | null>(null);
+  const location = useLocation();
+  
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('new') === '1') {
+      setIsDialogOpen(true);
+    }
+  }, [location.search]);
   
   // Form states
   const [tributeAmount, setTributeAmount] = useState('');
@@ -122,6 +133,42 @@ const TributeTrackerPage = () => {
       return tributeDate.getMonth() === currentMonth && tributeDate.getFullYear() === currentYear;
     })
     .reduce((sum, t) => sum + t.amount, 0);
+
+  const Row = ({ index, style, data }: ListChildComponentProps) => {
+    const tribute = (data as Tribute[])[index];
+    return (
+      <div style={style} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg">
+        <div>
+          <p className="text-white font-medium">{tribute.from_sub}</p>
+          <p className="text-gray-400 text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
+          {tribute.reason && <p className="text-gray-500 text-sm">{tribute.reason}</p>}
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="text-green-400 font-bold">${tribute.amount.toFixed(2)}</span>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => openEditDialog(tribute)}
+            className="text-gray-400 hover:text-white"
+            aria-label={`Edit tribute from ${tribute.from_sub}`}
+            title="Edit tribute"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleDeleteTribute(tribute.id)}
+            className="text-red-400 hover:text-red-300"
+            aria-label={`Delete tribute from ${tribute.from_sub}`}
+            title="Delete tribute"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -240,42 +287,27 @@ const TributeTrackerPage = () => {
           <CardTitle className="text-white">Recent Tributes</CardTitle>
         </CardHeader>
         <CardContent>
-          {appData.tributes.length === 0 ? (
+          {loading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full bg-gray-700" />
+              ))}
+            </div>
+          ) : appData.tributes.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No tributes yet. Add your first tribute!</p>
           ) : (
             <div className="space-y-4">
-              {appData.tributes
-                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                .map((tribute) => (
-                  <div key={tribute.id} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg">
-                    <div>
-                      <p className="text-white font-medium">{tribute.from_sub}</p>
-                      <p className="text-gray-400 text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
-                      {tribute.reason && (
-                        <p className="text-gray-500 text-sm">{tribute.reason}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-green-400 font-bold">${tribute.amount.toFixed(2)}</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEditDialog(tribute)}
-                        className="text-gray-400 hover:text-white"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteTribute(tribute.id)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+              <List
+                height={480}
+                width={"100%"}
+                itemCount={appData.tributes.length}
+                itemSize={80}
+                itemData={appData.tributes
+                  .slice()
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())}
+              >
+                {Row}
+              </List>
             </div>
           )}
         </CardContent>
