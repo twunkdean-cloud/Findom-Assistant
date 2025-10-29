@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { PerformanceMonitor } from '@/components/PerformanceMonitor';
 import BaselineMetricsPanel from '@/components/BaselineMetricsPanel';
+import GoalEditor from '@/components/GoalEditor';
 
 const Index = () => {
   const { appData } = useFindom();
@@ -91,7 +92,14 @@ const Index = () => {
           <CardContent>
             <div className="space-y-2">
               <p className="text-2xl font-bold text-white">${(appData.goal?.current || 0).toFixed(2)}</p>
-              <p className="text-sm text-gray-400">of ${(appData.goal?.target || 0).toFixed(2)}</p>
+              <GoalEditor>
+                <p 
+                  className="text-sm text-gray-400 cursor-pointer hover:text-gray-300"
+                  title="Click to edit goal target"
+                >
+                  of ${(appData.goal?.target || 0).toFixed(2)}
+                </p>
+              </GoalEditor>
               <Progress value={Math.min(goalProgress, 100)} className="h-2 bg-gray-700 [&>*]:bg-green-500" />
             </div>
           </CardContent>
