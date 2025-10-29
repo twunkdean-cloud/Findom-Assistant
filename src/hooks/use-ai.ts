@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useGenderedContent } from './use-gendered-content';
 import { API_BASE_URL } from '@/config/env';
 import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseConfigured } from '@/integrations/supabase/client';
 import { toast } from '@/utils/toast';
 import { Sub, AIContentSuggestion, ServiceResponse } from '@/types';
 import { cache } from '@/utils/cache';
@@ -74,6 +75,18 @@ const getAuthToken = async (): Promise<string> => {
   return token;
 };
 
+// Map raw errors to friendlier messages for users
+const mapFriendlyError = (message: string) => {
+  const msg = (message || '').toLowerCase();
+  if (msg.includes('api key not configured') || msg.includes('gemini_api_key')) {
+    return 'AI is unavailable: server API key is not configured. Please ask the admin to set GEMINI_API_KEY.';
+  }
+  if (msg.includes('unauthorized') || msg.includes('invalid token') || msg.includes('signed in')) {
+    return 'Please sign in to use AI features.';
+  }
+  return message;
+};
+
 export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +97,14 @@ export const useAI = () => {
     prompt: string, 
     systemPrompt?: string
   ): Promise<string | null> => {
+    // Preflight: ensure Supabase is configured
+    if (!isSupabaseConfigured) {
+      const m = 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
+      setError(m);
+      toast.error(m);
+      return null;
+    }
+
     // Compact inputs to reduce tokens
     const compactPrompt = compactText(prompt);
     const compactSystem = compactText(systemPrompt || getGenderedSystemPrompt('general'));
@@ -102,6 +123,9 @@ export const useAI = () => {
     setError(null);
 
     try {
+      // Early auth token fetch to fail fast if user isn't signed in
+      const token = await getAuthToken();
+
       const payload: GeminiRequest = {
         prompt: sanitizedPrompt,
         systemInstruction: sanitizedSystem,
@@ -111,7 +135,7 @@ export const useAI = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await getAuthToken()}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -130,7 +154,8 @@ export const useAI = () => {
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const rawMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = mapFriendlyError(rawMessage);
       setError(errorMessage);
       console.error('Gemini API error:', err);
       toast.error(errorMessage);
@@ -144,6 +169,13 @@ export const useAI = () => {
     imageData: string,
     prompt?: string
   ): Promise<string | null> => {
+    if (!isSupabaseConfigured) {
+      const m = 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
+      setError(m);
+      toast.error(m);
+      return null;
+    }
+
     const cacheKey = `gemini-vision:${imageData.substring(0, 50)}:${prompt}`;
     const cached = cache.get<string>(cacheKey);
     if (cached) {
@@ -163,6 +195,9 @@ export const useAI = () => {
       const mimeType = matches[1];
       const base64Data = matches[2];
 
+      // Early auth token fetch to fail fast if user isn't signed in
+      const token = await getAuthToken();
+
       const payload: GeminiVisionRequest = {
         image: base64Data,
         mimeType: mimeType,
@@ -174,7 +209,7 @@ export const useAI = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await getAuthToken()}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -193,7 +228,8 @@ export const useAI = () => {
 
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const rawMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = mapFriendlyError(rawMessage);
       setError(errorMessage);
       console.error('Gemini Vision API error:', err);
       toast.error(errorMessage);
