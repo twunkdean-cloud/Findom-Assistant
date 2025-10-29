@@ -35,14 +35,19 @@ const TributeTrackerPage = () => {
   };
 
   const handleAddTribute = async () => {
-    if (!tributeAmount || !tributeFrom) {
+    const amountNum = parseFloat(tributeAmount);
+    if (!tributeFrom) {
+      toast.error('Please select a sub.');
+      return;
+    }
+    if (!tributeAmount || isNaN(amountNum) || amountNum <= 0) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     const newTribute: Tribute = {
       id: Date.now().toString(),
-      amount: parseFloat(tributeAmount),
+      amount: parseFloat(amountNum.toFixed(2)),
       date: tributeDate,
       from_sub: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
@@ -58,14 +63,19 @@ const TributeTrackerPage = () => {
   };
 
   const handleEditTribute = async () => {
-    if (!editingTribute || !tributeAmount || !tributeFrom) {
+    const amountNum = parseFloat(tributeAmount);
+    if (!editingTribute || !tributeFrom) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    if (!tributeAmount || isNaN(amountNum) || amountNum <= 0) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     const updatedTribute: Tribute = {
       ...editingTribute,
-      amount: parseFloat(tributeAmount),
+      amount: parseFloat(amountNum.toFixed(2)),
       date: tributeDate,
       from_sub: tributeFrom.trim(),
       reason: tributeReason.trim() || undefined,
@@ -135,6 +145,7 @@ const TributeTrackerPage = () => {
                   id="amount"
                   type="number"
                   step="0.01"
+                  min="0.01"
                   value={tributeAmount}
                   onChange={(e) => setTributeAmount(e.target.value)}
                   placeholder="0.00"
@@ -143,13 +154,20 @@ const TributeTrackerPage = () => {
               </div>
               <div>
                 <Label htmlFor="from">From</Label>
-                <Input
-                  id="from"
-                  value={tributeFrom}
-                  onChange={(e) => setTributeFrom(e.target.value)}
-                  placeholder="Sub name"
-                  className="bg-gray-900 border-gray-600 text-white"
-                />
+                <Select value={tributeFrom} onValueChange={setTributeFrom}>
+                  <SelectTrigger id="from" className="bg-gray-900 border-gray-600 text-white">
+                    <SelectValue placeholder={appData.subs.length ? 'Select a sub' : 'No subs available'} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {appData.subs.length === 0 ? (
+                      <SelectItem value="" disabled>No subs yet</SelectItem>
+                    ) : (
+                      appData.subs.map((s) => (
+                        <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="date">Date</Label>
@@ -276,6 +294,7 @@ const TributeTrackerPage = () => {
                 id="edit-amount"
                 type="number"
                 step="0.01"
+                min="0.01"
                 value={tributeAmount}
                 onChange={(e) => setTributeAmount(e.target.value)}
                 placeholder="0.00"
@@ -284,13 +303,20 @@ const TributeTrackerPage = () => {
             </div>
             <div>
               <Label htmlFor="edit-from">From</Label>
-              <Input
-                id="edit-from"
-                value={tributeFrom}
-                onChange={(e) => setTributeFrom(e.target.value)}
-                placeholder="Sub name"
-                className="bg-gray-900 border-gray-600 text-white"
-              />
+              <Select value={tributeFrom} onValueChange={setTributeFrom}>
+                <SelectTrigger id="edit-from" className="bg-gray-900 border-gray-600 text-white">
+                  <SelectValue placeholder={appData.subs.length ? 'Select a sub' : 'No subs available'} />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  {appData.subs.length === 0 ? (
+                    <SelectItem value="" disabled>No subs yet</SelectItem>
+                  ) : (
+                    appData.subs.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="edit-date">Date</Label>
