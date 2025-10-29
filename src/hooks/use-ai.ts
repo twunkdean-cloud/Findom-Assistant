@@ -133,6 +133,7 @@ export const useAI = () => {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       console.error('Gemini API error:', err);
+      toast.error(errorMessage);
       return null;
     } finally {
       setIsLoading(false);
@@ -195,6 +196,7 @@ export const useAI = () => {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       console.error('Gemini Vision API error:', err);
+      toast.error(errorMessage);
       return null;
     } finally {
       setIsLoading(false);
@@ -243,6 +245,7 @@ suggestedActions:string[], contentSuggestions:string[].`);
       const errorMessage = error instanceof Error ? error.message : 'Analysis failed';
       console.error('Error analyzing conversation:', error);
       setError(errorMessage);
+      toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
@@ -288,6 +291,7 @@ suggestedActions:string[], contentSuggestions:string[].`);
       const errorMessage = error instanceof Error ? error.message : 'Content generation failed';
       console.error('Error generating content:', error);
       setError(errorMessage);
+      toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
@@ -353,6 +357,7 @@ action, reason, confidence:'high'|'medium'|'low', suggestedTone?:'dominant'|'sed
       const errorMessage = err instanceof Error ? err.message : 'Next best action generation failed';
       console.error('Error generating next best actions:', err);
       setError(errorMessage);
+      toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
@@ -381,6 +386,7 @@ Avoid promises or specifics.`);
       const errorMessage = error instanceof Error ? error.message : 'Response generation failed';
       console.error('Error generating response:', error);
       setError(errorMessage);
+      toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);

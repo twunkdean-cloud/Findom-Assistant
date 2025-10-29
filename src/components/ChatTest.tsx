@@ -5,11 +5,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAI } from '@/hooks/use-ai';
 import { toast } from '@/utils/toast';
 import { Loader2, Send, Bot } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export const ChatTest = () => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
-  const { callGemini, isLoading } = useAI();
+  const { callGemini, isLoading, error } = useAI();
+  const { user } = useAuth();
 
   const handleSend = async () => {
     if (!prompt.trim()) {
@@ -23,7 +25,14 @@ export const ChatTest = () => {
         setResponse(result);
         toast.success('Response received');
       } else {
-        toast.error('No response received');
+        // Show more helpful message
+        if (!user) {
+          toast.error('Please sign in to use AI features.');
+        } else if (error) {
+          toast.error(error);
+        } else {
+          toast.error('No response received');
+        }
       }
     } catch (error) {
       toast.error('Failed to get response');
@@ -39,6 +48,13 @@ export const ChatTest = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* NEW: Sign-in required banner */}
+        {!user && (
+          <div className="p-3 rounded bg-yellow-100 text-yellow-800 text-sm">
+            You must be signed in to use AI. Please log in and try again.
+          </div>
+        )}
+        
         <div>
           <Textarea
             placeholder="Enter your prompt here..."
@@ -70,6 +86,13 @@ export const ChatTest = () => {
           <div className="mt-4 p-4 bg-muted rounded-lg">
             <h4 className="font-medium mb-2">Response:</h4>
             <p className="text-sm whitespace-pre-wrap">{response}</p>
+          </div>
+        )}
+        
+        {/* NEW: Error display */}
+        {error && (
+          <div className="mt-2 p-3 rounded bg-red-100 text-red-800 text-sm">
+            {error}
           </div>
         )}
       </CardContent>
