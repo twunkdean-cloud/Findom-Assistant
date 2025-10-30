@@ -58,23 +58,23 @@ Do not include any introductory or concluding remarks, just the task content.`;
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Task Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         Generate creative {isMale ? 'findom' : 'femdom'} tasks based on type and intensity.
       </p>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generate New Task</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-300">Quick tone for this task:</span>
+            <span className="text-sm text-muted-foreground">Quick tone for this task:</span>
             {presets.map(p => (
               <Button
                 key={p}
                 size="sm"
                 variant={nextTone === p ? 'default' : 'outline'}
-                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-gray-200'}`}
+                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-foreground'}`}
                 onClick={() => setNextTone(prev => (prev === p ? null : p))}
                 disabled={isLoading}
               >
@@ -92,17 +92,17 @@ Do not include any introductory or concluding remarks, just the task content.`;
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               rows={3}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+              className="w-full p-2 bg-background border rounded text-foreground"
               disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="task-intensity">Intensity</Label>
             <Select value={intensity} onValueChange={(value: 'low' | 'medium' | 'high') => setIntensity(value)} disabled={isLoading}>
-              <SelectTrigger id="task-intensity" className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+              <SelectTrigger id="task-intensity" className="w-full p-2 bg-background border rounded text-foreground">
                 <SelectValue placeholder="Select intensity" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
+              <SelectContent className="bg-card border text-foreground">
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High</SelectItem>
@@ -120,7 +120,7 @@ Do not include any introductory or concluding remarks, just the task content.`;
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generated Task</CardTitle>
         </CardHeader>
@@ -130,10 +130,10 @@ Do not include any introductory or concluding remarks, just the task content.`;
               value={generatedTask}
               readOnly
               rows={6}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+              className="w-full p-2 bg-background border rounded text-muted-foreground resize-none"
             />
           ) : (
-            <p className="text-gray-500 text-center">Your generated task will appear here...</p>
+            <p className="text-muted-foreground text-center">Your generated task will appear here...</p>
           )}
           <Button
             onClick={handleCopyTask}

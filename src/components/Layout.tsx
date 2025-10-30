@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { AppSidebar } from '@/components/AppSidebar';
 import MigrationHelper from './MigrationHelper';
 import { OfflineIndicator } from './OfflineIndicator';
+import { MobileBottomNav } from './MobileBottomNav';
 
 export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
@@ -14,12 +15,13 @@ export const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) =
           <SidebarTrigger className="-ml-1" />
           <div className="flex-1" />
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
           <MigrationHelper />
           {children || <Outlet />}
         </main>
       </SidebarInset>
       <OfflineIndicator />
+      <MobileBottomNav />
     </SidebarProvider>
   );
 };

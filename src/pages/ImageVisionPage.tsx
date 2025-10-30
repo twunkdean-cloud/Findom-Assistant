@@ -58,11 +58,11 @@ const ImageVisionPage = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Image Vision Analysis</h2>
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         Upload an image and get AI-powered analysis based on your persona and preferences.
       </p>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Upload Image</CardTitle>
         </CardHeader>
@@ -81,14 +81,14 @@ const ImageVisionPage = () => {
                     setImagePreview('');
                   }}
                   variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  className="border-gray-600 text-muted-foreground hover:bg-gray-700"
                 >
                   Remove Image
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
-                <Upload className="h-12 w-12 text-gray-500 mx-auto" />
+                <Upload className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
                   <label htmlFor="image-upload" className="cursor-pointer">
                     <span className="text-indigo-400 hover:text-indigo-300">
@@ -102,7 +102,7 @@ const ImageVisionPage = () => {
                       className="hidden"
                     />
                   </label>
-                  <p className="text-gray-500 text-sm mt-2">
+                  <p className="text-muted-foreground text-sm mt-2">
                     or drag and drop
                   </p>
                 </div>
@@ -111,13 +111,13 @@ const ImageVisionPage = () => {
           </div>
 
           <div>
-            <label className="text-sm text-gray-300 mb-2 block">Analysis Prompt (Optional)</label>
+            <label className="text-sm text-muted-foreground mb-2 block">Analysis Prompt (Optional)</label>
             <Textarea
               placeholder="What would you like to know about this image?"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={3}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+              className="w-full p-2 bg-background border rounded text-foreground"
               disabled={isLoading}
             />
           </div>
@@ -134,7 +134,7 @@ const ImageVisionPage = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Analysis Results</CardTitle>
         </CardHeader>
@@ -144,10 +144,10 @@ const ImageVisionPage = () => {
               value={analysis}
               readOnly
               rows={8}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+              className="w-full p-2 bg-background border rounded text-muted-foreground resize-none"
             />
           ) : (
-            <p className="text-gray-500 text-center">Your image analysis will appear here...</p>
+            <p className="text-muted-foreground text-center">Your image analysis will appear here...</p>
           )}
           <Button
             onClick={handleCopyAnalysis}

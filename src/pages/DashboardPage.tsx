@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { useFindom } from '@/context/FindomContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { toast } from '@/utils/toast';
-import { 
-  DollarSign, 
-  Users, 
-  TrendingUp, 
+import {
+  DollarSign,
+  Users,
+  TrendingUp,
   Calendar,
   Brain,
   MessageSquare,
@@ -16,6 +16,8 @@ import {
   Activity
 } from 'lucide-react';
 import { LazyWrapper } from '@/utils/lazy-loading';
+import { EmptyState } from '@/components/EmptyState';
+import { useNavigate } from 'react-router-dom';
 
 // Lazy load dashboard components
 import {
@@ -25,6 +27,7 @@ import {
 const DashboardPage: React.FC = () => {
   const { appData } = useFindom();
   const { isMobile } = useMobile();
+  const navigate = useNavigate();
 
   const totalTributes = appData.tributes.reduce((sum, tribute) => sum + Number(tribute.amount), 0);
   const activeSubs = appData.subs.filter(sub => sub.lastTribute && 
@@ -106,22 +109,39 @@ const DashboardPage: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {appData.tributes.slice(0, 3).map((tribute, index) => (
-                <div key={tribute.id} className="flex items-center justify-between p-3 bg-muted rounded">
-                  <div>
-                    <p className="font-medium">{tribute.from_sub}</p>
-                    <p className="text-sm text-muted-foreground">{tribute.reason}</p>
+            {appData.tributes.length === 0 ? (
+              <EmptyState
+                icon={DollarSign}
+                title="No activity yet"
+                description="Start tracking tributes to see your recent activity here"
+                action={
+                  <Button
+                    onClick={() => navigate('/tributes?new=1')}
+                    size="sm"
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Add First Tribute
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="space-y-3">
+                {appData.tributes.slice(0, 3).map((tribute, index) => (
+                  <div key={tribute.id} className="flex items-center justify-between p-3 bg-muted rounded">
+                    <div>
+                      <p className="font-medium">{tribute.from_sub}</p>
+                      <p className="text-sm text-muted-foreground">{tribute.reason}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">${tribute.amount}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(tribute.date).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold">${tribute.amount}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(tribute.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

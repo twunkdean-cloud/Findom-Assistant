@@ -10,6 +10,7 @@ import { useFindom } from '@/context/FindomContext';
 import { toast } from '@/utils/toast';
 import { Plus, Edit, Trash2, Calendar, CheckSquare } from 'lucide-react';
 import { CalendarEvent } from '@/types';
+import { EmptyState } from '@/components/EmptyState';
 
 const ChecklistPage = () => {
   const { appData, updateCalendar } = useFindom();
@@ -104,7 +105,7 @@ const ChecklistPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">Calendar & Checklist</h2>
+        <h2 className="text-2xl font-bold text-foreground">Calendar & Checklist</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-indigo-600 hover:bg-indigo-700">
@@ -114,7 +115,7 @@ const ChecklistPage = () => {
           </DialogTrigger>
           <DialogContent className="bg-gray-800 border-gray-700">
             <DialogHeader>
-              <DialogTitle className="text-white">Add New Event</DialogTitle>
+              <DialogTitle className="text-foreground">Add New Event</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -124,7 +125,7 @@ const ChecklistPage = () => {
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
                   placeholder="Event title"
-                  className="bg-gray-900 border-gray-600 text-white"
+                  className="bg-gray-900 border-gray-600 text-foreground"
                 />
               </div>
               <div>
@@ -134,13 +135,13 @@ const ChecklistPage = () => {
                   type="datetime-local"
                   value={eventDateTime}
                   onChange={(e) => setEventDateTime(e.target.value)}
-                  className="bg-gray-900 border-gray-600 text-white"
+                  className="bg-gray-900 border-gray-600 text-foreground"
                 />
               </div>
               <div>
                 <Label htmlFor="platform">Platform</Label>
                 <Select value={eventPlatform} onValueChange={setEventPlatform}>
-                  <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
+                  <SelectTrigger className="bg-gray-900 border-gray-600 text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-700">
@@ -160,7 +161,7 @@ const ChecklistPage = () => {
                   onChange={(e) => setEventContent(e.target.value)}
                   placeholder="Event content or description..."
                   rows={3}
-                  className="bg-gray-900 border-gray-600 text-white"
+                  className="bg-gray-900 border-gray-600 text-foreground"
                 />
               </div>
               <Button onClick={handleAddEvent} className="w-full bg-indigo-600 hover:bg-indigo-700">
@@ -175,47 +176,60 @@ const ChecklistPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Total Events</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Events</CardTitle>
             <Calendar className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{appData.calendarEvents.length}</div>
+            <div className="text-2xl font-bold text-foreground">{appData.calendarEvents.length}</div>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Upcoming Events</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Upcoming Events</CardTitle>
             <CheckSquare className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{upcomingEvents.length}</div>
+            <div className="text-2xl font-bold text-foreground">{upcomingEvents.length}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Events List */}
-      <Card className="bg-gray-800 border-gray-700">
+      <Card className="bg-card border">
         <CardHeader>
-          <CardTitle className="text-white">Calendar Events</CardTitle>
+          <CardTitle className="text-foreground">Calendar Events</CardTitle>
         </CardHeader>
         <CardContent>
           {appData.calendarEvents.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No events yet. Add your first event!</p>
+            <EmptyState
+              icon={Calendar}
+              title="No events scheduled"
+              description="Add your first event to start planning your content calendar"
+              action={
+                <Button
+                  onClick={() => setIsDialogOpen(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Schedule First Event
+                </Button>
+              }
+            />
           ) : (
             <div className="space-y-4">
               {sortedEvents.map((event) => (
-                <div key={event.id} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg">
+                <div key={event.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div>
-                    <p className="text-white font-medium">{event.content.split('\n')[0]}</p>
-                    <p className="text-gray-400 text-sm">{new Date(event.datetime).toLocaleString()}</p>
-                    <p className="text-gray-500 text-sm">{event.platform}</p>
+                    <p className="text-foreground font-medium">{event.content.split('\n')[0]}</p>
+                    <p className="text-muted-foreground text-sm">{new Date(event.datetime).toLocaleString()}</p>
+                    <p className="text-muted-foreground text-sm">{event.platform}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => openEditDialog(event)}
-                      className="text-gray-400 hover:text-white"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -239,7 +253,7 @@ const ChecklistPage = () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="bg-gray-800 border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-white">Edit Event</DialogTitle>
+            <DialogTitle className="text-foreground">Edit Event</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -249,7 +263,7 @@ const ChecklistPage = () => {
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
                 placeholder="Event title"
-                className="bg-gray-900 border-gray-600 text-white"
+                className="bg-gray-900 border-gray-600 text-foreground"
               />
             </div>
             <div>
@@ -259,13 +273,13 @@ const ChecklistPage = () => {
                 type="datetime-local"
                 value={eventDateTime}
                 onChange={(e) => setEventDateTime(e.target.value)}
-                className="bg-gray-900 border-gray-600 text-white"
+                className="bg-gray-900 border-gray-600 text-foreground"
               />
             </div>
             <div>
               <Label htmlFor="edit-platform">Platform</Label>
               <Select value={eventPlatform} onValueChange={setEventPlatform}>
-                <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
+                <SelectTrigger className="bg-gray-900 border-gray-600 text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
@@ -285,7 +299,7 @@ const ChecklistPage = () => {
                 onChange={(e) => setEventContent(e.target.value)}
                 placeholder="Event content or description..."
                 rows={3}
-                className="bg-gray-900 border-gray-600 text-white"
+                className="bg-gray-900 border-gray-600 text-foreground"
               />
             </div>
             <Button onClick={handleEditEvent} className="w-full bg-indigo-600 hover:bg-indigo-700">

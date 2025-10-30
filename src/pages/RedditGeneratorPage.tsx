@@ -54,23 +54,23 @@ Do not include any introductory or concluding remarks, just the post content.`;
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-100">Reddit Post Generator</h2>
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         Generate engaging Reddit posts based on your {isMale ? 'Findom' : 'Femdom'} persona and topic.
       </p>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Topic for Reddit Post</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-300">Quick tone for this post:</span>
+            <span className="text-sm text-muted-foreground">Quick tone for this post:</span>
             {presets.map(p => (
               <Button
                 key={p}
                 size="sm"
                 variant={nextTone === p ? 'default' : 'outline'}
-                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-gray-200'}`}
+                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-foreground'}`}
                 onClick={() => setNextTone(prev => (prev === p ? null : p))}
                 disabled={isLoading}
               >
@@ -85,7 +85,7 @@ Do not include any introductory or concluding remarks, just the post content.`;
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             rows={3}
-            className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            className="w-full p-2 bg-background border rounded text-foreground"
             disabled={isLoading}
           />
           <Button
@@ -99,7 +99,7 @@ Do not include any introductory or concluding remarks, just the post content.`;
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generated Reddit Post</CardTitle>
         </CardHeader>
@@ -109,10 +109,10 @@ Do not include any introductory or concluding remarks, just the post content.`;
               value={generatedPost}
               readOnly
               rows={8}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+              className="w-full p-2 bg-background border rounded text-muted-foreground resize-none"
             />
           ) : (
-            <p className="text-gray-500 text-center">Your generated Reddit post will appear here...</p>
+            <p className="text-muted-foreground text-center">Your generated Reddit post will appear here...</p>
           )}
           <Button
             onClick={handleCopyPost}
