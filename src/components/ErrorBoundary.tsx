@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // Log error to monitoring service in production
     if (process.env.NODE_ENV === 'production') {
-      console.error('Error caught by boundary:', error, errorInfo);
+      logger.error('Error caught by boundary:', error, errorInfo);
     }
   }
 

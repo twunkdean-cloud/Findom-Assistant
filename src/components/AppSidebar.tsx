@@ -1,36 +1,33 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuButton, 
+import { logger } from '@/utils/logger';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar';
-import { 
-  Home, 
-  Users, 
-  DollarSign, 
-  MessageSquare, 
-  FileText, 
-  Settings, 
+import {
+  Home,
+  Users,
+  DollarSign,
+  Settings,
   LogOut,
   TrendingUp,
   CheckSquare,
-  Image,
-  Twitter,
-  MessageCircle,
-  CreditCard,
   Bot,
   Calendar,
   PieChart,
-  Flag
+  Flag,
+  CreditCard
 } from 'lucide-react';
 
-const navigationItems = [
+// Static navigation items - moved outside component to prevent recreation on every render
+const NAVIGATION_ITEMS = [
   { title: 'Dashboard', icon: Home, path: '/' },
   { title: 'Analytics', icon: PieChart, path: '/analytics' },
   { title: 'Sub Tracker', icon: Users, path: '/subs' },
@@ -41,16 +38,7 @@ const navigationItems = [
   { title: 'Content Calendar', icon: Calendar, path: '/calendar' },
   { title: 'Pricing', icon: CreditCard, path: '/pricing' },
   { title: 'Settings', icon: Settings, path: '/settings' },
-];
-
-const aiTools = [
-  { title: 'Twitter', icon: Twitter, path: '/twitter' },
-  { title: 'Reddit', icon: MessageCircle, path: '/reddit' },
-  { title: 'Captions', icon: FileText, path: '/caption' },
-  { title: 'Image Vision', icon: Image, path: '/image-vision' },
-  { title: 'Responses', icon: MessageSquare, path: '/responses' },
-  { title: 'Tasks', icon: CheckSquare, path: '/tasks' },
-];
+] as const;
 
 interface AppSidebarProps {
   className?: string;
@@ -61,18 +49,19 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
-  const handleNavigation = (path: string) => {
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handleNavigation = useCallback((path: string) => {
     navigate(path);
-  };
+  }, [navigate]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await signOut();
       navigate('/login');
     } catch (error) {
-      console.error('Sign out error:', error);
+      logger.error('Sign out error:', error);
     }
-  };
+  }, [signOut, navigate]);
 
   return (
     <Sidebar className={className}>
@@ -94,7 +83,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
 
       <SidebarContent className="px-3 py-2">
         <SidebarMenu>
-          {navigationItems.map((item) => {
+          {NAVIGATION_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <SidebarMenuItem key={item.path}>

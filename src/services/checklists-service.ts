@@ -1,5 +1,6 @@
 import { BaseService } from './base-service';
 import { Checklist } from '@/types';
+import { logger } from '@/utils/logger';
 
 export const DEFAULT_WEEKLY_TASKS = [
   'Check for new tributes',
@@ -9,20 +10,32 @@ export const DEFAULT_WEEKLY_TASKS = [
   'Schedule content posts'
 ];
 
+// Type for database row with optional weekly fields
+interface ChecklistRow {
+  id: string;
+  date: string;
+  tasks: string[];
+  completed: string[];
+  weeklyTasks?: string[];
+  weeklyCompleted?: string[];
+  created_at?: string;
+  updated_at?: string;
+}
+
 export class ChecklistsService extends BaseService<Checklist> {
   public getTableName(): string {
     return 'checklists';
   }
 
-  protected transformFromDB(items: any[]): Checklist[] {
+  protected transformFromDB(items: ChecklistRow[]): Checklist[] {
     return items.map(item => ({
       ...item,
-      weeklyTasks: (item as any).weeklyTasks || DEFAULT_WEEKLY_TASKS,
-      weeklyCompleted: (item as any).weeklyCompleted || [],
+      weeklyTasks: item.weeklyTasks || DEFAULT_WEEKLY_TASKS,
+      weeklyCompleted: item.weeklyCompleted || [],
     }));
   }
 
-  protected transformToDB(item: Checklist): any {
+  protected transformToDB(item: Checklist): Partial<ChecklistRow> {
     return {
       id: item.id,
       date: item.date,
@@ -47,10 +60,11 @@ export class ChecklistsService extends BaseService<Checklist> {
       }
 
       if (data) {
+        const row = data as ChecklistRow;
         return {
-          ...data,
-          weeklyTasks: (data as any).weeklyTasks || DEFAULT_WEEKLY_TASKS,
-          weeklyCompleted: (data as any).weeklyCompleted || [],
+          ...row,
+          weeklyTasks: row.weeklyTasks || DEFAULT_WEEKLY_TASKS,
+          weeklyCompleted: row.weeklyCompleted || [],
         };
       }
 
@@ -83,7 +97,7 @@ export class ChecklistsService extends BaseService<Checklist> {
         weeklyCompleted: [],
       };
     } catch (error) {
-      console.error('Error getting today\'s checklist:', error);
+      logger.error('Error getting today\'s checklist:', error);
       return {
         id: '',
         date: today,
@@ -112,7 +126,7 @@ export class ChecklistsService extends BaseService<Checklist> {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error updating checklist:', error);
+      logger.error('Error updating checklist:', error);
       throw error;
     }
   }

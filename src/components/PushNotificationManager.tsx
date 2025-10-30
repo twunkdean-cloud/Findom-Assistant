@@ -57,7 +57,7 @@ const PushNotificationManager: React.FC = () => {
           setSettings(JSON.parse(local));
         }
       } catch (e) {
-        console.error('Failed to load notification settings:', e);
+        logger.error('Failed to load notification settings:', e);
         if (local) {
           setSettings(JSON.parse(local));
         }
@@ -101,7 +101,7 @@ const PushNotificationManager: React.FC = () => {
         await persistSettings(updated);
       }
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      logger.error('Error requesting notification permission:', error);
       toast.error('Failed to enable notifications');
     }
   };

@@ -42,7 +42,7 @@ const MigrationHelper = () => {
       
       toast.success('Migration completed successfully! Your data is now synced across all devices.');
     } catch (error) {
-      console.error('Migration failed:', error);
+      logger.error('Migration failed:', error);
       toast.error('Migration failed. Please try again.');
     } finally {
       setIsMigrating(false);

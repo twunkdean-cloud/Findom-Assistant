@@ -1,6 +1,19 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceResponse } from '@/types';
 import { mapProfileFromDB, mapProfileToDB } from '@/services/profile-mapper';
+import { logger } from '@/utils/logger';
+
+// Type for Supabase errors
+interface SupabaseError extends Error {
+  code?: string;
+  details?: string;
+  hint?: string;
+}
+
+// Type guard to check if error is a Supabase error
+function isSupabaseError(error: unknown): error is SupabaseError {
+  return typeof error === 'object' && error !== null && 'code' in error;
+}
 
 export class UserDataService {
   private supabase = supabase;
@@ -20,7 +33,7 @@ export class UserDataService {
 
       return data?.data?.apiKey || '';
     } catch (error) {
-      console.error('Error getting API key:', error);
+      logger.error('Error getting API key:', error);
       return '';
     }
   }
@@ -39,7 +52,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting API key:', error);
+      logger.error('Error setting API key:', error);
       throw error;
     }
   }
@@ -59,7 +72,7 @@ export class UserDataService {
 
       return data?.data?.persona || 'dominant';
     } catch (error) {
-      console.error('Error getting persona:', error);
+      logger.error('Error getting persona:', error);
       return 'dominant';
     }
   }
@@ -78,7 +91,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting persona:', error);
+      logger.error('Error setting persona:', error);
       throw error;
     }
   }
@@ -98,7 +111,7 @@ export class UserDataService {
 
       return data?.data || { weekly: 0, monthly: 0 };
     } catch (error) {
-      console.error('Error getting goal:', error);
+      logger.error('Error getting goal:', error);
       return { weekly: 0, monthly: 0 };
     }
   }
@@ -117,7 +130,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting goal:', error);
+      logger.error('Error setting goal:', error);
       throw error;
     }
   }
@@ -137,7 +150,7 @@ export class UserDataService {
 
       return data?.data || {};
     } catch (error) {
-      console.error('Error getting responses:', error);
+      logger.error('Error getting responses:', error);
       return {};
     }
   }
@@ -156,7 +169,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting responses:', error);
+      logger.error('Error setting responses:', error);
       throw error;
     }
   }
@@ -176,7 +189,7 @@ export class UserDataService {
 
       return data?.data?.screenTime || 0;
     } catch (error) {
-      console.error('Error getting screen time:', error);
+      logger.error('Error getting screen time:', error);
       return 0;
     }
   }
@@ -195,7 +208,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting screen time:', error);
+      logger.error('Error setting screen time:', error);
       throw error;
     }
   }
@@ -215,7 +228,7 @@ export class UserDataService {
 
       return data?.data?.timerStart || null;
     } catch (error) {
-      console.error('Error getting timer start:', error);
+      logger.error('Error getting timer start:', error);
       return null;
     }
   }
@@ -234,7 +247,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting timer start:', error);
+      logger.error('Error setting timer start:', error);
       throw error;
     }
   }
@@ -254,7 +267,7 @@ export class UserDataService {
 
       return data?.data?.uploadedImageData || null;
     } catch (error) {
-      console.error('Error getting uploaded image data:', error);
+      logger.error('Error getting uploaded image data:', error);
       return null;
     }
   }
@@ -273,7 +286,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting uploaded image data:', error);
+      logger.error('Error setting uploaded image data:', error);
       throw error;
     }
   }
@@ -292,7 +305,7 @@ export class UserDataService {
 
       return mapProfileFromDB(data) || {};
     } catch (error) {
-      console.error('Error getting profile:', error);
+      logger.error('Error getting profile:', error);
       return {};
     }
   }
@@ -311,7 +324,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting profile:', error);
+      logger.error('Error setting profile:', error);
       throw error;
     }
   }
@@ -338,7 +351,7 @@ export class UserDataService {
         theme: 'auto',
       };
     } catch (error) {
-      console.error('Error getting settings:', error);
+      logger.error('Error getting settings:', error);
       return {
         emailNotifications: true,
         pushNotifications: true,
@@ -364,7 +377,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting settings:', error);
+      logger.error('Error setting settings:', error);
       throw error;
     }
   }
@@ -384,7 +397,7 @@ export class UserDataService {
         .eq('data_type', 'notification_settings')
         .single();
 
-      if (error && (error as any).code !== 'PGRST116') {
+      if (error && isSupabaseError(error) && error.code !== 'PGRST116') {
         throw error;
       }
 
@@ -396,7 +409,7 @@ export class UserDataService {
         weeklyReports: false,
       };
     } catch (error) {
-      console.error('Error getting notification settings:', error);
+      logger.error('Error getting notification settings:', error);
       return {
         enabled: false,
         newTributes: true,
@@ -427,7 +440,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting notification settings:', error);
+      logger.error('Error setting notification settings:', error);
       throw error;
     }
   }
@@ -447,7 +460,7 @@ export class UserDataService {
 
       return data?.data?.subscription || 'free';
     } catch (error) {
-      console.error('Error getting subscription:', error);
+      logger.error('Error getting subscription:', error);
       return 'free';
     }
   }
@@ -466,7 +479,7 @@ export class UserDataService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error setting subscription:', error);
+      logger.error('Error setting subscription:', error);
       throw error;
     }
   }

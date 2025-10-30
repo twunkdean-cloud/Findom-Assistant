@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setProfile(mapProfileFromDB(userProfile));
         }
       } catch (error) {
-        console.error('Error getting initial session:', error);
+        logger.error('Error getting initial session:', error);
       } finally {
         setLoading(false);
       }

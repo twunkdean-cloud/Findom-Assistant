@@ -76,7 +76,7 @@ export class MigrationService {
 
       toast.success('Data migrated successfully!');
     } catch (error) {
-      console.error('Migration failed:', error);
+      logger.error('Migration failed:', error);
       toast.error('Migration failed. Please try again.');
       throw error;
     }

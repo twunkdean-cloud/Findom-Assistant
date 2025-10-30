@@ -126,7 +126,7 @@ const SubForm: React.FC<SubFormProps> = ({
             await onUpdate(initialSub.id, { conversationHistory: storagePath });
             toast.success("Conversation history uploaded and linked.");
           } catch (err) {
-            console.error(err);
+            logger.error(err);
             toast.error('Could not upload conversation history. Ensure a private "conversations" bucket exists.');
           }
         } else if (conversationFile && !user?.id) {
@@ -161,7 +161,7 @@ const SubForm: React.FC<SubFormProps> = ({
           await onUpdate(newSub.id, { conversationHistory: storagePath });
           toast.success("Conversation history uploaded and linked.");
         } catch (err) {
-          console.error(err);
+          logger.error(err);
           toast.error('Could not upload conversation history. Ensure a private "conversations" bucket exists.');
         }
       } else if (conversationFile && !user?.id) {

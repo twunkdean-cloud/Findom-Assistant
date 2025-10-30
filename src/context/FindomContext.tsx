@@ -118,7 +118,7 @@ export const FindomProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           subscription: subscription as string,
         });
       } catch (error) {
-        console.error('Error loading data:', error);
+        logger.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }

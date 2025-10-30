@@ -1,17 +1,21 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ServiceResponse } from '@/types';
+import { logger } from '@/utils/logger';
+
+// Generic database row type
+type DatabaseRow = Record<string, unknown> & { id: string };
 
 export abstract class BaseService<T extends { id: string }> {
   protected supabase = supabase;
 
   public abstract getTableName(): string;
 
-  protected transformFromDB(items: any[]): T[] {
+  protected transformFromDB(items: DatabaseRow[]): T[] {
     return items as T[];
   }
 
-  protected transformToDB(item: Partial<T>): any {
-    return item;
+  protected transformToDB(item: Partial<T>): DatabaseRow {
+    return item as unknown as DatabaseRow;
   }
 
   async getAll(userId: string): Promise<T[]> {
@@ -27,7 +31,7 @@ export abstract class BaseService<T extends { id: string }> {
       
       return this.transformFromDB(data || []);
     } catch (error) {
-      console.error(`Error fetching ${this.getTableName()}:`, error);
+      logger.error(`Error fetching ${this.getTableName()}`, error);
       return [];
     }
   }
@@ -54,7 +58,7 @@ export abstract class BaseService<T extends { id: string }> {
         }
       }
     } catch (error) {
-      console.error(`Error updating ${this.getTableName()}:`, error);
+      logger.error(`Error updating ${this.getTableName()}`, error);
       throw error;
     }
   }
@@ -70,10 +74,10 @@ export abstract class BaseService<T extends { id: string }> {
       if (error) {
         throw error;
       }
-      
+
       return this.transformFromDB([data])[0];
     } catch (error) {
-      console.error(`Error creating ${this.getTableName()}:`, error);
+      logger.error(`Error creating ${this.getTableName()}`, error);
       return null;
     }
   }
@@ -91,10 +95,10 @@ export abstract class BaseService<T extends { id: string }> {
       if (error) {
         throw error;
       }
-      
+
       return this.transformFromDB([data])[0];
     } catch (error) {
-      console.error(`Error updating ${this.getTableName()}:`, error);
+      logger.error(`Error updating ${this.getTableName()}`, error);
       return null;
     }
   }
@@ -110,10 +114,10 @@ export abstract class BaseService<T extends { id: string }> {
       if (error) {
         throw error;
       }
-      
+
       return true;
     } catch (error) {
-      console.error(`Error deleting ${this.getTableName()}:`, error);
+      logger.error(`Error deleting ${this.getTableName()}`, error);
       return false;
     }
   }

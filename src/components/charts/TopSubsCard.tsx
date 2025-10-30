@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Sub } from '@/types';
 import { Crown } from 'lucide-react';
 
@@ -7,9 +7,13 @@ interface TopSubsCardProps {
 }
 
 const TopSubsCard: React.FC<TopSubsCardProps> = ({ subs }) => {
-  const topSubs = [...subs]
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
+  // Memoize the sorting operation to prevent unnecessary re-computations
+  const topSubs = useMemo(() =>
+    [...subs]
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5),
+    [subs]
+  );
 
   if (topSubs.length === 0) {
     return <div className="flex items-center justify-center h-full text-gray-500">No subs to display</div>;
@@ -33,4 +37,5 @@ const TopSubsCard: React.FC<TopSubsCardProps> = ({ subs }) => {
   );
 };
 
-export default TopSubsCard;
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(TopSubsCard);

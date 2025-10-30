@@ -34,7 +34,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled = false,
       };
 
       recognitionRef.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
+        logger.error('Speech recognition error:', event.error);
         setIsListening(false);
       };
 

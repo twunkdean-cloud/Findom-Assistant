@@ -125,7 +125,7 @@ Target audience: ${getTargetAudience()}`;
         toast.error(`Failed to get response: ${error}`);
       }
     } catch (err) {
-      console.error('Chat error:', err);
+      logger.error('Chat error:', err);
       toast.error('Failed to send message');
     }
   };
