@@ -16,6 +16,18 @@ import { useLocation } from 'react-router-dom';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Validation constants
+const MAX_REASON_LENGTH = 500;
+const MAX_AMOUNT = 999999.99;
+
+// Field error state type
+interface FieldErrors {
+  amount?: string;
+  from?: string;
+  date?: string;
+  reason?: string;
+}
+
 const TributeTrackerPage = () => {
   const { appData, updateTributes, loading } = useFindom();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,6 +48,7 @@ const TributeTrackerPage = () => {
   const [tributeFrom, setTributeFrom] = useState('');
   const [tributeReason, setTributeReason] = useState('');
   const [tributeSource, setTributeSource] = useState<'cashapp' | 'venmo' | 'paypal' | 'other'>('cashapp');
+  const [errors, setErrors] = useState<FieldErrors>({});
 
   const resetForm = () => {
     setTributeAmount('');
@@ -43,18 +56,105 @@ const TributeTrackerPage = () => {
     setTributeFrom('');
     setTributeReason('');
     setTributeSource('cashapp');
+    setErrors({});
+  };
+
+  // Validation functions
+  const validateAmount = (value: string): string | undefined => {
+    const num = parseFloat(value);
+    if (!value || value.trim() === '') {
+      return 'Amount is required';
+    }
+    if (isNaN(num)) {
+      return 'Please enter a valid number';
+    }
+    if (num <= 0) {
+      return 'Amount must be greater than zero';
+    }
+    if (num > MAX_AMOUNT) {
+      return `Amount cannot exceed $${MAX_AMOUNT.toFixed(2)}`;
+    }
+    return undefined;
+  };
+
+  const validateFrom = (value: string): string | undefined => {
+    if (!value || value.trim() === '') {
+      return 'Please select a sub';
+    }
+    return undefined;
+  };
+
+  const validateDate = (value: string): string | undefined => {
+    if (!value) {
+      return 'Date is required';
+    }
+    if (isNaN(Date.parse(value))) {
+      return 'Please enter a valid date';
+    }
+    const selectedDate = new Date(value);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (selectedDate > today) {
+      return 'Date cannot be in the future';
+    }
+    return undefined;
+  };
+
+  const validateReason = (value: string): string | undefined => {
+    if (value.length > MAX_REASON_LENGTH) {
+      return `Reason must be ${MAX_REASON_LENGTH} characters or less`;
+    }
+    return undefined;
+  };
+
+  // Field change handlers with validation
+  const handleAmountChange = (value: string) => {
+    setTributeAmount(value);
+    const error = validateAmount(value);
+    setErrors(prev => ({ ...prev, amount: error }));
+  };
+
+  const handleFromChange = (value: string) => {
+    setTributeFrom(value);
+    const error = validateFrom(value);
+    setErrors(prev => ({ ...prev, from: error }));
+  };
+
+  const handleDateChange = (value: string) => {
+    setTributeDate(value);
+    const error = validateDate(value);
+    setErrors(prev => ({ ...prev, date: error }));
+  };
+
+  const handleReasonChange = (value: string) => {
+    setTributeReason(value);
+    const error = validateReason(value);
+    setErrors(prev => ({ ...prev, reason: error }));
   };
 
   const handleAddTribute = async () => {
+    // Validate all fields
+    const amountError = validateAmount(tributeAmount);
+    const fromError = validateFrom(tributeFrom);
+    const dateError = validateDate(tributeDate);
+    const reasonError = validateReason(tributeReason);
+
+    const newErrors: FieldErrors = {
+      amount: amountError,
+      from: fromError,
+      date: dateError,
+      reason: reasonError,
+    };
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    if (Object.values(newErrors).some(error => error !== undefined)) {
+      toast.error('Please fix the validation errors before submitting.');
+      return;
+    }
+
     const amountNum = parseFloat(tributeAmount);
-    if (!tributeFrom) {
-      toast.error('Please select a sub.');
-      return;
-    }
-    if (!tributeAmount || isNaN(amountNum) || amountNum <= 0) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
 
     const newTribute: Tribute = {
       id: Date.now().toString(),
@@ -74,15 +174,33 @@ const TributeTrackerPage = () => {
   };
 
   const handleEditTribute = async () => {
+    // Validate all fields
+    const amountError = validateAmount(tributeAmount);
+    const fromError = validateFrom(tributeFrom);
+    const dateError = validateDate(tributeDate);
+    const reasonError = validateReason(tributeReason);
+
+    const newErrors: FieldErrors = {
+      amount: amountError,
+      from: fromError,
+      date: dateError,
+      reason: reasonError,
+    };
+
+    setErrors(newErrors);
+
+    // Check if there are any errors
+    if (Object.values(newErrors).some(error => error !== undefined)) {
+      toast.error('Please fix the validation errors before submitting.');
+      return;
+    }
+
+    if (!editingTribute) {
+      toast.error('No tribute selected for editing');
+      return;
+    }
+
     const amountNum = parseFloat(tributeAmount);
-    if (!editingTribute || !tributeFrom) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    if (!tributeAmount || isNaN(amountNum) || amountNum <= 0) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
 
     const updatedTribute: Tribute = {
       ...editingTribute,
@@ -120,6 +238,7 @@ const TributeTrackerPage = () => {
     setTributeFrom(tribute.from_sub);
     setTributeReason(tribute.reason || '');
     setTributeSource(tribute.source);
+    setErrors({});
     setIsEditDialogOpen(true);
   };
 
@@ -193,16 +312,29 @@ const TributeTrackerPage = () => {
                   type="number"
                   step="0.01"
                   min="0.01"
+                  max={MAX_AMOUNT}
                   value={tributeAmount}
-                  onChange={(e) => setTributeAmount(e.target.value)}
+                  onChange={(e) => handleAmountChange(e.target.value)}
                   placeholder="0.00"
-                  className="bg-gray-900 border-gray-600 text-white"
+                  className={`bg-gray-900 text-white ${errors.amount ? 'border-red-500' : 'border-gray-600'}`}
+                  aria-invalid={!!errors.amount}
+                  aria-describedby="amount-error"
                 />
+                {errors.amount && (
+                  <p id="amount-error" className="text-red-500 text-sm mt-1" role="alert">
+                    {errors.amount}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="from">From</Label>
-                <Select value={tributeFrom} onValueChange={setTributeFrom}>
-                  <SelectTrigger id="from" className="bg-gray-900 border-gray-600 text-white">
+                <Select value={tributeFrom} onValueChange={handleFromChange}>
+                  <SelectTrigger
+                    id="from"
+                    className={`bg-gray-900 text-white ${errors.from ? 'border-red-500' : 'border-gray-600'}`}
+                    aria-invalid={!!errors.from}
+                    aria-describedby="from-error"
+                  >
                     <SelectValue placeholder={appData.subs.length ? 'Select a sub' : 'No subs available'} />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-700">
@@ -215,6 +347,11 @@ const TributeTrackerPage = () => {
                     )}
                   </SelectContent>
                 </Select>
+                {errors.from && (
+                  <p id="from-error" className="text-red-500 text-sm mt-1" role="alert">
+                    {errors.from}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="date">Date</Label>
@@ -222,9 +359,16 @@ const TributeTrackerPage = () => {
                   id="date"
                   type="date"
                   value={tributeDate}
-                  onChange={(e) => setTributeDate(e.target.value)}
-                  className="bg-gray-900 border-gray-600 text-white"
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  className={`bg-gray-900 text-white ${errors.date ? 'border-red-500' : 'border-gray-600'}`}
+                  aria-invalid={!!errors.date}
+                  aria-describedby="date-error"
                 />
+                {errors.date && (
+                  <p id="date-error" className="text-red-500 text-sm mt-1" role="alert">
+                    {errors.date}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="source">Source</Label>
@@ -245,11 +389,22 @@ const TributeTrackerPage = () => {
                 <Textarea
                   id="reason"
                   value={tributeReason}
-                  onChange={(e) => setTributeReason(e.target.value)}
+                  onChange={(e) => handleReasonChange(e.target.value)}
                   placeholder="Reason for tribute..."
                   rows={3}
-                  className="bg-gray-900 border-gray-600 text-white"
+                  maxLength={MAX_REASON_LENGTH}
+                  className={`bg-gray-900 text-white ${errors.reason ? 'border-red-500' : 'border-gray-600'}`}
+                  aria-invalid={!!errors.reason}
+                  aria-describedby="reason-error"
                 />
+                {errors.reason && (
+                  <p id="reason-error" className="text-red-500 text-sm mt-1" role="alert">
+                    {errors.reason}
+                  </p>
+                )}
+                <p className="text-gray-500 text-xs mt-1">
+                  {tributeReason.length}/{MAX_REASON_LENGTH} characters
+                </p>
               </div>
               <Button onClick={handleAddTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">
                 Add Tribute
@@ -327,16 +482,29 @@ const TributeTrackerPage = () => {
                 type="number"
                 step="0.01"
                 min="0.01"
+                max={MAX_AMOUNT}
                 value={tributeAmount}
-                onChange={(e) => setTributeAmount(e.target.value)}
+                onChange={(e) => handleAmountChange(e.target.value)}
                 placeholder="0.00"
-                className="bg-gray-900 border-gray-600 text-white"
+                className={`bg-gray-900 text-white ${errors.amount ? 'border-red-500' : 'border-gray-600'}`}
+                aria-invalid={!!errors.amount}
+                aria-describedby="edit-amount-error"
               />
+              {errors.amount && (
+                <p id="edit-amount-error" className="text-red-500 text-sm mt-1" role="alert">
+                  {errors.amount}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="edit-from">From</Label>
-              <Select value={tributeFrom} onValueChange={setTributeFrom}>
-                <SelectTrigger id="edit-from" className="bg-gray-900 border-gray-600 text-white">
+              <Select value={tributeFrom} onValueChange={handleFromChange}>
+                <SelectTrigger
+                  id="edit-from"
+                  className={`bg-gray-900 text-white ${errors.from ? 'border-red-500' : 'border-gray-600'}`}
+                  aria-invalid={!!errors.from}
+                  aria-describedby="edit-from-error"
+                >
                   <SelectValue placeholder={appData.subs.length ? 'Select a sub' : 'No subs available'} />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
@@ -349,6 +517,11 @@ const TributeTrackerPage = () => {
                   )}
                 </SelectContent>
               </Select>
+              {errors.from && (
+                <p id="edit-from-error" className="text-red-500 text-sm mt-1" role="alert">
+                  {errors.from}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="edit-date">Date</Label>
@@ -356,9 +529,16 @@ const TributeTrackerPage = () => {
                 id="edit-date"
                 type="date"
                 value={tributeDate}
-                onChange={(e) => setTributeDate(e.target.value)}
-                className="bg-gray-900 border-gray-600 text-white"
+                onChange={(e) => handleDateChange(e.target.value)}
+                className={`bg-gray-900 text-white ${errors.date ? 'border-red-500' : 'border-gray-600'}`}
+                aria-invalid={!!errors.date}
+                aria-describedby="edit-date-error"
               />
+              {errors.date && (
+                <p id="edit-date-error" className="text-red-500 text-sm mt-1" role="alert">
+                  {errors.date}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="edit-source">Source</Label>
@@ -379,11 +559,22 @@ const TributeTrackerPage = () => {
               <Textarea
                 id="edit-reason"
                 value={tributeReason}
-                onChange={(e) => setTributeReason(e.target.value)}
+                onChange={(e) => handleReasonChange(e.target.value)}
                 placeholder="Reason for tribute..."
                 rows={3}
-                className="bg-gray-900 border-gray-600 text-white"
+                maxLength={MAX_REASON_LENGTH}
+                className={`bg-gray-900 text-white ${errors.reason ? 'border-red-500' : 'border-gray-600'}`}
+                aria-invalid={!!errors.reason}
+                aria-describedby="edit-reason-error"
               />
+              {errors.reason && (
+                <p id="edit-reason-error" className="text-red-500 text-sm mt-1" role="alert">
+                  {errors.reason}
+                </p>
+              )}
+              <p className="text-gray-500 text-xs mt-1">
+                {tributeReason.length}/{MAX_REASON_LENGTH} characters
+              </p>
             </div>
             <Button onClick={handleEditTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">
               Update Tribute
