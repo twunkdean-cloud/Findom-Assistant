@@ -52,20 +52,31 @@ const DashboardPage: React.FC = () => {
     trend?: string;
     color?: string;
   }> = ({ title, value, icon, trend, color = 'text-blue-600' }) => (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card
+      className="hover:shadow-md transition-shadow"
+      role="article"
+      aria-label={`${title}: ${value}${trend ? `, ${trend}` : ''}`}
+    >
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
+            <p className="text-sm font-medium text-muted-foreground" id={`stat-${title.replace(/\s+/g, '-').toLowerCase()}-label`}>
+              {title}
+            </p>
+            <p
+              className="text-2xl font-bold"
+              aria-labelledby={`stat-${title.replace(/\s+/g, '-').toLowerCase()}-label`}
+            >
+              {value}
+            </p>
             {trend && (
-              <p className="text-sm text-green-600 flex items-center">
-                <TrendingUp className="h-4 w-4 mr-1" />
+              <p className="text-sm text-green-600 flex items-center" aria-label={`Trend: ${trend}`}>
+                <TrendingUp className="h-4 w-4 mr-1" aria-hidden="true" />
                 {trend}
               </p>
             )}
           </div>
-          <div className={`p-3 rounded-full bg-muted ${color}`}>
+          <div className={`p-3 rounded-full bg-muted ${color}`} aria-hidden="true">
             {icon}
           </div>
         </div>
@@ -77,8 +88,13 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <Button variant="outline" size="sm" onClick={handleExportData}>
+          <h1 className="text-2xl font-bold" id="dashboard-heading">Dashboard</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportData}
+            aria-label="Export all financial data as JSON file"
+          >
             Export Data
           </Button>
         </div>
@@ -98,30 +114,35 @@ const DashboardPage: React.FC = () => {
           />
         </div>
 
-        <Card>
+        <Card role="region" aria-labelledby="recent-activity-heading">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-blue-500" />
+            <CardTitle className="flex items-center gap-2" id="recent-activity-heading">
+              <Activity className="h-5 w-5 text-blue-500" aria-hidden="true" />
               Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <ul className="space-y-3" role="list" aria-label="Recent tribute transactions">
               {appData.tributes.slice(0, 3).map((tribute, index) => (
-                <div key={tribute.id} className="flex items-center justify-between p-3 bg-muted rounded">
+                <li
+                  key={tribute.id}
+                  className="flex items-center justify-between p-3 bg-muted rounded"
+                  role="listitem"
+                  aria-label={`Tribute from ${tribute.from_sub}, $${tribute.amount}, ${tribute.reason || 'No reason'}`}
+                >
                   <div>
                     <p className="font-medium">{tribute.from_sub}</p>
                     <p className="text-sm text-muted-foreground">{tribute.reason}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">${tribute.amount}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-bold" aria-label={`Amount: $${tribute.amount}`}>${tribute.amount}</p>
+                    <p className="text-xs text-muted-foreground" aria-label={`Date: ${new Date(tribute.date).toLocaleDateString()}`}>
                       {new Date(tribute.date).toLocaleDateString()}
                     </p>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </CardContent>
         </Card>
       </div>
@@ -131,9 +152,13 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold" id="dashboard-heading-desktop">Dashboard</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExportData}>
+          <Button
+            variant="outline"
+            onClick={handleExportData}
+            aria-label="Export all financial data as JSON file"
+          >
             Export Data
           </Button>
         </div>

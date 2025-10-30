@@ -176,13 +176,22 @@ const SubForm: React.FC<SubFormProps> = ({
   };
 
   return (
-    <DialogContent className="bg-gray-800 border border-gray-700 text-gray-200">
+    <DialogContent
+      className="bg-gray-800 border border-gray-700 text-gray-200"
+      aria-labelledby="sub-form-title"
+      aria-describedby="sub-form-description"
+    >
       <DialogHeader>
-        <DialogTitle className="text-lg font-semibold">
+        <DialogTitle id="sub-form-title" className="text-lg font-semibold">
           {isEdit ? "Edit Sub" : "Add New Sub"}
         </DialogTitle>
+        <p id="sub-form-description" className="sr-only">
+          {isEdit
+            ? "Edit the details of an existing sub in your tracker"
+            : "Add a new sub to your tracker with their details and preferences"}
+        </p>
       </DialogHeader>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" aria-label={isEdit ? "Edit sub form" : "Add new sub form"}>
         <div>
           <Label htmlFor="sub-name">Name</Label>
           <Input
@@ -192,7 +201,13 @@ const SubForm: React.FC<SubFormProps> = ({
             onChange={(e) => setSubName(e.target.value)}
             className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
             required
+            aria-required="true"
+            aria-label="Sub's name"
+            aria-describedby="sub-name-description"
           />
+          <span id="sub-name-description" className="sr-only">
+            Enter the name or username of the sub
+          </span>
         </div>
         <div>
           <Label htmlFor="sub-total">Total Tributed ($)</Label>
@@ -205,7 +220,12 @@ const SubForm: React.FC<SubFormProps> = ({
             min={0}
             step="0.01"
             className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            aria-label="Total amount tributed in dollars"
+            aria-describedby="sub-total-description"
           />
+          <span id="sub-total-description" className="sr-only">
+            The cumulative total amount this sub has tributed
+          </span>
         </div>
         <div>
           <Label htmlFor="sub-last-tribute">Last Tribute Date</Label>
@@ -215,12 +235,21 @@ const SubForm: React.FC<SubFormProps> = ({
             value={subLastTribute}
             onChange={(e) => setSubLastTribute(e.target.value)}
             className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            aria-label="Date of last tribute"
+            aria-describedby="sub-last-tribute-description"
           />
+          <span id="sub-last-tribute-description" className="sr-only">
+            The date when this sub last made a tribute
+          </span>
         </div>
         <div>
           <Label htmlFor="sub-tier">Tier</Label>
           <Select value={subTier} onValueChange={setSubTier}>
-            <SelectTrigger className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200">
+            <SelectTrigger
+              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+              aria-label="Sub tier level"
+              aria-describedby="sub-tier-description"
+            >
               <SelectValue placeholder="Select a tier" />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
@@ -229,6 +258,9 @@ const SubForm: React.FC<SubFormProps> = ({
               ))}
             </SelectContent>
           </Select>
+          <span id="sub-tier-description" className="sr-only">
+            Choose a tier level: Bronze, Silver, Gold, Platinum, or Diamond
+          </span>
         </div>
         <div>
           <Label htmlFor="sub-tags">Tags (comma-separated)</Label>
@@ -238,7 +270,12 @@ const SubForm: React.FC<SubFormProps> = ({
             value={subTags}
             onChange={(e) => setSubTags(e.target.value)}
             className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            aria-label="Sub tags"
+            aria-describedby="sub-tags-description"
           />
+          <span id="sub-tags-description" className="sr-only">
+            Add tags separated by commas to categorize this sub
+          </span>
         </div>
         <div>
           <Label htmlFor="sub-preferences">Preferences</Label>
@@ -249,7 +286,12 @@ const SubForm: React.FC<SubFormProps> = ({
             onChange={(e) => setSubPreferences(e.target.value)}
             rows={3}
             className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            aria-label="Sub preferences and interests"
+            aria-describedby="sub-preferences-description"
           />
+          <span id="sub-preferences-description" className="sr-only">
+            Describe this sub's preferences, kinks, and interests
+          </span>
         </div>
         <div>
           <Label htmlFor="sub-notes">Notes</Label>
@@ -260,7 +302,12 @@ const SubForm: React.FC<SubFormProps> = ({
             onChange={(e) => setSubNotes(e.target.value)}
             rows={3}
             className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+            aria-label="Additional notes"
+            aria-describedby="sub-notes-description"
           />
+          <span id="sub-notes-description" className="sr-only">
+            Add any additional notes or information about this sub
+          </span>
         </div>
         <div className="space-y-2">
           <Label htmlFor="conversation-history">Conversation History (JSON)</Label>
@@ -270,20 +317,29 @@ const SubForm: React.FC<SubFormProps> = ({
             accept=".json"
             onChange={handleConversationUpload}
             className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
+            aria-label="Upload conversation history JSON file"
+            aria-describedby="conversation-history-description"
           />
+          <span id="conversation-history-description" className="sr-only">
+            Upload a JSON file containing the conversation history with this sub. Must be a valid JSON file.
+          </span>
           {conversationFileName && (
-            <p className="text-xs text-gray-400 flex items-center">
-              <UploadCloud className="h-3 w-3 mr-1" /> {conversationFileName} uploaded.
+            <p className="text-xs text-gray-400 flex items-center" role="status" aria-live="polite">
+              <UploadCloud className="h-3 w-3 mr-1" aria-hidden="true" /> {conversationFileName} uploaded.
             </p>
           )}
           {!conversationFileName && initialSub?.conversationHistory && (
-            <p className="text-xs text-gray-400 flex items-center">
-              <UploadCloud className="h-3 w-3 mr-1" /> Existing conversation history present.
+            <p className="text-xs text-gray-400 flex items-center" role="status">
+              <UploadCloud className="h-3 w-3 mr-1" aria-hidden="true" /> Existing conversation history present.
             </p>
           )}
         </div>
         <DialogFooter className="flex gap-3 pt-4">
-          <Button type="submit" className="flex-1 bg-green-600 px-4 py-2 rounded hover:bg-green-700">
+          <Button
+            type="submit"
+            className="flex-1 bg-green-600 px-4 py-2 rounded hover:bg-green-700"
+            aria-label={isEdit ? "Save changes to sub" : "Add new sub to tracker"}
+          >
             {isEdit ? "Save Changes" : "Add Sub"}
           </Button>
           <Button
@@ -291,6 +347,7 @@ const SubForm: React.FC<SubFormProps> = ({
             variant="secondary"
             onClick={() => onOpenChange(false)}
             className="flex-1 bg-gray-600 px-4 py-2 rounded hover:bg-gray-700"
+            aria-label="Cancel and close dialog"
           >
             Cancel
           </Button>

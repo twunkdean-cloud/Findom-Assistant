@@ -24,9 +24,17 @@ const IncomeTrendChart: React.FC<IncomeTrendChartProps> = ({ tributes }) => {
     return <div className="flex items-center justify-center h-full text-gray-500">No data to display</div>;
   }
 
+  // Calculate summary stats for aria-label
+  const total = chartData.reduce((sum, item) => sum + item.amount, 0);
+  const average = total / chartData.length;
+  const maxDay = chartData.reduce((max, item) => item.amount > max.amount ? item : max, chartData[0]);
+
+  const ariaLabel = `Income trend chart showing ${chartData.length} days of data. Total income: $${total.toFixed(2)}, Average daily: $${average.toFixed(2)}, Highest day: $${maxDay.amount.toFixed(2)} on ${new Date(maxDay.date).toLocaleDateString()}`;
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={chartData}>
+    <div role="img" aria-label={ariaLabel}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={chartData} aria-hidden="true">
         <defs>
           <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
@@ -53,6 +61,7 @@ const IncomeTrendChart: React.FC<IncomeTrendChartProps> = ({ tributes }) => {
         <Area type="monotone" dataKey="amount" stroke="#8884d8" fillOpacity={1} fill="url(#colorIncome)" />
       </AreaChart>
     </ResponsiveContainer>
+    </div>
   );
 };
 
