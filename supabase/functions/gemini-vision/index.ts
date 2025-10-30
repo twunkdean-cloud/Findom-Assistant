@@ -1,16 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// Security: Configure CORS for specific domains
+// In production, set ALLOWED_ORIGINS environment variable (comma-separated list)
+// Example: "https://yourdomain.com,https://www.yourdomain.com"
+const getAllowedOrigin = (req: Request): string => {
+  const allowedOrigins = Deno.env.get('ALLOWED_ORIGINS')?.split(',') || [];
+  const origin = req.headers.get('origin') || '';
+
+  // In development, allow all origins for testing
+  if (Deno.env.get('ENVIRONMENT') === 'development') {
+    return origin || '*';
+  }
+
+  // In production, only allow configured origins
+  return allowedOrigins.includes(origin) ? origin : allowedOrigins[0] || '';
 };
+
+const getCorsHeaders = (origin: string) => ({
+  'Access-Control-Allow-Origin': origin,
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Credentials': 'true',
+});
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, serviceRoleKey);
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(getAllowedOrigin(req));
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

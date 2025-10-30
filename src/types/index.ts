@@ -1,3 +1,12 @@
+// Conversation history can be either a JSON string or a structured object
+export interface ConversationMessage {
+  role: 'user' | 'assistant' | 'sub';
+  content: string;
+  timestamp?: string;
+}
+
+export type ConversationHistory = string | ConversationMessage[] | Record<string, ConversationMessage[]>;
+
 export interface Sub {
   id: string;
   name: string;
@@ -5,7 +14,7 @@ export interface Sub {
   lastTribute?: string;
   preferences?: string;
   notes?: string;
-  conversationHistory?: string | Record<string, any>;
+  conversationHistory?: ConversationHistory;
   created_at?: string;
   updated_at?: string;
   tier?: string;
@@ -64,11 +73,45 @@ export interface CalendarEvent {
   updated_at?: string;
 }
 
+// More specific data types for UserData
+export type UserDataType =
+  | 'subs'
+  | 'tributes'
+  | 'redflags'
+  | 'checklists'
+  | 'customPrices'
+  | 'calendarEvents'
+  | 'goal'
+  | 'profile'
+  | 'settings'
+  | 'responses'
+  | 'apiKey'
+  | 'persona'
+  | 'screenTime'
+  | 'timerStart'
+  | 'uploadedImageData'
+  | 'subscription';
+
+export type UserDataValue =
+  | Sub[]
+  | Tribute[]
+  | RedFlag[]
+  | Checklist[]
+  | CustomPrice[]
+  | CalendarEvent[]
+  | AppData['goal']
+  | AppData['profile']
+  | AppData['settings']
+  | Record<string, string>
+  | string
+  | number
+  | null;
+
 export interface UserData {
   id: string;
   user_id: string;
-  data_type: string;
-  data: Record<string, any>;
+  data_type: UserDataType;
+  data: UserDataValue;
   created_at?: string;
   updated_at?: string;
 }
@@ -160,12 +203,15 @@ export interface PerformanceMetrics {
   timeToInteractive?: number;
 }
 
+// Type-safe update value based on AppData keys
+export type AppDataValue<K extends keyof AppData> = AppData[K];
+
 // Enhanced context types
 export interface FindomContextType {
   appData: AppData;
   setAppData: React.Dispatch<React.SetStateAction<AppData>>;
   loading: boolean;
-  updateAppData: (key: keyof AppData, value: any) => Promise<void>;
+  updateAppData: <K extends keyof AppData>(key: K, value: AppDataValue<K>) => Promise<void>;
   saveAllAppData: (newData?: AppData) => void;
   clearAllData: () => Promise<void>;
   exportData: () => void;
@@ -182,26 +228,36 @@ export interface FindomContextType {
   updateCustomPrices: (customPrices: CustomPrice[]) => Promise<void>;
   updateCalendar: (calendar: CalendarEvent[]) => Promise<void>;
   updateRedflags: (redflags: RedFlag[]) => Promise<void>;
-  updateChecklist: (key: keyof Checklist, value: any) => void;
+  updateChecklist: <K extends keyof Checklist>(key: K, value: Checklist[K]) => void;
   handleToggleWeeklyTask: (task: string) => void;
 }
 
-// Service response types
-export interface ServiceResponse<T = any> {
+// Service response types - now with proper error typing
+export interface ServiceError {
+  message: string;
+  code?: string;
+  details?: unknown;
+  stack?: string;
+}
+
+export interface ServiceResponse<T> {
   data?: T;
-  error?: any;
+  error?: string | ServiceError;
   success: boolean;
   loading?: boolean;
 }
 
 // API types
-export interface APIResponse<T = any> {
+export interface APIError {
+  message: string;
+  code?: string;
+  details?: unknown;
+  statusCode?: number;
+}
+
+export interface APIResponse<T> {
   data?: T;
-  error?: {
-    message: string;
-    code?: string;
-    details?: any;
-  };
+  error?: APIError;
   success: boolean;
 }
 

@@ -9,6 +9,7 @@ import { cache } from '@/utils/cache';
 import { sanitizeAiText } from '@/utils/ai-sanitize';
 import { streamGemini } from '@/services/ai-stream';
 import { parseCompactJson } from '@/utils/json-contract';
+import { validatePrompt, validateImageData, validateConversationHistory } from '@/utils/input-validation';
 
 interface AIAnalytics {
   sentimentScore: number;
@@ -96,7 +97,7 @@ export const useAI = () => {
   const [analytics, setAnalytics] = useState<AIAnalytics | null>(null);
 
   const callGemini = useCallback(async (
-    prompt: string, 
+    prompt: string,
     systemPrompt?: string
   ): Promise<string | null> => {
     // Preflight: ensure Supabase is configured
@@ -107,8 +108,17 @@ export const useAI = () => {
       return null;
     }
 
+    // Validate prompt input
+    const promptValidation = validatePrompt(prompt);
+    if (!promptValidation.isValid) {
+      const errorMsg = promptValidation.error || 'Invalid prompt';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      return null;
+    }
+
     // Compact inputs to reduce tokens
-    const compactPrompt = compactText(prompt);
+    const compactPrompt = compactText(promptValidation.sanitizedValue);
     const compactSystem = compactText(systemPrompt || getGenderedSystemPrompt('general'));
     // Sanitize to remove currency/total references everywhere
     const sanitizedPrompt = sanitizeAiText(compactPrompt);
@@ -178,6 +188,26 @@ export const useAI = () => {
       return null;
     }
 
+    // Validate image data
+    const imageValidation = validateImageData(imageData);
+    if (!imageValidation.isValid) {
+      const errorMsg = imageValidation.error || 'Invalid image data';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      return null;
+    }
+
+    // Validate prompt if provided
+    if (prompt) {
+      const promptValidation = validatePrompt(prompt);
+      if (!promptValidation.isValid) {
+        const errorMsg = promptValidation.error || 'Invalid prompt';
+        setError(errorMsg);
+        toast.error(errorMsg);
+        return null;
+      }
+    }
+
     const cacheKey = `gemini-vision:${imageData.substring(0, 50)}:${prompt}`;
     const cached = cache.get<string>(cacheKey);
     if (cached) {
@@ -193,7 +223,7 @@ export const useAI = () => {
       if (!matches) {
         throw new Error('Invalid image data format');
       }
-      
+
       const mimeType = matches[1];
       const base64Data = matches[2];
 
@@ -253,7 +283,16 @@ export const useAI = () => {
       return null;
     }
 
-    const compactPrompt = compactText(prompt);
+    // Validate prompt input
+    const promptValidation = validatePrompt(prompt);
+    if (!promptValidation.isValid) {
+      const errorMsg = promptValidation.error || 'Invalid prompt';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      return null;
+    }
+
+    const compactPrompt = compactText(promptValidation.sanitizedValue);
     const compactSystem = compactText(systemPrompt || getGenderedSystemPrompt('general'));
     const sanitizedPrompt = sanitizeAiText(compactPrompt);
     const sanitizedSystem = sanitizeAiText(compactSystem);

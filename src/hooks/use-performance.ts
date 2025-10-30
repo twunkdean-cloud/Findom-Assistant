@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface PerformanceMetrics {
   renderTime: number;
@@ -13,20 +13,22 @@ export const usePerformance = (componentName: string) => {
   useEffect(() => {
     renderCount.current += 1;
     const renderTime = Date.now() - startTime.current;
-    
+
     // Only log in development
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
       console.log(`[PERF] ${componentName} render #${renderCount.current}: ${renderTime}ms`);
     }
-    
+
     startTime.current = Date.now();
   });
 
-  const getMetrics = (): PerformanceMetrics => ({
+  // Memoize getMetrics to prevent infinite loops in components that use it in useEffect
+  const getMetrics = useCallback((): PerformanceMetrics => ({
     renderTime: Date.now() - startTime.current,
     componentCount: 1,
     reRenderCount: renderCount.current
-  });
+  }), []);
 
   return {
     getMetrics
@@ -44,6 +46,7 @@ export const usePerformanceObserver = () => {
           if (entry.entryType === 'measure') {
             // Only log in development
             if (process.env.NODE_ENV === 'development') {
+              // eslint-disable-next-line no-console
               console.log(`[PERF] ${entry.name}: ${entry.duration}ms`);
             }
           }
