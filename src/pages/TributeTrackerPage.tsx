@@ -13,7 +13,7 @@ import { toast } from '@/utils/toast';
 import { Plus, Edit, Trash2, DollarSign, Calendar } from 'lucide-react';
 import { Tribute } from '@/types';
 import { useLocation } from 'react-router-dom';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { List, RowComponentProps } from 'react-window';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TributeTrackerPage = () => {
@@ -134,10 +134,14 @@ const TributeTrackerPage = () => {
     })
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const Row = ({ index, style, data }: ListChildComponentProps) => {
-    const tribute = (data as Tribute[])[index];
+  interface RowProps {
+    tributes: Tribute[];
+  }
+
+  const Row = ({ ariaAttributes, index, style, tributes }: RowComponentProps<RowProps>) => {
+    const tribute = tributes[index];
     return (
-      <div style={style} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg">
+      <div style={style} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg" {...ariaAttributes}>
         <div>
           <p className="text-white font-medium">{tribute.from_sub}</p>
           <p className="text-gray-400 text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
@@ -298,16 +302,17 @@ const TributeTrackerPage = () => {
           ) : (
             <div className="space-y-4">
               <List
-                height={480}
-                width={"100%"}
-                itemCount={appData.tributes.length}
-                itemSize={80}
-                itemData={appData.tributes
-                  .slice()
-                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())}
-              >
-                {Row}
-              </List>
+                defaultHeight={480}
+                rowCount={appData.tributes.length}
+                rowHeight={80}
+                rowProps={{
+                  tributes: appData.tributes
+                    .slice()
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                }}
+                rowComponent={Row}
+                style={{ width: "100%" }}
+              />
             </div>
           )}
         </CardContent>

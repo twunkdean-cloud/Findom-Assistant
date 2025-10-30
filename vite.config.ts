@@ -19,6 +19,10 @@ export default defineConfig(({ command }) => {
       },
     },
     build: {
+      commonjsOptions: {
+        include: [/react-window/, /node_modules/],
+        transformMixedEsModules: true
+      },
       rollupOptions: {
         output: {
           manualChunks: {
@@ -60,7 +64,8 @@ export default defineConfig(({ command }) => {
         'react-dom',
         'react-router-dom',
         'lucide-react',
-        'sonner'
+        'sonner',
+        'react-window'
       ]
     }
   };

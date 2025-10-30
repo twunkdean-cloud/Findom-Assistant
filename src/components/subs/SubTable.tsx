@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Download } from "lucide-react";
 import { Sub } from "@/types";
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import { List, RowComponentProps } from 'react-window';
 
 interface SubTableProps {
   subs: Sub[];
@@ -17,20 +17,25 @@ interface SubTableProps {
 
 const ROW_HEIGHT = 64;
 
+interface VirtualRowProps {
+  items: Sub[];
+  onEdit: (s: Sub) => void;
+  onDelete: (id: string) => void;
+  onDownloadHistory: (path: string) => void;
+}
+
 function VirtualRow({
+  ariaAttributes,
   index,
   style,
-  data,
-}: ListChildComponentProps) {
-  const { items, onEdit, onDelete, onDownloadHistory } = data as {
-    items: Sub[];
-    onEdit: (s: Sub) => void;
-    onDelete: (id: string) => void;
-    onDownloadHistory: (path: string) => void;
-  };
+  items,
+  onEdit,
+  onDelete,
+  onDownloadHistory,
+}: RowComponentProps<VirtualRowProps>) {
   const sub = items[index];
   return (
-    <div style={style} className="border-b border-gray-700 flex items-center px-3">
+    <div style={style} className="border-b border-gray-700 flex items-center px-3" {...ariaAttributes}>
       <div className="flex-1 min-w-0">
         <div className="font-medium text-gray-200">{sub.name}</div>
         <div className="text-xs text-muted-foreground">
@@ -100,14 +105,13 @@ const SubTable: React.FC<SubTableProps> = ({ subs, onEdit, onDelete, onDownloadH
       <div className="rounded-md border border-gray-700">
         <div className="bg-gray-700 px-3 py-2 text-sm text-muted-foreground">Subs</div>
         <List
-          height={480}
-          width={"100%"}
-          itemCount={subs.length}
-          itemSize={ROW_HEIGHT}
-          itemData={{ items: subs, onEdit, onDelete, onDownloadHistory }}
-        >
-          {VirtualRow}
-        </List>
+          defaultHeight={480}
+          rowCount={subs.length}
+          rowHeight={ROW_HEIGHT}
+          rowProps={{ items: subs, onEdit, onDelete, onDownloadHistory }}
+          rowComponent={VirtualRow}
+          style={{ width: "100%" }}
+        />
       </div>
     );
   }
