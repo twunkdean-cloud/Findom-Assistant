@@ -65,7 +65,21 @@ const SentimentAnalysis = () => {
     }
   };
 
-  const subsWithHistory = appData.subs.filter(sub => sub.conversationHistory);
+  const subsWithHistory = appData.subs.filter(sub => {
+    if (!sub.conversationHistory) return false;
+    // If it's a string (storage path), include it if non-empty
+    if (typeof sub.conversationHistory === 'string') {
+      return sub.conversationHistory.trim().length > 0;
+    }
+    // If it's an object or array, include it if it has content
+    if (typeof sub.conversationHistory === 'object') {
+      if (Array.isArray(sub.conversationHistory)) {
+        return sub.conversationHistory.length > 0;
+      }
+      return Object.keys(sub.conversationHistory).length > 0;
+    }
+    return false;
+  });
 
   return (
     <Card className="bg-gray-800 border border-gray-700">
