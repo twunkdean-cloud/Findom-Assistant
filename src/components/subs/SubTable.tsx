@@ -35,9 +35,9 @@ function VirtualRow({
 }: RowComponentProps<VirtualRowProps>) {
   const sub = items[index];
   return (
-    <div style={style} className="border-b border-gray-700 flex items-center px-3" {...ariaAttributes}>
+    <div style={style} className="border-b flex items-center px-3" {...ariaAttributes}>
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-gray-200">{sub.name}</div>
+        <div className="font-medium text-foreground">{sub.name}</div>
         <div className="text-xs text-muted-foreground">
           {sub.lastTribute || "N/A"} • ${Number(sub.total).toFixed(2)}
         </div>
@@ -67,7 +67,7 @@ function VirtualRow({
             )}
           </div>
         ) : (
-          <span className="text-xs text-gray-500">No History</span>
+          <span className="text-xs text-muted-foreground">No History</span>
         )}
         <Button
           variant="ghost"
@@ -96,14 +96,14 @@ function VirtualRow({
 
 const SubTable: React.FC<SubTableProps> = ({ subs, onEdit, onDelete, onDownloadHistory }) => {
   if (!subs || subs.length === 0) {
-    return <p className="text-gray-500 text-center py-4">No subs tracked yet. Add your first sub!</p>;
+    return <p className="text-muted-foreground text-center py-4">No subs tracked yet. Add your first sub!</p>;
   }
 
   // Virtualize when the list is large; otherwise use a simple table.
   if (subs.length > 50) {
     return (
-      <div className="rounded-md border border-gray-700">
-        <div className="bg-gray-700 px-3 py-2 text-sm text-muted-foreground">Subs</div>
+      <div className="rounded-md border">
+        <div className="bg-muted px-3 py-2 text-sm text-muted-foreground">Subs</div>
         <List
           defaultHeight={480}
           rowCount={subs.length}
@@ -120,7 +120,7 @@ const SubTable: React.FC<SubTableProps> = ({ subs, onEdit, onDelete, onDownloadH
     <div className="overflow-x-auto">
       <Table className="min-w-full">
         <TableHeader>
-          <TableRow className="bg-gray-700 hover:bg-gray-700">
+          <TableRow className="bg-muted hover:bg-muted">
             <TableHead className="text-muted-foreground">Name</TableHead>
             <TableHead className="text-muted-foreground">Tier</TableHead>
             <TableHead className="text-muted-foreground">Tags</TableHead>
@@ -132,10 +132,10 @@ const SubTable: React.FC<SubTableProps> = ({ subs, onEdit, onDelete, onDownloadH
         </TableHeader>
         <TableBody>
           {subs.map((sub) => (
-            <TableRow key={sub.id} className="border-b border-gray-700 hover:bg-gray-700">
-              <TableCell className="font-medium text-gray-200">{sub.name}</TableCell>
+            <TableRow key={sub.id} className="border-b hover:bg-muted/50">
+              <TableCell className="font-medium text-foreground">{sub.name}</TableCell>
               <TableCell>
-                {sub.tier ? <Badge>{sub.tier}</Badge> : <span className="text-gray-500">N/A</span>}
+                {sub.tier ? <Badge>{sub.tier}</Badge> : <span className="text-muted-foreground">N/A</span>}
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1 max-w-xs">
@@ -166,7 +166,7 @@ const SubTable: React.FC<SubTableProps> = ({ subs, onEdit, onDelete, onDownloadH
                     )}
                   </div>
                 ) : (
-                  <span className="text-xs text-gray-500">No History</span>
+                  <span className="text-xs text-muted-foreground">No History</span>
                 )}
               </TableCell>
               <TableCell className="flex space-x-2">

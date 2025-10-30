@@ -4,15 +4,18 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Users } from "lucide-react";
 import { useFindom } from "@/context/FindomContext";
 import { Sub } from "@/types";
 import { toast } from "@/utils/toast";
 import { getConversationHistorySignedUrl } from "@/services/storage-service";
 import SubForm from "@/components/subs/SubForm";
 import SubTable from "@/components/subs/SubTable";
+import { SubCards } from "@/components/subs/SubCards";
+import { EmptyState } from "@/components/EmptyState";
 import { useLocation } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMobile } from "@/hooks/use-mobile";
 
 const SubTrackerPage = () => {
   const { appData, createSub, updateSub, deleteSub, loading } = useFindom();
@@ -20,6 +23,7 @@ const SubTrackerPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentSub, setCurrentSub] = useState<Sub | null>(null);
   const location = useLocation();
+  const { isMobile } = useMobile();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -57,15 +61,17 @@ const SubTrackerPage = () => {
         Keep track of your loyal subs, their tributes, and preferences.
       </p>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-semibold text-primary-foreground">
+          <CardTitle className="text-lg font-semibold text-foreground">
             Your Subs
           </CardTitle>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                <PlusCircle className="mr-2 h-4 w-4" /> Add New Sub
+                <PlusCircle className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Add New Sub</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </DialogTrigger>
             <SubForm
@@ -81,9 +87,31 @@ const SubTrackerPage = () => {
           {loading ? (
             <div className="space-y-2">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full bg-gray-700" />
+                <Skeleton key={i} className="h-10 w-full" />
               ))}
             </div>
+          ) : appData.subs.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No subs yet"
+              description="Add your first sub to start tracking tributes and conversations"
+              action={
+                <Button
+                  onClick={() => setIsAddDialogOpen(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Your First Sub
+                </Button>
+              }
+            />
+          ) : isMobile ? (
+            <SubCards
+              subs={appData.subs}
+              onEdit={(sub) => openEditDialog(sub)}
+              onDelete={(id) => handleDeleteSub(id)}
+              onDownloadHistory={(path) => handleDownloadHistory(path)}
+            />
           ) : (
             <SubTable
               subs={appData.subs}

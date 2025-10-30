@@ -15,6 +15,9 @@ import { Tribute } from '@/types';
 import { useLocation } from 'react-router-dom';
 import { List, RowComponentProps } from 'react-window';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TributeCards } from '@/components/tributes/TributeCards';
+import { EmptyState } from '@/components/EmptyState';
+import { useMobile } from '@/hooks/use-mobile';
 
 const TributeTrackerPage = () => {
   const { appData, updateTributes, loading } = useFindom();
@@ -22,6 +25,7 @@ const TributeTrackerPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingTribute, setEditingTribute] = useState<Tribute | null>(null);
   const location = useLocation();
+  const { isMobile } = useMobile();
   
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -123,7 +127,7 @@ const TributeTrackerPage = () => {
     setIsEditDialogOpen(true);
   };
 
-  // Calculate totals
+  // Calculate totals and sorted tributes
   const totalTributes = appData.tributes.reduce((sum, t) => sum + t.amount, 0);
   const monthlyTotal = appData.tributes
     .filter(t => {
@@ -134,6 +138,11 @@ const TributeTrackerPage = () => {
     })
     .reduce((sum, t) => sum + t.amount, 0);
 
+  const sortedTributes = useMemo(
+    () => appData.tributes.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [appData.tributes]
+  );
+
   interface RowProps {
     tributes: Tribute[];
   }
@@ -141,11 +150,11 @@ const TributeTrackerPage = () => {
   const Row = ({ ariaAttributes, index, style, tributes }: RowComponentProps<RowProps>) => {
     const tribute = tributes[index];
     return (
-      <div style={style} className="flex items-center justify-between p-4 bg-gray-900 rounded-lg" {...ariaAttributes}>
+      <div style={style} className="flex items-center justify-between p-4 bg-muted rounded-lg" {...ariaAttributes}>
         <div>
-          <p className="text-white font-medium">{tribute.from_sub}</p>
-          <p className="text-gray-400 text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
-          {tribute.reason && <p className="text-gray-500 text-sm">{tribute.reason}</p>}
+          <p className="text-foreground font-medium">{tribute.from_sub}</p>
+          <p className="text-muted-foreground text-sm">{new Date(tribute.date).toLocaleDateString()}</p>
+          {tribute.reason && <p className="text-muted-foreground text-sm">{tribute.reason}</p>}
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-green-400 font-bold">${tribute.amount.toFixed(2)}</span>
@@ -153,7 +162,7 @@ const TributeTrackerPage = () => {
             size="sm"
             variant="ghost"
             onClick={() => openEditDialog(tribute)}
-            className="text-gray-400 hover:text-white"
+            className="text-muted-foreground hover:text-foreground"
             aria-label={`Edit tribute from ${tribute.from_sub}`}
             title="Edit tribute"
           >
@@ -185,9 +194,9 @@ const TributeTrackerPage = () => {
               Add Tribute
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-800 border-gray-700">
+          <DialogContent className="bg-card border">
             <DialogHeader>
-              <DialogTitle className="text-white">Add New Tribute</DialogTitle>
+              <DialogTitle className="text-foreground">Add New Tribute</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -200,16 +209,15 @@ const TributeTrackerPage = () => {
                   value={tributeAmount}
                   onChange={(e) => setTributeAmount(e.target.value)}
                   placeholder="0.00"
-                  className="bg-gray-900 border-gray-600 text-white"
                 />
               </div>
               <div>
                 <Label htmlFor="from">From</Label>
                 <Select value={tributeFrom} onValueChange={setTributeFrom}>
-                  <SelectTrigger id="from" className="bg-gray-900 border-gray-600 text-white">
+                  <SelectTrigger id="from">
                     <SelectValue placeholder={appData.subs.length ? 'Select a sub' : 'No subs available'} />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
+                  <SelectContent>
                     {appData.subs.length === 0 ? (
                       <SelectItem value="" disabled>No subs yet</SelectItem>
                     ) : (
@@ -227,16 +235,15 @@ const TributeTrackerPage = () => {
                   type="date"
                   value={tributeDate}
                   onChange={(e) => setTributeDate(e.target.value)}
-                  className="bg-gray-900 border-gray-600 text-white"
                 />
               </div>
               <div>
                 <Label htmlFor="source">Source</Label>
                 <Select value={tributeSource} onValueChange={(value) => setTributeSource(value as any)}>
-                  <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
+                  <SelectContent>
                     <SelectItem value="cashapp">Cash App</SelectItem>
                     <SelectItem value="venmo">Venmo</SelectItem>
                     <SelectItem value="paypal">PayPal</SelectItem>
@@ -252,7 +259,6 @@ const TributeTrackerPage = () => {
                   onChange={(e) => setTributeReason(e.target.value)}
                   placeholder="Reason for tribute..."
                   rows={3}
-                  className="bg-gray-900 border-gray-600 text-white"
                 />
               </div>
               <Button onClick={handleAddTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">
@@ -265,51 +271,66 @@ const TributeTrackerPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Total Tributes</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Tributes</CardTitle>
             <DollarSign className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">${totalTributes.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-foreground">${totalTributes.toFixed(2)}</div>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-card border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">Monthly Total</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Total</CardTitle>
             <Calendar className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">${monthlyTotal.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-foreground">${monthlyTotal.toFixed(2)}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Tributes List */}
-      <Card className="bg-gray-800 border-gray-700">
+      <Card className="bg-card border">
         <CardHeader>
-          <CardTitle className="text-white">Recent Tributes</CardTitle>
+          <CardTitle className="text-foreground">Recent Tributes</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="space-y-2">
               {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 w-full bg-gray-700" />
+                <Skeleton key={i} className="h-14 w-full" />
               ))}
             </div>
           ) : appData.tributes.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No tributes yet. Add your first tribute!</p>
+            <EmptyState
+              icon={DollarSign}
+              title="No tributes yet"
+              description="Start tracking your income by adding your first tribute"
+              action={
+                <Button
+                  onClick={() => setIsDialogOpen(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Tribute
+                </Button>
+              }
+            />
+          ) : isMobile ? (
+            <TributeCards
+              tributes={sortedTributes}
+              onEdit={(tribute) => openEditDialog(tribute)}
+              onDelete={(id) => handleDeleteTribute(id)}
+            />
           ) : (
             <div className="space-y-4">
               <List
                 defaultHeight={480}
-                rowCount={appData.tributes.length}
+                rowCount={sortedTributes.length}
                 rowHeight={80}
-                rowProps={{
-                  tributes: appData.tributes
-                    .slice()
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                }}
+                rowProps={{ tributes: sortedTributes }}
                 rowComponent={Row}
                 style={{ width: "100%" }}
               />
@@ -320,9 +341,9 @@ const TributeTrackerPage = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-800 border-gray-700">
+        <DialogContent className="bg-card border">
           <DialogHeader>
-            <DialogTitle className="text-white">Edit Tribute</DialogTitle>
+            <DialogTitle className="text-foreground">Edit Tribute</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -335,16 +356,15 @@ const TributeTrackerPage = () => {
                 value={tributeAmount}
                 onChange={(e) => setTributeAmount(e.target.value)}
                 placeholder="0.00"
-                className="bg-gray-900 border-gray-600 text-white"
               />
             </div>
             <div>
               <Label htmlFor="edit-from">From</Label>
               <Select value={tributeFrom} onValueChange={setTributeFrom}>
-                <SelectTrigger id="edit-from" className="bg-gray-900 border-gray-600 text-white">
+                <SelectTrigger id="edit-from">
                   <SelectValue placeholder={appData.subs.length ? 'Select a sub' : 'No subs available'} />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent>
                   {appData.subs.length === 0 ? (
                     <SelectItem value="" disabled>No subs yet</SelectItem>
                   ) : (
@@ -362,16 +382,15 @@ const TributeTrackerPage = () => {
                 type="date"
                 value={tributeDate}
                 onChange={(e) => setTributeDate(e.target.value)}
-                className="bg-gray-900 border-gray-600 text-white"
               />
             </div>
             <div>
               <Label htmlFor="edit-source">Source</Label>
               <Select value={tributeSource} onValueChange={(value) => setTributeSource(value as any)}>
-                <SelectTrigger className="bg-gray-900 border-gray-600 text-white">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectContent>
                   <SelectItem value="cashapp">Cash App</SelectItem>
                   <SelectItem value="venmo">Venmo</SelectItem>
                   <SelectItem value="paypal">PayPal</SelectItem>
@@ -387,7 +406,6 @@ const TributeTrackerPage = () => {
                 onChange={(e) => setTributeReason(e.target.value)}
                 placeholder="Reason for tribute..."
                 rows={3}
-                className="bg-gray-900 border-gray-600 text-white"
               />
             </div>
             <Button onClick={handleEditTribute} className="w-full bg-indigo-600 hover:bg-indigo-700">

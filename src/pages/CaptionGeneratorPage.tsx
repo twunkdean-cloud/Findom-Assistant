@@ -65,19 +65,19 @@ Do not include any introductory or concluding remarks, just the caption content.
         Generate compelling captions for various platforms based on image description and your {isMale ? 'Findom' : 'Femdom'} persona.
       </p>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Image Description</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-300">Quick tone for this caption:</span>
+            <span className="text-sm text-muted-foreground">Quick tone for this caption:</span>
             {presets.map(p => (
               <Button
                 key={p}
                 size="sm"
                 variant={nextTone === p ? 'default' : 'outline'}
-                className={`${nextTone === p ? 'bg-indigo-600 text-white' : 'border-gray-700 text-gray-200'}`}
+                className={`${nextTone === p ? 'bg-indigo-600 text-white' : ''}`}
                 onClick={() => setNextTone(prev => (prev === p ? null : p))}
                 disabled={isLoading}
               >
@@ -86,21 +86,20 @@ Do not include any introductory or concluding remarks, just the caption content.
             ))}
           </div>
           <Textarea
-            placeholder={`Describe the image (e.g., ${isMale 
-              ? "'me in black boots holding a whip', 'close-up of my feet in black nail polish', 'sitting on a throne looking dominant'" 
+            placeholder={`Describe the image (e.g., ${isMale
+              ? "'me in black boots holding a whip', 'close-up of my feet in black nail polish', 'sitting on a throne looking dominant'"
               : "'me in heels holding a crop', 'close-up of my red nails', 'lounging on velvet like a queen'"})`}
             value={imageDescription}
             onChange={(e) => setImageDescription(e.target.value)}
             rows={3}
-            className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
             disabled={isLoading}
           />
           <div className="space-y-2">
-            <label className="text-sm text-gray-300">Caption Style</label>
+            <label className="text-sm text-muted-foreground">Caption Style</label>
             <select
               value={captionStyle}
               onChange={(e) => setCaptionStyle(e.target.value as PersonaTone)}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-200"
+              className="w-full p-2 bg-background border rounded"
               disabled={isLoading}
             >
               {getCaptionStyles().map((style) => (
@@ -121,7 +120,7 @@ Do not include any introductory or concluding remarks, just the caption content.
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border border-gray-700 p-4">
+      <Card className="bg-card border p-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Generated Caption</CardTitle>
         </CardHeader>
@@ -131,12 +130,12 @@ Do not include any introductory or concluding remarks, just the caption content.
               value={generatedCaption}
               readOnly
               rows={4}
-              className="w-full p-2 bg-gray-900 border border-gray-700 rounded text-gray-300 resize-none"
+              className="resize-none"
             />
           ) : (
             <div className="text-center py-8">
-              <Image className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-500">Your generated caption will appear here...</p>
+              <Image className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">Your generated caption will appear here...</p>
             </div>
           )}
           <div className="flex items-center justify-between">
