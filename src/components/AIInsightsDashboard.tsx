@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { useFindom } from '@/context/FindomContext';
+import { useAppData } from '@/context/FindomContext';
 import { useAI } from '@/hooks/use-ai';
 import { toast } from '@/utils/toast';
 import { 
@@ -30,7 +30,7 @@ interface AIInsight {
 }
 
 const AIInsightsDashboard = () => {
-  const { appData } = useFindom();
+  const appData = useAppData();
   const { isLoading } = useAI();
   const { isMobile } = useMobile();
   const [insights, setInsights] = useState<AIInsight[]>([]);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useFindom } from '@/context/FindomContext';
+import { useAppData } from '@/context/FindomContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, Users, TrendingUp, PieChart } from 'lucide-react';
 import IncomeTrendChart from '@/components/charts/IncomeTrendChart';
@@ -7,7 +7,7 @@ import TopSubsCard from '@/components/charts/TopSubsCard';
 import SourceBreakdownPieChart from '@/components/charts/SourceBreakdownPieChart';
 
 const AnalyticsPage = () => {
-  const { appData } = useFindom();
+  const appData = useAppData();
   const { tributes, subs } = appData;
 
   const totalRevenue = tributes.reduce((sum, t) => sum + t.amount, 0);

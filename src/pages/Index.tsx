@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { useFindom } from '@/context/FindomContext';
+import { useAppData } from '@/context/FindomContext';
 import { useNavigate } from 'react-router-dom';
 import { 
   DollarSign, 
@@ -18,7 +18,7 @@ import BaselineMetricsPanel from '@/components/BaselineMetricsPanel';
 import GoalEditor from '@/components/GoalEditor';
 
 const Index = () => {
-  const { appData } = useFindom();
+  const appData = useAppData();
   const navigate = useNavigate();
 
   const totalTributes = appData.tributes.reduce((sum, tribute) => sum + tribute.amount, 0);

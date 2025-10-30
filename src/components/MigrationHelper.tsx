@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useFindom } from '@/context/FindomContext';
+import { useAppActions } from '@/context/FindomContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from '@/utils/toast';
 import { UploadCloud, Database, Cloud, CheckCircle } from 'lucide-react';
 
 const MigrationHelper = () => {
   const { user } = useAuth();
-  const { migrateFromLocalStorage } = useFindom();
+  const { migrateFromLocalStorage } = useAppActions();
   const [hasLocalStorageData, setHasLocalStorageData] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationComplete, setMigrationComplete] = useState(false);

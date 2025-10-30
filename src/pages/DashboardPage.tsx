@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useFindom } from '@/context/FindomContext';
+import { useAppData } from '@/context/FindomContext';
 import { useMobile } from '@/hooks/use-mobile';
 import { toast } from '@/utils/toast';
 import { 
@@ -23,7 +23,7 @@ import {
 } from '@/components/lazy';
 
 const DashboardPage: React.FC = () => {
-  const { appData } = useFindom();
+  const appData = useAppData();
   const { isMobile } = useMobile();
 
   const totalTributes = appData.tributes.reduce((sum, tribute) => sum + Number(tribute.amount), 0);
