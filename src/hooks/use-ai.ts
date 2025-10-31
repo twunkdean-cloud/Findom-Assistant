@@ -334,8 +334,9 @@ suggestedActions:string[], contentSuggestions:string[].`);
     setError(null);
 
     // Concise, schema-first system prompt
-    const systemPrompt = compactText(`Return ONLY a compact JSON array of 3 items with keys:
-    type, content, tone, reasoning, targetSub.
+    const systemPrompt = compactText(`You are a findom content generator. Return ONLY a valid JSON array with exactly 3 items.
+    Each item must have these keys: type, content, tone, reasoning, targetSub.
+    Example format: [{"type":"message","content":"...","tone":"dominant","reasoning":"...","targetSub":"..."}]
     Rules: Do NOT include any currency amounts or propose specific dollar values; avoid referencing tribute totals.`);
 
     const userPrompt = compactText(`Create ${request.contentType} suggestions for ${request.sub.name} with ${request.tone} tone.
@@ -344,23 +345,37 @@ suggestedActions:string[], contentSuggestions:string[].`);
 
     try {
       const result = await callGemini(userPrompt, systemPrompt);
-      if (result) {
-        const parsed = parseCompactJson(result, 'array');
-        if (parsed) {
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const suggestions: AIContentSuggestion[] = parsed.map((item, index) => ({
-              type: item.type || request.contentType,
-              content: item.content || `Generated ${request.contentType} ${index + 1}`,
-              tone: item.tone || request.tone,
-              targetSub: item.targetSub || request.sub.name,
-              reasoning: item.reasoning || 'Personalized content suggestion',
-              priority: item.priority || 'medium'
-            }));
-            return { data: suggestions, success: true };
-          }
-        }
+      console.log('AI Response received:', result?.substring(0, 200));
+
+      if (!result) {
+        throw new Error("No response received from AI.");
       }
-      throw new Error("Failed to parse AI response for content generation.");
+
+      const parsed = parseCompactJson(result, 'array');
+      console.log('Parsed result:', parsed);
+
+      if (!parsed) {
+        throw new Error("Failed to parse AI response as JSON. The AI may have returned invalid format.");
+      }
+
+      if (!Array.isArray(parsed)) {
+        throw new Error("AI response was not an array.");
+      }
+
+      if (parsed.length === 0) {
+        throw new Error("AI returned an empty array.");
+      }
+
+      const suggestions: AIContentSuggestion[] = parsed.map((item, index) => ({
+        type: item.type || request.contentType,
+        content: item.content || `Generated ${request.contentType} ${index + 1}`,
+        tone: item.tone || request.tone,
+        targetSub: item.targetSub || request.sub.name,
+        reasoning: item.reasoning || 'Personalized content suggestion',
+        priority: item.priority || 'medium'
+      }));
+
+      return { data: suggestions, success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Content generation failed';
       console.error('Error generating content:', error);
