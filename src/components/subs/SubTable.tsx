@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Download } from "lucide-react";
 import { Sub } from "@/types";
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import * as ReactWindow from 'react-window';
+
+type ListChildComponentProps = ReactWindow.ListChildComponentProps;
 
 interface SubTableProps {
   subs: Sub[];
@@ -99,7 +101,7 @@ const SubTable: React.FC<SubTableProps> = ({ subs, onEdit, onDelete, onDownloadH
     return (
       <div className="rounded-md border border-gray-700">
         <div className="bg-gray-700 px-3 py-2 text-sm text-muted-foreground">Subs</div>
-        <List
+        <ReactWindow.FixedSizeList
           height={480}
           width={"100%"}
           itemCount={subs.length}
@@ -107,7 +109,7 @@ const SubTable: React.FC<SubTableProps> = ({ subs, onEdit, onDelete, onDownloadH
           itemData={{ items: subs, onEdit, onDelete, onDownloadHistory }}
         >
           {VirtualRow}
-        </List>
+        </ReactWindow.FixedSizeList>
       </div>
     );
   }

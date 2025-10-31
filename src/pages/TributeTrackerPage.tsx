@@ -13,7 +13,9 @@ import { toast } from '@/utils/toast';
 import { Plus, Edit, Trash2, DollarSign, Calendar } from 'lucide-react';
 import { Tribute } from '@/types';
 import { useLocation } from 'react-router-dom';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import * as ReactWindow from 'react-window';
+
+type ListChildComponentProps = ReactWindow.ListChildComponentProps;
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TributeTrackerPage = () => {
@@ -297,7 +299,7 @@ const TributeTrackerPage = () => {
             <p className="text-gray-500 text-center py-8">No tributes yet. Add your first tribute!</p>
           ) : (
             <div className="space-y-4">
-              <List
+              <ReactWindow.FixedSizeList
                 height={480}
                 width={"100%"}
                 itemCount={appData.tributes.length}
@@ -307,7 +309,7 @@ const TributeTrackerPage = () => {
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())}
               >
                 {Row}
-              </List>
+              </ReactWindow.FixedSizeList>
             </div>
           )}
         </CardContent>
