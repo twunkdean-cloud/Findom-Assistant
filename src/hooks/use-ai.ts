@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useGenderedContent } from './use-gendered-content';
+import { usePersona } from './use-persona';
 import { API_BASE_URL } from '@/config/env';
 import { supabase } from '@/integrations/supabase/client';
 import { isSupabaseConfigured } from '@/integrations/supabase/client';
@@ -93,6 +94,7 @@ export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { getSystemPrompt: getGenderedSystemPrompt } = useGenderedContent();
+  const { buildSystemPrompt, gender } = usePersona();
   const [analytics, setAnalytics] = useState<AIAnalytics | null>(null);
 
   const callGemini = useCallback(async (
@@ -333,8 +335,19 @@ suggestedActions:string[], contentSuggestions:string[].`);
     setIsLoading(true);
     setError(null);
 
-    // Concise, schema-first system prompt
-    const systemPrompt = compactText(`You are a findom content generator. Return ONLY a valid JSON array with exactly 3 items.
+    // Build gendered system prompt with proper context
+    const baseSystemPrompt = buildSystemPrompt(request.contentType, {
+      tone: request.tone,
+      extraFocus: 'Generate content suggestions that maintain the power dynamic and strengthen the financial domination relationship.'
+    });
+
+    // Add JSON formatting instructions to the gendered prompt
+    const systemPrompt = compactText(`${baseSystemPrompt}
+
+    IMPORTANT: You are a ${gender === 'male' ? 'male Dom (dominant male)' : 'female Domme (dominant woman)'}.
+    Generate content from the perspective of a ${gender === 'male' ? 'male financial dominant addressing male subs' : 'female financial dominant (Goddess/Mistress) addressing male subs'}.
+
+    Return ONLY a valid JSON array with exactly 3 items.
     Each item must have these keys: type, content, tone, reasoning, targetSub.
     Example format: [{"type":"message","content":"...","tone":"dominant","reasoning":"...","targetSub":"..."}]
     Rules: Do NOT include any currency amounts or propose specific dollar values; avoid referencing tribute totals.`);
@@ -458,10 +471,14 @@ action, reason, confidence:'high'|'medium'|'low', suggestedTone?:'dominant'|'sed
     setIsLoading(true);
     setError(null);
 
-    // Concise system prompt
-    const systemPrompt = compactText(`You are a findom assistant.
-Write a concise, professional, dominant reply.
-Avoid promises or specifics.`);
+    // Build gendered system prompt
+    const baseSystemPrompt = buildSystemPrompt('response', {
+      extraFocus: 'Write a concise, professional reply that maintains your dominant position. Avoid promises or specifics.'
+    });
+
+    const systemPrompt = compactText(`${baseSystemPrompt}
+
+    You are a ${gender === 'male' ? 'male Dom' : 'female Domme (Goddess/Mistress)'}.`);
 
     const userPrompt = compactText(`From ${subName}: "${message}". Ctx: ${context}`);
 
